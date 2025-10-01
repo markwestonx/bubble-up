@@ -1,4 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
+import { supabase } from '../lib/supabase';
 import {
   DndContext,
   closestCenter,
@@ -36,7 +39,7 @@ import {
 } from 'lucide-react';
 
 // Epic/Phase type
-type Epic = 'foundation' | 'agents' | 'fanatical' | 'integration' | 'infrastructure' | 'production' | 'content' | 'social' | 'crm' | 'analytics' | 'architecture';
+type Epic = 'foundation' | 'agents' | 'fanatical' | 'integration' | 'infrastructure' | 'production' | 'content' | 'social' | 'crm' | 'analytics' | 'architecture' | 'product' | 'deployment' | 'marketing' | 'purchase' | 'leadgen';
 
 // Priority levels
 type Priority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
@@ -47,6 +50,7 @@ type Status = 'NOT_STARTED' | 'IN_PROGRESS' | 'BLOCKED' | 'TESTING' | 'DONE' | '
 // Backlog item interface
 interface BacklogItem {
   id: string;
+  project: string;
   epic: Epic;
   priority: Priority;
   status: Status;
@@ -494,11 +498,13 @@ function SortableRow({
   );
 }
 
-export function BacklogPage() {
+function BacklogPage() {
   const initialBacklogItems: BacklogItem[] = [
     // CRITICAL FOUNDATION ITEMS
     {
       id: '001',
+      project: 'Sales Genie',
+      project: 'Sales Genie',
       epic: 'foundation',
       priority: 'CRITICAL',
       status: 'DONE',
@@ -517,6 +523,7 @@ export function BacklogPage() {
     },
     {
       id: '002',
+      project: 'Sales Genie',
       epic: 'foundation',
       priority: 'CRITICAL',
       status: 'DONE',
@@ -535,6 +542,7 @@ export function BacklogPage() {
     },
     {
       id: '003',
+      project: 'Sales Genie',
       epic: 'foundation',
       priority: 'CRITICAL',
       status: 'DONE',
@@ -553,6 +561,7 @@ export function BacklogPage() {
     },
     {
       id: '004',
+      project: 'Sales Genie',
       epic: 'foundation',
       priority: 'CRITICAL',
       status: 'DONE',
@@ -571,6 +580,7 @@ export function BacklogPage() {
     },
     {
       id: '005',
+      project: 'Sales Genie',
       epic: 'integration',
       priority: 'CRITICAL',
       status: 'BLOCKED',
@@ -589,6 +599,7 @@ export function BacklogPage() {
     },
     {
       id: '006',
+      project: 'Sales Genie',
       epic: 'integration',
       priority: 'CRITICAL',
       status: 'BLOCKED',
@@ -609,6 +620,7 @@ export function BacklogPage() {
     // INFRASTRUCTURE EPIC
     {
       id: '007',
+      project: 'Sales Genie',
       epic: 'infrastructure',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -629,6 +641,7 @@ export function BacklogPage() {
     },
     {
       id: '008',
+      project: 'Sales Genie',
       epic: 'infrastructure',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -648,6 +661,7 @@ export function BacklogPage() {
     },
     {
       id: '009',
+      project: 'Sales Genie',
       epic: 'infrastructure',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -667,6 +681,7 @@ export function BacklogPage() {
     },
     {
       id: '010',
+      project: 'Sales Genie',
       epic: 'infrastructure',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -686,6 +701,7 @@ export function BacklogPage() {
     },
     {
       id: '011',
+      project: 'Sales Genie',
       epic: 'infrastructure',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -705,6 +721,7 @@ export function BacklogPage() {
     },
     {
       id: '012',
+      project: 'Sales Genie',
       epic: 'infrastructure',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -724,6 +741,7 @@ export function BacklogPage() {
     },
     {
       id: '013',
+      project: 'Sales Genie',
       epic: 'infrastructure',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -743,6 +761,7 @@ export function BacklogPage() {
     },
     {
       id: '014',
+      project: 'Sales Genie',
       epic: 'infrastructure',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -764,6 +783,7 @@ export function BacklogPage() {
     // HIGH PRIORITY AGENT DEVELOPMENT
     {
       id: '015',
+      project: 'Sales Genie',
       epic: 'agents',
       priority: 'HIGH',
       status: 'IN_PROGRESS',
@@ -782,6 +802,7 @@ export function BacklogPage() {
     },
     {
       id: '016',
+      project: 'Sales Genie',
       epic: 'agents',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -800,6 +821,7 @@ export function BacklogPage() {
     },
     {
       id: '017',
+      project: 'Sales Genie',
       epic: 'integration',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -818,6 +840,7 @@ export function BacklogPage() {
     },
     {
       id: '018',
+      project: 'Sales Genie',
       epic: 'agents',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -837,6 +860,7 @@ export function BacklogPage() {
     },
     {
       id: '019',
+      project: 'Sales Genie',
       epic: 'agents',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -856,6 +880,7 @@ export function BacklogPage() {
     },
     {
       id: '020',
+      project: 'Sales Genie',
       epic: 'agents',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -877,6 +902,7 @@ export function BacklogPage() {
     // ARCHITECTURE & DESIGN GOVERNANCE
     {
       id: '021',
+      project: 'Sales Genie',
       epic: 'architecture',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -897,6 +923,7 @@ export function BacklogPage() {
     },
     {
       id: '022',
+      project: 'Sales Genie',
       epic: 'architecture',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -916,6 +943,7 @@ export function BacklogPage() {
     },
     {
       id: '023',
+      project: 'Sales Genie',
       epic: 'architecture',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -935,6 +963,7 @@ export function BacklogPage() {
     },
     {
       id: '024',
+      project: 'Sales Genie',
       epic: 'architecture',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -954,6 +983,7 @@ export function BacklogPage() {
     },
     {
       id: '025',
+      project: 'Sales Genie',
       epic: 'architecture',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -973,6 +1003,7 @@ export function BacklogPage() {
     },
     {
       id: '026',
+      project: 'Sales Genie',
       epic: 'architecture',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -994,6 +1025,7 @@ export function BacklogPage() {
     // FANATICAL PROSPECTING AGENTS
     {
       id: '027',
+      project: 'Sales Genie',
       epic: 'fanatical',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1012,6 +1044,7 @@ export function BacklogPage() {
     },
     {
       id: '028',
+      project: 'Sales Genie',
       epic: 'fanatical',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1030,6 +1063,7 @@ export function BacklogPage() {
     },
     {
       id: '029',
+      project: 'Sales Genie',
       epic: 'fanatical',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1048,6 +1082,7 @@ export function BacklogPage() {
     },
     {
       id: '030',
+      project: 'Sales Genie',
       epic: 'fanatical',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1068,6 +1103,7 @@ export function BacklogPage() {
     // CONTENT GENERATION EPIC
     {
       id: '031',
+      project: 'Sales Genie',
       epic: 'content',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1087,6 +1123,7 @@ export function BacklogPage() {
     },
     {
       id: '032',
+      project: 'Sales Genie',
       epic: 'content',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1106,6 +1143,7 @@ export function BacklogPage() {
     },
     {
       id: '033',
+      project: 'Sales Genie',
       epic: 'content',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1125,6 +1163,7 @@ export function BacklogPage() {
     },
     {
       id: '034',
+      project: 'Sales Genie',
       epic: 'content',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1144,6 +1183,7 @@ export function BacklogPage() {
     },
     {
       id: '035',
+      project: 'Sales Genie',
       epic: 'content',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -1163,6 +1203,7 @@ export function BacklogPage() {
     },
     {
       id: '036',
+      project: 'Sales Genie',
       epic: 'content',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1184,6 +1225,7 @@ export function BacklogPage() {
     // SOCIAL MEDIA EPIC
     {
       id: '037',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1203,6 +1245,7 @@ export function BacklogPage() {
     },
     {
       id: '038',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1222,6 +1265,7 @@ export function BacklogPage() {
     },
     {
       id: '039',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1241,6 +1285,7 @@ export function BacklogPage() {
     },
     {
       id: '040',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1260,6 +1305,7 @@ export function BacklogPage() {
     },
     {
       id: '041',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1279,6 +1325,7 @@ export function BacklogPage() {
     },
     {
       id: '042',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1298,6 +1345,7 @@ export function BacklogPage() {
     },
     {
       id: '043',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -1317,6 +1365,7 @@ export function BacklogPage() {
     },
     {
       id: '044',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1336,6 +1385,7 @@ export function BacklogPage() {
     },
     {
       id: '045',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1355,6 +1405,7 @@ export function BacklogPage() {
     },
     {
       id: '046',
+      project: 'Sales Genie',
       epic: 'social',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -1376,6 +1427,7 @@ export function BacklogPage() {
     // CRM & PIPELINE MANAGEMENT EPIC
     {
       id: '047',
+      project: 'Sales Genie',
       epic: 'crm',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1395,6 +1447,7 @@ export function BacklogPage() {
     },
     {
       id: '048',
+      project: 'Sales Genie',
       epic: 'crm',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1414,6 +1467,7 @@ export function BacklogPage() {
     },
     {
       id: '049',
+      project: 'Sales Genie',
       epic: 'crm',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1433,6 +1487,7 @@ export function BacklogPage() {
     },
     {
       id: '050',
+      project: 'Sales Genie',
       epic: 'crm',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1452,6 +1507,7 @@ export function BacklogPage() {
     },
     {
       id: '051',
+      project: 'Sales Genie',
       epic: 'crm',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1471,6 +1527,7 @@ export function BacklogPage() {
     },
     {
       id: '052',
+      project: 'Sales Genie',
       epic: 'crm',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1492,6 +1549,7 @@ export function BacklogPage() {
     // ANALYTICS & INSIGHTS EPIC
     {
       id: '053',
+      project: 'Sales Genie',
       epic: 'analytics',
       priority: 'HIGH',
       status: 'NOT_STARTED',
@@ -1511,6 +1569,7 @@ export function BacklogPage() {
     },
     {
       id: '054',
+      project: 'Sales Genie',
       epic: 'analytics',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1530,6 +1589,7 @@ export function BacklogPage() {
     },
     {
       id: '055',
+      project: 'Sales Genie',
       epic: 'analytics',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1549,6 +1609,7 @@ export function BacklogPage() {
     },
     {
       id: '056',
+      project: 'Sales Genie',
       epic: 'analytics',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -1570,6 +1631,7 @@ export function BacklogPage() {
     // PRODUCTION & OPERATIONAL
     {
       id: '057',
+      project: 'Sales Genie',
       epic: 'production',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1588,6 +1650,7 @@ export function BacklogPage() {
     },
     {
       id: '058',
+      project: 'Sales Genie',
       epic: 'production',
       priority: 'LOW',
       status: 'NOT_STARTED',
@@ -1603,7 +1666,304 @@ export function BacklogPage() {
       businessValue: 7,
       dependencies: ['003'],
       technicalNotes: 'Express middleware for rate limiting, helmet.js for security headers',
-      owner: 'Development'
+      owner: 'Development',
+      isNext: false
+    },
+
+    // GTM SPIKE PROJECT STORIES
+
+    // EPIC: PRODUCT
+    {
+      id: '059',
+      project: 'GTM Spike',
+      epic: 'product',
+      priority: 'HIGH',
+      status: 'NOT_STARTED',
+      userStory: 'As a product manager, I need to select the most marketable app (e.g., ISO27001) so that we can focus our GTM efforts',
+      acceptanceCriteria: [
+        'Research and identify most marketable app',
+        'Document selection rationale',
+        'Confirm with stakeholders'
+      ],
+      effort: 2,
+      businessValue: 10,
+      dependencies: [],
+      technicalNotes: 'ISO27001 likely candidate due to broad regulatory appeal',
+      owner: 'Product',
+      isNext: false
+    },
+    {
+      id: '060',
+      project: 'GTM Spike',
+      epic: 'product',
+      priority: 'HIGH',
+      status: 'NOT_STARTED',
+      userStory: 'As a user, I need show/hide feature toggles so that I can customize what functionality is visible',
+      acceptanceCriteria: [
+        'Build feature flag system',
+        'Add UI controls for show/hide',
+        'Persist user preferences',
+        'Test all feature combinations'
+      ],
+      effort: 5,
+      businessValue: 8,
+      dependencies: ['059'],
+      technicalNotes: 'Use feature flag library or build simple toggle system',
+      owner: 'Development',
+      isNext: false
+    },
+    {
+      id: '061',
+      project: 'GTM Spike',
+      epic: 'product',
+      priority: 'CRITICAL',
+      status: 'NOT_STARTED',
+      userStory: 'As a prospect, I need clear calls to action (Buy now / Book a call) so that I can take next steps',
+      acceptanceCriteria: [
+        'Add "Buy now" CTA button',
+        'Add "Book a call to discuss" CTA button',
+        'Position CTAs prominently',
+        'Ensure CTAs work on mobile',
+        'Track CTA click events'
+      ],
+      effort: 3,
+      businessValue: 10,
+      dependencies: ['059'],
+      technicalNotes: 'Link to payment flow and Calendly/booking system',
+      owner: 'Development',
+      isNext: false
+    },
+    {
+      id: '062',
+      project: 'GTM Spike',
+      epic: 'product',
+      priority: 'HIGH',
+      status: 'NOT_STARTED',
+      userStory: 'As a new user, I need a quick start help guide so that I can get up to speed quickly',
+      acceptanceCriteria: [
+        'Create getting started guide',
+        'Add progressive disclosure of help',
+        'Include video walkthrough',
+        'Test with new users'
+      ],
+      effort: 5,
+      businessValue: 8,
+      dependencies: ['059'],
+      technicalNotes: 'Interactive onboarding flow with tooltips',
+      owner: 'Product',
+      isNext: false
+    },
+    {
+      id: '063',
+      project: 'GTM Spike',
+      epic: 'product',
+      priority: 'HIGH',
+      status: 'NOT_STARTED',
+      userStory: 'As a user, I need tooltips throughout the UI so that the demo app is completely self-explanatory',
+      acceptanceCriteria: [
+        'Add tooltips to all UI elements',
+        'Ensure tooltips are contextual',
+        'Test tooltip accessibility',
+        'Verify mobile tooltip behavior'
+      ],
+      effort: 8,
+      businessValue: 9,
+      dependencies: ['059'],
+      technicalNotes: 'Use tooltip library like Tippy.js or Radix UI',
+      owner: 'Development',
+      isNext: false
+    },
+    {
+      id: '064',
+      project: 'GTM Spike',
+      epic: 'product',
+      priority: 'CRITICAL',
+      status: 'NOT_STARTED',
+      userStory: 'As a user, I need all buttons to be clickable and produce results so that the demo feels complete',
+      acceptanceCriteria: [
+        'Audit all buttons in demo',
+        'Wire up all button actions',
+        'Add loading/success states',
+        'Test all interactions'
+      ],
+      effort: 8,
+      businessValue: 10,
+      dependencies: ['059'],
+      technicalNotes: 'Complete all interactive elements with real or mock data',
+      owner: 'Development',
+      isNext: false
+    },
+    {
+      id: '065',
+      project: 'GTM Spike',
+      epic: 'product',
+      priority: 'MEDIUM',
+      status: 'NOT_STARTED',
+      userStory: 'As a small company user, I need a minimal feature set so that the product is not overwhelming',
+      acceptanceCriteria: [
+        'Identify core features for small companies',
+        'Remove or hide advanced features',
+        'Create simplified workflows',
+        'Test with small company users'
+      ],
+      effort: 5,
+      businessValue: 8,
+      dependencies: ['059', '060'],
+      technicalNotes: 'Use feature flags to create "essentials" mode',
+      owner: 'Product',
+      isNext: false
+    },
+    {
+      id: '066',
+      project: 'GTM Spike',
+      epic: 'product',
+      priority: 'HIGH',
+      status: 'NOT_STARTED',
+      userStory: 'As a system, I need to connect to the regulatory service layer so that compliance data is live',
+      acceptanceCriteria: [
+        'Design API integration architecture',
+        'Connect to regulatory service',
+        'Map data structures',
+        'Handle API errors gracefully',
+        'Test with real regulatory data'
+      ],
+      effort: 13,
+      businessValue: 10,
+      dependencies: ['059'],
+      technicalNotes: 'RESTful API integration with caching strategy',
+      owner: 'Development',
+      isNext: false
+    },
+
+    // EPIC: DEPLOYMENT
+    {
+      id: '067',
+      project: 'GTM Spike',
+      epic: 'deployment',
+      priority: 'CRITICAL',
+      status: 'NOT_STARTED',
+      userStory: 'As a customer, I need to buy and deploy immediately so that I can start using the product right away',
+      acceptanceCriteria: [
+        'Automated deployment pipeline',
+        'Customer receives access within 5 minutes',
+        'Zero manual intervention required',
+        'Test full purchase-to-deploy flow'
+      ],
+      effort: 8,
+      businessValue: 10,
+      dependencies: [],
+      technicalNotes: 'Automated provisioning with Vercel/similar',
+      owner: 'DevOps',
+      isNext: false
+    },
+    {
+      id: '068',
+      project: 'GTM Spike',
+      epic: 'deployment',
+      priority: 'HIGH',
+      status: 'NOT_STARTED',
+      userStory: 'As an operator, I need fast manual deployment capability so that I can quickly provision customers',
+      acceptanceCriteria: [
+        'Document manual deployment process',
+        'Create deployment scripts',
+        'Deploy in under 10 minutes',
+        'Test repeatability'
+      ],
+      effort: 3,
+      businessValue: 8,
+      dependencies: [],
+      technicalNotes: 'Shell scripts or Ansible playbooks for quick deployment',
+      owner: 'DevOps',
+      isNext: false
+    },
+
+    // EPIC: MARKETING MICROSITE
+    {
+      id: '069',
+      project: 'GTM Spike',
+      epic: 'marketing',
+      priority: 'HIGH',
+      status: 'NOT_STARTED',
+      userStory: 'As a marketer, I need to create a marketing microsite with high-value content so that we can attract leads',
+      acceptanceCriteria: [
+        'Build landing page with value proposition',
+        'Add compliance tips and resources',
+        'Optimize for SEO',
+        'Mobile responsive design',
+        'Fast page load times'
+      ],
+      effort: 8,
+      businessValue: 9,
+      dependencies: [],
+      technicalNotes: 'Next.js static site with MDX for content',
+      owner: 'Marketing',
+      isNext: false
+    },
+    {
+      id: '070',
+      project: 'GTM Spike',
+      epic: 'marketing',
+      priority: 'HIGH',
+      status: 'NOT_STARTED',
+      userStory: 'As a prospect, I need to see a massive value proposition (high-value, low-price) so that I am motivated to buy',
+      acceptanceCriteria: [
+        'Clear value statement above the fold',
+        'Pricing prominently displayed',
+        'ROI calculator or comparison chart',
+        'Customer testimonials/social proof'
+      ],
+      effort: 5,
+      businessValue: 10,
+      dependencies: ['069'],
+      technicalNotes: 'Compelling copywriting with visual hierarchy',
+      owner: 'Marketing',
+      isNext: false
+    },
+
+    // EPIC: PURCHASE
+    {
+      id: '071',
+      project: 'GTM Spike',
+      epic: 'purchase',
+      priority: 'CRITICAL',
+      status: 'NOT_STARTED',
+      userStory: 'As a customer, I need a payment process so that I can purchase the product',
+      acceptanceCriteria: [
+        'Integrate Stripe or similar payment processor',
+        'Support credit card payments',
+        'Generate invoices automatically',
+        'Handle payment failures gracefully',
+        'PCI compliance'
+      ],
+      effort: 8,
+      businessValue: 10,
+      dependencies: [],
+      technicalNotes: 'Stripe Checkout or Payment Links for quick setup',
+      owner: 'Development',
+      isNext: false
+    },
+
+    // EPIC: LEAD GENERATION
+    {
+      id: '072',
+      project: 'GTM Spike',
+      epic: 'leadgen',
+      priority: 'HIGH',
+      status: 'NOT_STARTED',
+      userStory: 'As a sales team, I need outbound email and prospecting links working in Sales Genie so that we can generate leads',
+      acceptanceCriteria: [
+        'Email sending functional',
+        'Link tracking working',
+        'CRM integration active',
+        'Email templates tested',
+        'Bounce handling configured'
+      ],
+      effort: 8,
+      businessValue: 9,
+      dependencies: [],
+      technicalNotes: 'Integrate with Sales Genie outreach agent',
+      owner: 'Development',
+      isNext: false
     }
   ];
 
@@ -1611,10 +1971,17 @@ export function BacklogPage() {
 
   // Load backlog from localStorage or use initial items
   const [backlogItems, setBacklogItems] = useState<BacklogItem[]>(() => {
+    if (typeof window === 'undefined') return initialBacklogItems;
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        // Migrate old data: add project field if missing
+        return parsed.map((item: any) => ({
+          ...item,
+          project: item.project || 'Sales Genie'
+        }));
       } catch (error) {
         console.error('Failed to parse stored backlog:', error);
         return initialBacklogItems;
@@ -1663,10 +2030,17 @@ export function BacklogPage() {
     isMultiple: boolean;
   }>>([]);
 
+  // Project management state
+  const [projects, setProjects] = useState<string[]>(['Sales Genie', 'GTM Spike']);
+  const [currentProject, setCurrentProject] = useState<string>('Sales Genie');
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+
   // New story creation state
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newStory, setNewStory] = useState<BacklogItem>({
     id: '',
+    project: currentProject,
     epic: 'foundation',
     priority: 'MEDIUM',
     status: 'NOT_STARTED',
@@ -1676,12 +2050,122 @@ export function BacklogPage() {
     businessValue: 5,
     dependencies: [],
     technicalNotes: '',
-    owner: ''
+    owner: '',
+    isNext: false
   });
 
-  // Persist backlog to localStorage whenever it changes
+  // Load from Supabase on initial mount
   React.useEffect(() => {
+    const loadFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('backlog_items')
+          .select('*')
+          .order('display_order', { ascending: true });
+
+        if (error) {
+          console.error('Error loading from Supabase:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          // Convert from database format to app format
+          const loadedItems: BacklogItem[] = data.map((item: any) => ({
+            id: item.id,
+            project: item.project,
+            epic: item.epic as Epic,
+            priority: item.priority as Priority,
+            status: item.status as Status,
+            userStory: item.user_story,
+            acceptanceCriteria: item.acceptance_criteria || [],
+            effort: item.effort,
+            businessValue: item.business_value,
+            dependencies: item.dependencies || [],
+            technicalNotes: item.technical_notes || '',
+            owner: item.owner || '',
+            isNext: item.is_next || false
+          }));
+
+          setBacklogItems(loadedItems);
+          console.log('✅ Loaded from Supabase:', loadedItems.length, 'items');
+        }
+      } catch (error) {
+        console.error('Error loading from Supabase:', error);
+      }
+    };
+
+    loadFromSupabase();
+  }, []); // Only run once on mount
+
+  // Persist backlog to localStorage and Supabase whenever it changes
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    console.log('🔄 Triggering sync for', backlogItems.length, 'items');
+
+    // Save to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(backlogItems));
+
+    // Sync to Supabase
+    const syncToSupabase = async () => {
+      if (backlogItems.length === 0) {
+        console.log('⏭️ Skipping sync - no items');
+        return;
+      }
+
+      try {
+        console.log('🚀 Starting Supabase sync...');
+
+        // Delete all existing items and insert fresh data (simple upsert strategy)
+        const { error: deleteError } = await supabase
+          .from('backlog_items')
+          .delete()
+          .neq('id', ''); // Delete all
+
+        if (deleteError) {
+          console.error('❌ Error clearing Supabase:', deleteError);
+          return;
+        }
+
+        console.log('🗑️ Cleared existing items');
+
+        // Insert all current items
+        const itemsToInsert = backlogItems.map((item, index) => ({
+          id: item.id,
+          project: item.project,
+          epic: item.epic,
+          priority: item.priority,
+          status: item.status,
+          user_story: item.userStory,
+          acceptance_criteria: item.acceptanceCriteria,
+          effort: item.effort,
+          business_value: item.businessValue,
+          dependencies: item.dependencies,
+          technical_notes: item.technicalNotes,
+          owner: item.owner,
+          is_next: item.isNext,
+          display_order: index
+        }));
+
+        console.log('📦 Inserting', itemsToInsert.length, 'items...');
+
+        const { error: insertError } = await supabase
+          .from('backlog_items')
+          .insert(itemsToInsert);
+
+        if (insertError) {
+          console.error('❌ Error syncing to Supabase:', insertError);
+        } else {
+          console.log('✅ Synced to Supabase:', backlogItems.length, 'items');
+        }
+      } catch (error) {
+        console.error('❌ Exception syncing to Supabase:', error);
+      }
+    };
+
+    // Debounce the sync to avoid too many requests
+    const timeoutId = setTimeout(syncToSupabase, 1000);
+    return () => clearTimeout(timeoutId);
   }, [backlogItems]);
 
   const sensors = useSensors(
@@ -1702,6 +2186,9 @@ export function BacklogPage() {
 
   // Filter items
   const filteredItems = backlogItems.filter(item => {
+    // Filter by current project
+    if (item.project !== currentProject) return false;
+
     // Handle epic filtering based on mode
     if (epicFilterMode === 'single') {
       if (filter.epic !== 'all' && item.epic !== filter.epic) return false;
@@ -1900,6 +2387,7 @@ export function BacklogPage() {
     setIsAddingNew(false);
     setNewStory({
       id: '',
+      project: 'Sales Genie',
       epic: 'foundation',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -1917,6 +2405,7 @@ export function BacklogPage() {
     setIsAddingNew(false);
     setNewStory({
       id: '',
+      project: 'Sales Genie',
       epic: 'foundation',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -2025,6 +2514,22 @@ export function BacklogPage() {
   const handleContextMenuSearch = (searchTerm: string) => {
     if (!contextMenu) return;
     setContextMenu({ ...contextMenu, searchTerm });
+
+    // For User Story column, apply filter dynamically as user types
+    if (contextMenu.column === 'story' && searchTerm.trim()) {
+      setContextMenuFilters(prev => {
+        const filtered = prev.filter(f => f.column !== 'story');
+        return [...filtered, {
+          column: 'story',
+          value: searchTerm.trim(),
+          values: [],
+          isMultiple: false
+        }];
+      });
+    } else if (contextMenu.column === 'story' && !searchTerm.trim()) {
+      // Clear the filter when search box is empty
+      setContextMenuFilters(prev => prev.filter(f => f.column !== 'story'));
+    }
   };
 
   // Handle single select from dropdown
@@ -2070,7 +2575,15 @@ export function BacklogPage() {
 
   // Apply multi-select filter
   const applyMultiSelectFilter = () => {
-    if (!contextMenu || !contextMenu.column || contextMenu.selectedValues.size === 0) return;
+    if (!contextMenu || !contextMenu.column) return;
+
+    // If nothing selected OR all options selected, clear the filter for this column
+    const allOptions = getColumnOptions(contextMenu.column);
+    if (contextMenu.selectedValues.size === 0 || contextMenu.selectedValues.size === allOptions.length) {
+      clearContextMenuFilter(contextMenu.column);
+      setContextMenu(null);
+      return;
+    }
 
     // Remove existing filter for this column and add new one
     const newFilters = [...contextMenuFilters.filter(f => f.column !== contextMenu.column)];
@@ -2139,7 +2652,12 @@ export function BacklogPage() {
       content: 'Content Generation',
       social: 'Social Media',
       crm: 'CRM & Pipeline',
-      analytics: 'Analytics & Insights'
+      analytics: 'Analytics & Insights',
+      product: 'Product',
+      deployment: 'Deployment',
+      marketing: 'Marketing Microsite',
+      purchase: 'Purchase',
+      leadgen: 'Lead Generation'
     };
     return labels[epic] || epic;
   };
@@ -2155,18 +2673,73 @@ export function BacklogPage() {
     return value;
   };
 
-  // Calculate stats
+  // Calculate stats (filtered by current project)
+  const projectItems = backlogItems.filter(i => i.project === currentProject);
   const stats = {
-    total: backlogItems.length,
-    complete: backlogItems.filter(i => i.status === 'DONE').length,
-    inProgress: backlogItems.filter(i => i.status === 'IN_PROGRESS').length,
-    blocked: backlogItems.filter(i => i.status === 'BLOCKED').length,
-    totalEffort: backlogItems.reduce((sum, i) => sum + i.effort, 0),
-    completedEffort: backlogItems.filter(i => i.status === 'DONE').reduce((sum, i) => sum + i.effort, 0)
+    total: projectItems.length,
+    complete: projectItems.filter(i => i.status === 'DONE').length,
+    inProgress: projectItems.filter(i => i.status === 'IN_PROGRESS').length,
+    blocked: projectItems.filter(i => i.status === 'BLOCKED').length,
+    totalEffort: projectItems.reduce((sum, i) => sum + i.effort, 0),
+    completedEffort: projectItems.filter(i => i.status === 'DONE').reduce((sum, i) => sum + i.effort, 0)
   };
 
   return (
     <div className="space-y-6">
+      {/* Create Project Modal */}
+      {isCreatingProject && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-96">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Create New Project</h3>
+            <input
+              type="text"
+              placeholder="Enter project name..."
+              value={newProjectName}
+              onChange={(e) => setNewProjectName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newProjectName.trim()) {
+                  if (!projects.includes(newProjectName.trim())) {
+                    setProjects([...projects, newProjectName.trim()]);
+                    setCurrentProject(newProjectName.trim());
+                  }
+                  setNewProjectName('');
+                  setIsCreatingProject(false);
+                } else if (e.key === 'Escape') {
+                  setNewProjectName('');
+                  setIsCreatingProject(false);
+                }
+              }}
+              autoFocus
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            />
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  if (newProjectName.trim() && !projects.includes(newProjectName.trim())) {
+                    setProjects([...projects, newProjectName.trim()]);
+                    setCurrentProject(newProjectName.trim());
+                  }
+                  setNewProjectName('');
+                  setIsCreatingProject(false);
+                }}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Create
+              </button>
+              <button
+                onClick={() => {
+                  setNewProjectName('');
+                  setIsCreatingProject(false);
+                }}
+                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Context Menu Filter - Excel Style */}
       {contextMenu && (
         <div
@@ -2189,11 +2762,14 @@ export function BacklogPage() {
               if (e.key === 'Enter' && contextMenu.searchTerm.trim()) {
                 // For User Story column, apply text search filter on Enter
                 if (contextMenu.column === 'story') {
-                  setContextMenuFilter({
-                    column: 'story',
-                    value: contextMenu.searchTerm.trim(),
-                    values: [],
-                    isMultiple: false
+                  setContextMenuFilters(prev => {
+                    const filtered = prev.filter(f => f.column !== 'story');
+                    return [...filtered, {
+                      column: 'story',
+                      value: contextMenu.searchTerm.trim(),
+                      values: [],
+                      isMultiple: false
+                    }];
                   });
                   setContextMenu(null);
                 }
@@ -2209,7 +2785,7 @@ export function BacklogPage() {
             <div className="max-h-48 overflow-y-auto border border-gray-200 rounded mb-2">
               <div
                 onClick={() => {
-                  setContextMenuFilter(null);
+                  clearContextMenuFilter(contextMenu?.column);
                   setContextMenu(null);
                 }}
                 className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer border-b border-gray-100"
@@ -2230,6 +2806,25 @@ export function BacklogPage() {
             </div>
           ) : (
             <div className="max-h-48 overflow-y-auto border border-gray-200 rounded mb-2">
+              {/* Select All Option */}
+              <label className="flex items-center px-3 py-2 text-sm font-semibold hover:bg-blue-50 cursor-pointer border-b border-gray-300 bg-gray-50">
+                <input
+                  type="checkbox"
+                  checked={contextMenu.selectedValues.size === 0 || contextMenu.selectedValues.size === getColumnOptions(contextMenu.column).length}
+                  onChange={() => {
+                    const allOptions = getColumnOptions(contextMenu.column);
+                    if (contextMenu.selectedValues.size === allOptions.length) {
+                      // Deselect all
+                      setContextMenu({ ...contextMenu, selectedValues: new Set() });
+                    } else {
+                      // Select all
+                      setContextMenu({ ...contextMenu, selectedValues: new Set(allOptions) });
+                    }
+                  }}
+                  className="mr-2 rounded border-gray-300"
+                />
+                (Select All)
+              </label>
               {getColumnOptions(contextMenu.column)
                 .filter(option => !contextMenu.searchTerm || formatDisplayValue(contextMenu.column, option).toLowerCase().includes(contextMenu.searchTerm.toLowerCase()))
                 .map((option) => (
@@ -2307,13 +2902,56 @@ export function BacklogPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 pt-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-            <ListTodo className="h-7 w-7 mr-3 text-blue-600" />
-            Project Backlog
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <svg className="h-10 w-10 mr-3" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Large bubble */}
+              <circle cx="24" cy="28" r="16" fill="url(#bubble1)" opacity="0.9"/>
+              <circle cx="24" cy="28" r="16" stroke="#3B82F6" strokeWidth="1.5" opacity="0.3"/>
+              <ellipse cx="19" cy="23" rx="5" ry="6" fill="white" opacity="0.3"/>
+              <circle cx="17" cy="21" r="2.5" fill="white" opacity="0.5"/>
+
+              {/* Medium bubble */}
+              <circle cx="34" cy="16" r="9" fill="url(#bubble2)" opacity="0.85"/>
+              <circle cx="34" cy="16" r="9" stroke="#60A5FA" strokeWidth="1" opacity="0.3"/>
+              <ellipse cx="31" cy="13" rx="2.5" ry="3" fill="white" opacity="0.35"/>
+
+              {/* Small bubble */}
+              <circle cx="12" cy="12" r="6" fill="url(#bubble3)" opacity="0.8"/>
+              <circle cx="12" cy="12" r="6" stroke="#93C5FD" strokeWidth="1" opacity="0.3"/>
+              <circle cx="10" cy="10" r="1.5" fill="white" opacity="0.4"/>
+
+              {/* Tiny bubbles */}
+              <circle cx="38" cy="32" r="3" fill="url(#bubble4)" opacity="0.7"/>
+              <circle cx="7" cy="35" r="2.5" fill="url(#bubble4)" opacity="0.65"/>
+
+              <defs>
+                <radialGradient id="bubble1" cx="30%" cy="30%">
+                  <stop offset="0%" stopColor="#DBEAFE"/>
+                  <stop offset="50%" stopColor="#93C5FD"/>
+                  <stop offset="100%" stopColor="#3B82F6"/>
+                </radialGradient>
+                <radialGradient id="bubble2" cx="30%" cy="30%">
+                  <stop offset="0%" stopColor="#EFF6FF"/>
+                  <stop offset="50%" stopColor="#BFDBFE"/>
+                  <stop offset="100%" stopColor="#60A5FA"/>
+                </radialGradient>
+                <radialGradient id="bubble3" cx="30%" cy="30%">
+                  <stop offset="0%" stopColor="#F0F9FF"/>
+                  <stop offset="50%" stopColor="#DBEAFE"/>
+                  <stop offset="100%" stopColor="#93C5FD"/>
+                </radialGradient>
+                <radialGradient id="bubble4" cx="30%" cy="30%">
+                  <stop offset="0%" stopColor="#EFF6FF"/>
+                  <stop offset="50%" stopColor="#DBEAFE"/>
+                  <stop offset="100%" stopColor="#BFDBFE"/>
+                </radialGradient>
+              </defs>
+            </svg>
+            BubbleUp
           </h1>
-          <p className="mt-1 text-gray-600 flex items-center flex-wrap">
+          <p className="mt-2 text-gray-600 flex items-center flex-wrap">
             <span>Drag and drop to reorder</span>
             {(contextMenuFilters.length > 0 || selectedEpics.size > 0 || selectedPriorities.size > 0 || selectedStatuses.size > 0 || filter.epic !== 'all' || filter.priority !== 'all' || filter.status !== 'all') && (
               <>
@@ -2378,6 +3016,26 @@ export function BacklogPage() {
               </>
             )}
           </p>
+        </div>
+        <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+          <select
+            value={currentProject}
+            onChange={(e) => setCurrentProject(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          >
+            {projects.map((project) => (
+              <option key={project} value={project}>
+                {project}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => setIsCreatingProject(true)}
+            className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Create New Project
+          </button>
         </div>
       </div>
 
@@ -2739,3 +3397,5 @@ export function BacklogPage() {
     </div>
   );
 }
+
+export default BacklogPage;

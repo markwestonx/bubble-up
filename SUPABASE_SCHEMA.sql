@@ -40,6 +40,7 @@ CREATE TABLE epics (
 CREATE TABLE stories (
     id TEXT PRIMARY KEY, -- e.g., '001', '002', '003'
     team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
+    project TEXT NOT NULL, -- Project name (e.g., 'Sales Genie')
     epic_id UUID REFERENCES epics(id) ON DELETE SET NULL,
     epic_name TEXT, -- Denormalized for easier queries
     story TEXT NOT NULL,

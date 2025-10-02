@@ -70,7 +70,7 @@ interface SortableRowProps {
   onToggleExpand: () => void;
   getPriorityColor: (priority: Priority) => string;
   getStatusColor: (status: Status) => string;
-  getStatusIcon: (status: Status) => JSX.Element;
+  getStatusIcon: (status: Status) => React.ReactElement;
   getEpicLabel: (epic: Epic) => string;
   onUpdate: (id: string, updates: Partial<BacklogItem>) => void;
 }

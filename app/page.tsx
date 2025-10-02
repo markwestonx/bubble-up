@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import {
   DndContext,
@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 
 // Epic/Phase type
-type Epic = 'foundation' | 'agents' | 'fanatical' | 'integration' | 'infrastructure' | 'production' | 'content' | 'social' | 'crm' | 'analytics' | 'architecture' | 'product' | 'deployment' | 'marketing' | 'purchase' | 'leadgen';
+type Epic = 'foundation' | 'agents' | 'fanatical' | 'integration' | 'infrastructure' | 'production' | 'content' | 'social' | 'crm' | 'analytics' | 'architecture' | 'product' | 'deployment' | 'marketing' | 'purchase' | 'leadgen' | 'tracking' | 'cdp' | 'personalization' | 'orchestration' | 'compliance';
 
 // Priority levels
 type Priority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
@@ -74,6 +74,7 @@ interface SortableRowProps {
   getEpicLabel: (epic: Epic) => string;
   onUpdate: (id: string, updates: Partial<BacklogItem>) => void;
   availableEpics: Epic[];
+  allItems: BacklogItem[];
 }
 
 function SortableRow({
@@ -85,7 +86,8 @@ function SortableRow({
   getStatusIcon,
   getEpicLabel,
   onUpdate,
-  availableEpics
+  availableEpics,
+  allItems
 }: SortableRowProps) {
   const {
     attributes,
@@ -421,9 +423,31 @@ function SortableRow({
                   ) : (
                     <div
                       onClick={() => setEditingDeps(true)}
-                      className="cursor-text hover:bg-gray-100 px-3 py-2 text-sm font-mono rounded"
+                      className="cursor-text hover:bg-gray-100 px-3 py-2 text-sm font-mono rounded flex flex-wrap gap-2"
                     >
-                      {item.dependencies.length > 0 ? item.dependencies.join(', ') : 'No dependencies - click to add'}
+                      {item.dependencies.length > 0 ? (
+                        item.dependencies.map((depId) => {
+                          const depItem = allItems.find(i => i.id === depId);
+                          return (
+                            <span
+                              key={depId}
+                              className="relative group inline-block"
+                            >
+                              <span className="px-2 py-1 bg-gray-200 text-gray-800 rounded text-xs font-mono">
+                                {depId}
+                              </span>
+                              {depItem && (
+                                <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black text-white text-xs rounded whitespace-nowrap z-10 shadow-lg">
+                                  {depItem.userStory}
+                                  <span className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-black"></span>
+                                </span>
+                              )}
+                            </span>
+                          );
+                        })
+                      ) : (
+                        'No dependencies - click to add'
+                      )}
                     </div>
                   )}
                 </div>
@@ -2049,26 +2073,77 @@ function BacklogPage() {
 
   const STORAGE_KEY = 'sales_genie_backlog';
 
-  // Load backlog from localStorage or use initial items
-  const [backlogItems, setBacklogItems] = useState<BacklogItem[]>(() => {
-    if (typeof window === 'undefined') return initialBacklogItems;
+  // Track if component is mounted to prevent hydration errors
+  const [isMounted, setIsMounted] = useState(false);
 
+  // Load backlog from localStorage or use initial items
+  const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([]);
+
+  // Load from Supabase and localStorage only after mounting (client-side only)
+  useEffect(() => {
+    setIsMounted(true);
+
+    // Check localStorage first
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        // Migrate old data: add project field if missing
-        return parsed.map((item: any) => ({
+        const migrated = parsed.map((item: any) => ({
           ...item,
           project: item.project || 'Sales Genie'
         }));
+        setBacklogItems(migrated);
+        console.log('✅ Loaded from localStorage:', migrated.length, 'items');
+        // Trust localStorage - it will sync to Supabase via the sync effect
+        return;
       } catch (error) {
         console.error('Failed to parse stored backlog:', error);
-        return initialBacklogItems;
       }
     }
-    return initialBacklogItems;
-  });
+
+    // Only load from Supabase if no localStorage
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('backlog_items')
+          .select('*')
+          .order('display_order', { ascending: true });
+
+        if (error) {
+          console.error('Failed to load from Supabase:', error);
+          setBacklogItems(initialBacklogItems);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          const supabaseItems: BacklogItem[] = data.map((item: any) => ({
+            id: item.id,
+            project: item.project,
+            epic: item.epic as Epic,
+            priority: item.priority as Priority,
+            status: item.status as Status,
+            userStory: item.user_story,
+            acceptanceCriteria: item.acceptance_criteria || [],
+            effort: item.effort,
+            businessValue: item.business_value,
+            dependencies: item.dependencies || [],
+            technicalNotes: item.technical_notes || '',
+            owner: item.owner,
+            isNext: item.is_next || false
+          }));
+
+          setBacklogItems(supabaseItems);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(supabaseItems));
+          console.log('✅ Loaded from Supabase:', supabaseItems.length, 'items');
+        } else {
+          setBacklogItems(initialBacklogItems);
+        }
+      } catch (error) {
+        console.error('Failed to load from Supabase:', error);
+        setBacklogItems(initialBacklogItems);
+      }
+    })();
+  }, []);
 
   const [filter, setFilter] = useState<{
     epic: Epic | 'all';
@@ -2177,40 +2252,18 @@ function BacklogPage() {
     loadFromSupabase();
   }, []); // Only run once on mount
 
-  // Persist backlog to localStorage and Supabase whenever it changes
+  // Persist backlog to localStorage and Supabase
   React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    console.log('🔄 Triggering sync for', backlogItems.length, 'items');
+    if (typeof window === 'undefined' || backlogItems.length === 0) return;
 
     // Save to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(backlogItems));
+    console.log('💾 Saved to localStorage:', backlogItems.length, 'items');
 
-    // Sync to Supabase
+    // Sync to Supabase using safe upsert (doesn't delete existing data)
     const syncToSupabase = async () => {
-      if (backlogItems.length === 0) {
-        console.log('⏭️ Skipping sync - no items');
-        return;
-      }
-
       try {
-        console.log('🚀 Starting Supabase sync...');
-
-        // Delete all existing items and insert fresh data (simple upsert strategy)
-        const { error: deleteError } = await supabase
-          .from('backlog_items')
-          .delete()
-          .neq('id', ''); // Delete all
-
-        if (deleteError) {
-          console.error('❌ Error clearing Supabase:', deleteError);
-          return;
-        }
-
-        console.log('🗑️ Cleared existing items');
-
-        // Insert all current items
-        const itemsToInsert = backlogItems.map((item, index) => ({
+        const itemsToUpsert = backlogItems.map((item, index) => ({
           id: item.id,
           project: item.project,
           epic: item.epic,
@@ -2227,14 +2280,12 @@ function BacklogPage() {
           display_order: index
         }));
 
-        console.log('📦 Inserting', itemsToInsert.length, 'items...');
-
-        const { error: insertError } = await supabase
+        const { error } = await supabase
           .from('backlog_items')
-          .insert(itemsToInsert as any);
+          .upsert(itemsToUpsert, { onConflict: 'id' });
 
-        if (insertError) {
-          console.error('❌ Error syncing to Supabase:', insertError);
+        if (error) {
+          console.error('❌ Error syncing to Supabase:', error);
         } else {
           console.log('✅ Synced to Supabase:', backlogItems.length, 'items');
         }
@@ -2742,7 +2793,12 @@ function BacklogPage() {
       deployment: 'Deployment',
       marketing: 'Marketing Microsite',
       purchase: 'Purchase',
-      leadgen: 'Lead Generation'
+      leadgen: 'Lead Generation',
+      tracking: 'Tracking',
+      cdp: 'CDP',
+      personalization: 'Personalization',
+      orchestration: 'Orchestration',
+      compliance: 'Compliance'
     };
     return labels[epic] || epic;
   };
@@ -2775,6 +2831,15 @@ function BacklogPage() {
     projectItems.forEach(item => uniqueEpics.add(item.epic));
     return Array.from(uniqueEpics).sort((a, b) => getEpicLabel(a).localeCompare(getEpicLabel(b)));
   }, [projectItems]);
+
+  // Don't render until mounted to avoid hydration errors
+  if (!isMounted) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -3463,6 +3528,7 @@ function BacklogPage() {
                       getEpicLabel={getEpicLabel}
                       onUpdate={updateItem}
                       availableEpics={availableEpics}
+                      allItems={backlogItems}
                     />
                   ))}
                 </SortableContext>
@@ -3474,6 +3540,124 @@ function BacklogPage() {
 
       {/* Backlog Cards - Mobile */}
       <div className="md:hidden space-y-3">
+        {/* Mobile Filters */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+          {/* Search */}
+          <div>
+            <input
+              type="text"
+              placeholder="Search stories..."
+              value={contextMenu?.searchTerm || ''}
+              onChange={(e) => {
+                const searchValue = e.target.value.toLowerCase();
+                if (searchValue) {
+                  setContextMenuFilters([{
+                    column: 'story',
+                    value: searchValue,
+                    values: [searchValue],
+                    isMultiple: false
+                  }]);
+                } else {
+                  setContextMenuFilters(prev => prev.filter(f => f.column !== 'story'));
+                }
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Sort By */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Sort By</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="id">ID</option>
+                <option value="epic">Epic</option>
+                <option value="priority">Priority</option>
+                <option value="status">Status</option>
+                <option value="story">Story</option>
+                <option value="next">Next</option>
+                <option value="effort">Effort</option>
+                <option value="value">Value</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Direction</label>
+              <select
+                value={sortDirection}
+                onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Epic</label>
+              <select
+                value={filter.epic}
+                onChange={(e) => setFilter({ ...filter, epic: e.target.value as Epic | 'all' })}
+                className="w-full px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All</option>
+                {availableEpics.map(epic => (
+                  <option key={epic} value={epic}>{getEpicLabel(epic)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
+              <select
+                value={filter.priority}
+                onChange={(e) => setFilter({ ...filter, priority: e.target.value as Priority | 'all' })}
+                className="w-full px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All</option>
+                <option value="CRITICAL">Critical</option>
+                <option value="HIGH">High</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LOW">Low</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+              <select
+                value={filter.status}
+                onChange={(e) => setFilter({ ...filter, status: e.target.value as Status | 'all' })}
+                className="w-full px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All</option>
+                <option value="NOT_STARTED">Not Started</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="BLOCKED">Blocked</option>
+                <option value="TESTING">Testing</option>
+                <option value="DONE">Done</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Clear Filters */}
+          {(filter.epic !== 'all' || filter.priority !== 'all' || filter.status !== 'all' || contextMenuFilters.length > 0) && (
+            <button
+              onClick={() => {
+                setFilter({ epic: 'all', priority: 'all', status: 'all' });
+                setContextMenuFilters([]);
+              }}
+              className="w-full px-3 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Clear All Filters
+            </button>
+          )}
+        </div>
+
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -3565,7 +3749,27 @@ function BacklogPage() {
                       {item.dependencies.length > 0 && (
                         <div>
                           <h4 className="text-sm font-semibold text-gray-900 mb-2">Dependencies</h4>
-                          <p className="text-sm text-gray-700 font-mono">{item.dependencies.join(', ')}</p>
+                          <div className="flex flex-wrap gap-2">
+                            {item.dependencies.map((depId) => {
+                              const depItem = backlogItems.find(i => i.id === depId);
+                              return (
+                                <span
+                                  key={depId}
+                                  className="relative group inline-block"
+                                >
+                                  <span className="px-2 py-1 bg-gray-200 text-gray-800 rounded text-xs font-mono">
+                                    {depId}
+                                  </span>
+                                  {depItem && (
+                                    <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black text-white text-xs rounded whitespace-nowrap z-10 shadow-lg max-w-xs">
+                                      {depItem.userStory}
+                                      <span className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-black"></span>
+                                    </span>
+                                  )}
+                                </span>
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
 

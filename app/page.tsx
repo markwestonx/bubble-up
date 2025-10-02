@@ -3096,7 +3096,7 @@ function BacklogPage() {
                 </radialGradient>
               </defs>
             </svg>
-            BubbleUp
+            BubbleUp - {currentProject}
           </h1>
           <p className="mt-2 text-gray-600 flex items-center flex-wrap">
             <span>Drag and drop to reorder</span>

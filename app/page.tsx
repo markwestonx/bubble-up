@@ -205,7 +205,11 @@ function SortableRow({
                 placeholder="Enter new epic name..."
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                    const newEpic = e.currentTarget.value.trim().toLowerCase().replace(/\s+/g, '-');
+                    // Capitalize first letter of each word, then convert to kebab-case
+                    const newEpic = e.currentTarget.value.trim()
+                      .split(/\s+/)
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                      .join('-');
                     onUpdate(item.id, { epic: newEpic as Epic });
                     setEditingEpic(false);
                   } else if (e.key === 'Escape') {
@@ -3051,7 +3055,7 @@ function BacklogPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 pt-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
             <svg className="h-10 w-10 mr-3" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               {/* Large bubble */}
               <circle cx="24" cy="28" r="16" fill="url(#bubble1)" opacity="0.9"/>
@@ -3098,7 +3102,7 @@ function BacklogPage() {
             </svg>
             BubbleUp - {currentProject}
           </h1>
-          <p className="mt-2 text-gray-600 flex items-center flex-wrap">
+          <p className="mt-2 text-gray-600 dark:text-gray-300 flex items-center flex-wrap">
             <span>Drag and drop to reorder</span>
             {(contextMenuFilters.length > 0 || selectedEpics.size > 0 || selectedPriorities.size > 0 || selectedStatuses.size > 0 || filter.epic !== 'all' || filter.priority !== 'all' || filter.status !== 'all') && (
               <>
@@ -3531,7 +3535,7 @@ function BacklogPage() {
       {/* Backlog Cards - Mobile */}
       <div className="md:hidden space-y-3">
         {/* Mobile Filters */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
           {/* Search */}
           <div>
             <input
@@ -3551,18 +3555,18 @@ function BacklogPage() {
                   setContextMenuFilters(prev => prev.filter(f => f.column !== 'story'));
                 }
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           {/* Sort By */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Sort By</label>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="id">ID</option>
                 <option value="epic">Epic</option>
@@ -3575,11 +3579,11 @@ function BacklogPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Direction</label>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Direction</label>
               <select
                 value={sortDirection}
                 onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
@@ -3590,11 +3594,11 @@ function BacklogPage() {
           {/* Filters */}
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Epic</label>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Epic</label>
               <select
                 value={filter.epic}
                 onChange={(e) => setFilter({ ...filter, epic: e.target.value as Epic | 'all' })}
-                className="w-full px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All</option>
                 {availableEpics.map(epic => (
@@ -3603,11 +3607,11 @@ function BacklogPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
               <select
                 value={filter.priority}
                 onChange={(e) => setFilter({ ...filter, priority: e.target.value as Priority | 'all' })}
-                className="w-full px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All</option>
                 <option value="CRITICAL">Critical</option>
@@ -3617,11 +3621,11 @@ function BacklogPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
               <select
                 value={filter.status}
                 onChange={(e) => setFilter({ ...filter, status: e.target.value as Status | 'all' })}
-                className="w-full px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All</option>
                 <option value="NOT_STARTED">Not Started</option>
@@ -3641,7 +3645,7 @@ function BacklogPage() {
                 setFilter({ epic: 'all', priority: 'all', status: 'all' });
                 setContextMenuFilters([]);
               }}
-              className="w-full px-3 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="w-full px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
             >
               Clear All Filters
             </button>

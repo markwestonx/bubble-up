@@ -2150,8 +2150,9 @@ function BacklogPage() {
   const [epicFilterMode, setEpicFilterMode] = useState<'single' | 'multiple'>('single');
   const [selectedEpics, setSelectedEpics] = useState<Set<Epic>>(new Set());
 
-  const [sortBy, setSortBy] = useState<'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value'>('priority');
+  const [sortBy, setSortBy] = useState<'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'custom'>('priority');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [isCustomOrder, setIsCustomOrder] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
@@ -2413,6 +2414,13 @@ function BacklogPage() {
 
   // Sort items
   const sortedItems = [...filteredItems].sort((a, b) => {
+    // Custom order mode: use original backlogItems order
+    if (isCustomOrder) {
+      const aIndex = backlogItems.findIndex(item => item.id === a.id);
+      const bIndex = backlogItems.findIndex(item => item.id === b.id);
+      return aIndex - bIndex;
+    }
+
     let comparison = 0;
 
     switch (sortBy) {
@@ -2442,6 +2450,9 @@ function BacklogPage() {
       case 'value':
         comparison = a.businessValue - b.businessValue;
         break;
+      case 'custom':
+        // Should not reach here as isCustomOrder flag handles it
+        return 0;
     }
 
     return sortDirection === 'asc' ? comparison : -comparison;
@@ -2795,7 +2806,11 @@ function BacklogPage() {
       orchestration: 'Orchestration',
       compliance: 'Compliance'
     };
-    return labels[epic] || epic;
+    // If epic not in labels, capitalize each word
+    if (labels[epic]) {
+      return labels[epic];
+    }
+    return epic.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
   // Format display value for context menu based on column type
@@ -3307,8 +3322,18 @@ function BacklogPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
-                    <GripVertical className="h-4 w-4 text-gray-400 inline" /> Order
+                  <th
+                    onClick={() => {
+                      setIsCustomOrder(!isCustomOrder);
+                      setSortBy('custom');
+                    }}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 cursor-pointer hover:bg-gray-100"
+                  >
+                    <div className="flex items-center">
+                      <GripVertical className={`h-4 w-4 inline mr-1 ${isCustomOrder ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <span className={isCustomOrder ? 'text-blue-600 font-bold' : ''}>Order</span>
+                      {isCustomOrder && <span className="ml-1 text-blue-600">●</span>}
+                    </div>
                   </th>
                   <th
                     onClick={() => handleSort('id')}
@@ -3589,9 +3614,18 @@ function BacklogPage() {
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSortBy(value as any);
+                  if (value === 'custom') {
+                    setIsCustomOrder(true);
+                  } else {
+                    setIsCustomOrder(false);
+                  }
+                }}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
+                <option value="custom">Custom Order</option>
                 <option value="id">ID</option>
                 <option value="epic">Epic</option>
                 <option value="priority">Priority</option>

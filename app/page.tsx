@@ -3367,7 +3367,7 @@ function BacklogPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setExpandedRows(new Set())}
+                        onClick={() => setExpandedItems(new Set())}
                         className="p-1 hover:bg-gray-200 rounded transition-colors"
                         title="Collapse all stories"
                       >

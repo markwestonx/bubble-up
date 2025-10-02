@@ -73,6 +73,7 @@ interface SortableRowProps {
   getStatusIcon: (status: Status) => React.ReactElement;
   getEpicLabel: (epic: Epic) => string;
   onUpdate: (id: string, updates: Partial<BacklogItem>) => void;
+  availableEpics: Epic[];
 }
 
 function SortableRow({
@@ -83,7 +84,8 @@ function SortableRow({
   getStatusColor,
   getStatusIcon,
   getEpicLabel,
-  onUpdate
+  onUpdate,
+  availableEpics
 }: SortableRowProps) {
   const {
     attributes,
@@ -168,28 +170,50 @@ function SortableRow({
         </td>
         <td className="px-4 py-4 whitespace-nowrap">
           {editingEpic ? (
-            <select
-              value={item.epic}
-              onChange={(e) => {
-                onUpdate(item.id, { epic: e.target.value as Epic });
-                setEditingEpic(false);
-              }}
-              onBlur={() => setEditingEpic(false)}
-              autoFocus
-              className="px-2 py-1 text-xs font-medium border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="foundation">Foundation</option>
-              <option value="integration">API Integration</option>
-              <option value="agents">Agent Development</option>
-              <option value="fanatical">Fanatical Prospecting</option>
-              <option value="infrastructure">Infrastructure</option>
-              <option value="architecture">Architecture & Design</option>
-              <option value="content">Content Generation</option>
-              <option value="social">Social Media</option>
-              <option value="crm">CRM & Pipeline</option>
-              <option value="analytics">Analytics & Insights</option>
-              <option value="production">Production</option>
-            </select>
+            <div className="flex flex-col gap-1">
+              <select
+                value={item.epic}
+                onChange={(e) => {
+                  if (e.target.value === '__new__') {
+                    // Switch to input mode for new epic
+                    return;
+                  }
+                  onUpdate(item.id, { epic: e.target.value as Epic });
+                  setEditingEpic(false);
+                }}
+                onBlur={(e) => {
+                  // Don't close if clicking on input below
+                  if (!e.relatedTarget?.id?.startsWith('new-epic-input')) {
+                    setEditingEpic(false);
+                  }
+                }}
+                autoFocus
+                className="px-2 py-1 text-xs font-medium border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {availableEpics.map((epic) => (
+                  <option key={epic} value={epic}>
+                    {getEpicLabel(epic)}
+                  </option>
+                ))}
+                <option value="__new__">+ Add New Epic</option>
+              </select>
+              <input
+                id={`new-epic-input-${item.id}`}
+                type="text"
+                placeholder="Enter new epic name..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                    const newEpic = e.currentTarget.value.trim().toLowerCase().replace(/\s+/g, '-');
+                    onUpdate(item.id, { epic: newEpic as Epic });
+                    setEditingEpic(false);
+                  } else if (e.key === 'Escape') {
+                    setEditingEpic(false);
+                  }
+                }}
+                onBlur={() => setEditingEpic(false)}
+                className="px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           ) : (
             <span
               onClick={() => setEditingEpic(true)}
@@ -2514,7 +2538,8 @@ function BacklogPage() {
     }
 
     const uniqueValues = new Set<string>();
-    backlogItems.forEach(item => {
+    // Use projectItems instead of backlogItems to show only current project's values
+    projectItems.forEach(item => {
       switch (column) {
         case 'id':
           uniqueValues.add(item.id);
@@ -2743,6 +2768,13 @@ function BacklogPage() {
     totalEffort: projectItems.reduce((sum, i) => sum + i.effort, 0),
     completedEffort: projectItems.filter(i => i.status === 'DONE').reduce((sum, i) => sum + i.effort, 0)
   };
+
+  // Get available epics for current project (auto-generated from existing items)
+  const availableEpics = React.useMemo(() => {
+    const uniqueEpics = new Set<Epic>();
+    projectItems.forEach(item => uniqueEpics.add(item.epic));
+    return Array.from(uniqueEpics).sort((a, b) => getEpicLabel(a).localeCompare(getEpicLabel(b)));
+  }, [projectItems]);
 
   return (
     <div className="space-y-6">
@@ -3324,17 +3356,11 @@ function BacklogPage() {
                         onChange={(e) => setNewStory({ ...newStory, epic: e.target.value as Epic })}
                         className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       >
-                        <option value="foundation">Foundation</option>
-                        <option value="integration">Integration</option>
-                        <option value="agents">Agents</option>
-                        <option value="fanatical">Fanatical</option>
-                        <option value="infrastructure">Infrastructure</option>
-                        <option value="architecture">Architecture</option>
-                        <option value="content">Content</option>
-                        <option value="social">Social</option>
-                        <option value="crm">CRM</option>
-                        <option value="analytics">Analytics</option>
-                        <option value="production">Production</option>
+                        {availableEpics.map((epic) => (
+                          <option key={epic} value={epic}>
+                            {getEpicLabel(epic)}
+                          </option>
+                        ))}
                       </select>
                     </td>
                     <td className="px-4 py-3">
@@ -3436,6 +3462,7 @@ function BacklogPage() {
                       getStatusIcon={getStatusIcon}
                       getEpicLabel={getEpicLabel}
                       onUpdate={updateItem}
+                      availableEpics={availableEpics}
                     />
                   ))}
                 </SortableContext>

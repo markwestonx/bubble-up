@@ -1,0 +1,1507 @@
+[
+  {
+    "id": "001",
+    "project": "Sales Genie",
+    "epic": "foundation",
+    "priority": "CRITICAL",
+    "status": "DONE",
+    "user_story": "PERSISTENCE TEST 1 OCT SHUTDOWN As a developer, I need a working database so that agents can persist prospect data",
+    "acceptance_criteria": [
+      "Database created",
+      "Schema with prospects, campaigns, messages tables",
+      "Database connection working from both Python and Node.js",
+      "Sample data inserted successfully"
+    ],
+    "effort": 2,
+    "business_value": 10,
+    "dependencies": [],
+    "technical_notes": "Using better-sqlite3 for Node.js and aiosqlite for Python initially\nSwitrched to PostreSQL in Docker container\n",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 0,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "002",
+    "project": "Sales Genie",
+    "epic": "foundation",
+    "priority": "CRITICAL",
+    "status": "DONE",
+    "user_story": "As a developer, I need Python 3.13.7 environment with LangChain so that I can build AI agents",
+    "acceptance_criteria": [
+      "Python 3.13.7 installed",
+      "LangChain, FastAPI, aiosqlite dependencies installed",
+      "Virtual environment configured",
+      "Test script runs successfully"
+    ],
+    "effort": 1,
+    "business_value": 10,
+    "dependencies": [],
+    "technical_notes": "Avoid Python 3.14 beta - causes package compilation issues",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 1,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "003",
+    "project": "Sales Genie",
+    "epic": "foundation",
+    "priority": "CRITICAL",
+    "status": "DONE",
+    "user_story": "As a system, I need Lead Discovery Agent running on port 8001 so that I can discover prospects",
+    "acceptance_criteria": [
+      "FastAPI server starts on port 8001",
+      "/health endpoint responds",
+      "Database connection established",
+      "LinkedIn CSV import endpoint functional"
+    ],
+    "effort": 3,
+    "business_value": 10,
+    "dependencies": [
+      "001",
+      "002"
+    ],
+    "technical_notes": "FastAPI + async/await patterns for high concurrency",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 2,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "004",
+    "project": "Sales Genie",
+    "epic": "foundation",
+    "priority": "CRITICAL",
+    "status": "DONE",
+    "user_story": "As a system, I need Outreach Agent running on port 8002 so that I can send emails",
+    "acceptance_criteria": [
+      "FastAPI server starts on port 8002",
+      "/health endpoint responds",
+      "Database connection established",
+      "Email template engine functional"
+    ],
+    "effort": 3,
+    "business_value": 10,
+    "dependencies": [
+      "001",
+      "002"
+    ],
+    "technical_notes": "Jinja2 templates for email personalization",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 3,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "005",
+    "project": "Sales Genie",
+    "epic": "integration",
+    "priority": "CRITICAL",
+    "status": "DONE",
+    "user_story": "As Lead Discovery Agent, I need Companies House API key so that I can discover UK prospects",
+    "acceptance_criteria": [
+      "API key obtained from Companies House",
+      "API integration tested",
+      "Can search for companies by industry",
+      "Can fetch company details and officers"
+    ],
+    "effort": 2,
+    "business_value": 9,
+    "dependencies": [
+      "003"
+    ],
+    "technical_notes": "Free API with rate limits - implement caching",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 4,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "006",
+    "project": "Sales Genie",
+    "epic": "integration",
+    "priority": "CRITICAL",
+    "status": "DONE",
+    "user_story": "As Outreach Agent, I need SMTP credentials so that I can send emails to prospects",
+    "acceptance_criteria": [
+      "SMTP server configured (Gmail/SendGrid)",
+      "Can send test emails",
+      "Email authentication (SPF/DKIM) configured",
+      "Delivery tracking enabled"
+    ],
+    "effort": 2,
+    "business_value": 9,
+    "dependencies": [
+      "004"
+    ],
+    "technical_notes": "Gmail app passwords or SendGrid API - ensure deliverability",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 5,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "007",
+    "project": "Sales Genie",
+    "epic": "infrastructure",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a DevOps engineer, I need Docker Compose configuration so that I can deploy the full stack easily",
+    "acceptance_criteria": [
+      "docker-compose.yml defines all 7 services",
+      "Ollama (11434), PostgreSQL (5432), Redis (6379) configured",
+      "API (3001), Agents (8001/8002), Dashboard (3002) configured",
+      "Volumes for data persistence",
+      "Health checks for all services",
+      "Single command deployment works"
+    ],
+    "effort": 5,
+    "business_value": 7,
+    "dependencies": [],
+    "technical_notes": "Already exists - needs updating for SQLite option and current ports (3002 for dashboard)",
+    "owner": "DevOps",
+    "is_next": false,
+    "display_order": 6,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "008",
+    "project": "Sales Genie",
+    "epic": "infrastructure",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a developer, I need environment variable management so that configuration is secure and flexible",
+    "acceptance_criteria": [
+      ".env.example template created",
+      "All API keys documented",
+      "Database URLs configurable",
+      "Port configurations flexible",
+      "Secrets not committed to git"
+    ],
+    "effort": 2,
+    "business_value": 8,
+    "dependencies": [],
+    "technical_notes": "Support both SQLite (dev) and PostgreSQL (prod) via env vars",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 7,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "009",
+    "project": "Sales Genie",
+    "epic": "infrastructure",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a system administrator, I need logging and monitoring so that I can troubleshoot issues",
+    "acceptance_criteria": [
+      "Winston logging configured in Node.js",
+      "Python logging with structured output",
+      "Log levels configurable (DEBUG, INFO, WARN, ERROR)",
+      "Logs persisted to files",
+      "Error tracking with stack traces"
+    ],
+    "effort": 3,
+    "business_value": 6,
+    "dependencies": [],
+    "technical_notes": "Winston for Node, structlog for Python, consider ELK stack for production",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 8,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "010",
+    "project": "Sales Genie",
+    "epic": "infrastructure",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a team, I need CI/CD pipeline so that deployments are automated and reliable",
+    "acceptance_criteria": [
+      "GitHub Actions workflow configured",
+      "Automated tests run on PR",
+      "Docker images built and pushed",
+      "Deployment to staging automated",
+      "Production deployment requires approval"
+    ],
+    "effort": 8,
+    "business_value": 5,
+    "dependencies": [
+      "007",
+      "013"
+    ],
+    "technical_notes": "GitHub Actions + Azure Container Registry + Azure Container Apps",
+    "owner": "DevOps",
+    "is_next": false,
+    "display_order": 9,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "011",
+    "project": "Sales Genie",
+    "epic": "infrastructure",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a system, I need health check endpoints so that monitoring can detect failures",
+    "acceptance_criteria": [
+      "/health endpoints on all services",
+      "/health/ready for readiness checks",
+      "/health/live for liveness checks",
+      "Database connectivity checked",
+      "Dependency health included"
+    ],
+    "effort": 3,
+    "business_value": 7,
+    "dependencies": [
+      "003",
+      "004"
+    ],
+    "technical_notes": "Already partially implemented - standardize across all services",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 10,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "012",
+    "project": "Sales Genie",
+    "epic": "infrastructure",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a DevOps engineer, I need database backup strategy so that data is never lost",
+    "acceptance_criteria": [
+      "Automated daily backups",
+      "Backup retention policy (30 days)",
+      "Backup restoration tested",
+      "Point-in-time recovery capability",
+      "Backup monitoring and alerts"
+    ],
+    "effort": 5,
+    "business_value": 6,
+    "dependencies": [
+      "001"
+    ],
+    "technical_notes": "SQLite: .backup command, PostgreSQL: pg_dump, Azure Backup for production",
+    "owner": "DevOps",
+    "is_next": false,
+    "display_order": 11,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "013",
+    "project": "Sales Genie",
+    "epic": "infrastructure",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a developer, I need automated testing infrastructure so that code quality is maintained",
+    "acceptance_criteria": [
+      "Jest configured for Node.js",
+      "Pytest configured for Python",
+      "Playwright for E2E tests",
+      "Test coverage reporting",
+      "Tests run in CI pipeline"
+    ],
+    "effort": 5,
+    "business_value": 7,
+    "dependencies": [],
+    "technical_notes": "Test files already exist in tests/ directory - need full integration",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 12,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "014",
+    "project": "Sales Genie",
+    "epic": "infrastructure",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a product owner, I need staging environment so that features can be tested before production",
+    "acceptance_criteria": [
+      "Staging environment deployed",
+      "Separate database from production",
+      "Same configuration as production",
+      "Accessible to team for testing",
+      "Data seeding scripts available"
+    ],
+    "effort": 8,
+    "business_value": 5,
+    "dependencies": [
+      "007",
+      "010"
+    ],
+    "technical_notes": "Azure Container Apps with staging slot, or separate resource group",
+    "owner": "DevOps",
+    "is_next": false,
+    "display_order": 13,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "015",
+    "project": "Sales Genie",
+    "epic": "agents",
+    "priority": "CRITICAL",
+    "status": "IN_PROGRESS",
+    "user_story": "As a user, I need LinkedIn Sales Navigator CSV import so that I can bulk import prospects",
+    "acceptance_criteria": [
+      "Upload CSV endpoint functional",
+      "Parse LinkedIn export format",
+      "Validate and clean prospect data",
+      "Store in database with qualification scores"
+    ],
+    "effort": 5,
+    "business_value": 9,
+    "dependencies": [
+      "003"
+    ],
+    "technical_notes": "ToS-compliant approach - manual exports only",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 14,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "016",
+    "project": "Sales Genie",
+    "epic": "agents",
+    "priority": "CRITICAL",
+    "status": "NOT_STARTED",
+    "user_story": "As Outreach Agent, I need AI email personalization so that emails feel human-written",
+    "acceptance_criteria": [
+      "LangChain integration for email generation",
+      "Prospect data used for personalization",
+      "Multiple template variations",
+      ">80% human-like quality score"
+    ],
+    "effort": 8,
+    "business_value": 9,
+    "dependencies": [
+      "004",
+      "006"
+    ],
+    "technical_notes": "Use Ollama Mistral or OpenAI GPT-4",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 15,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "017",
+    "project": "Sales Genie",
+    "epic": "integration",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As Lead Discovery Agent, I need Apollo.io integration so that I can find prospect emails",
+    "acceptance_criteria": [
+      "Apollo.io API integrated",
+      "Can enrich company data",
+      "Can find contact emails",
+      "Handles rate limits gracefully"
+    ],
+    "effort": 5,
+    "business_value": 8,
+    "dependencies": [
+      "003",
+      "015"
+    ],
+    "technical_notes": "Free tier available - 50 credits/month",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 16,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "018",
+    "project": "Sales Genie",
+    "epic": "agents",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a system, I need Fanatical Hunter Agent so that Lead Discovery never stops finding prospects",
+    "acceptance_criteria": [
+      "Extends Lead Discovery Agent with relentless mode",
+      "Continuous trigger event monitoring",
+      "Quality + quantity balanced approach",
+      "Competitive account intelligence",
+      "Never-stop hunting protocol"
+    ],
+    "effort": 8,
+    "business_value": 9,
+    "dependencies": [
+      "015",
+      "027"
+    ],
+    "technical_notes": "Enhanced Lead Discovery Agent with fanatical prospecting capabilities",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 17,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "019",
+    "project": "Sales Genie",
+    "epic": "agents",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a system, I need Multi-Channel Assault Agent so that outreach uses optimal channel sequences",
+    "acceptance_criteria": [
+      "Extends Outreach Agent with multi-channel orchestration",
+      "Email, LinkedIn, phone coordination",
+      "Systematic interruption engine",
+      "Message personalization at scale",
+      "Objection anticipation in initial outreach"
+    ],
+    "effort": 13,
+    "business_value": 9,
+    "dependencies": [
+      "016",
+      "027"
+    ],
+    "technical_notes": "Enhanced Outreach Agent with multi-channel fanatical capabilities",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 18,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "020",
+    "project": "Sales Genie",
+    "epic": "agents",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a social selling system, I need Social Dominance Agent so that I can execute LinkedIn 5 Cs at scale",
+    "acceptance_criteria": [
+      "Connection automation with personalized requests",
+      "Content curation engine",
+      "Engagement amplification (likes, shares, comments)",
+      "Trigger event detection from social signals",
+      "Relationship warming through consistent interactions"
+    ],
+    "effort": 13,
+    "business_value": 8,
+    "dependencies": [
+      "027",
+      "015"
+    ],
+    "technical_notes": "Five Cs: Connecting, Content Creation, Content Curation, Conversations, Converting",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 19,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "021",
+    "project": "Sales Genie",
+    "epic": "architecture",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a team, I need centralized architecture documentation so that all design decisions are traceable",
+    "acceptance_criteria": [
+      "Create /architecture folder with standard structure",
+      "System architecture diagrams (C4 model)",
+      "Agent interaction flows documented",
+      "Database schema documentation",
+      "API contract specifications",
+      "Technology stack rationale"
+    ],
+    "effort": 5,
+    "business_value": 7,
+    "dependencies": [],
+    "technical_notes": "Use Mermaid diagrams for version control, store in /architecture folder",
+    "owner": "Architecture",
+    "is_next": false,
+    "display_order": 20,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "022",
+    "project": "Sales Genie",
+    "epic": "architecture",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a developer, I need Architecture Decision Records (ADRs) so that I understand why choices were made",
+    "acceptance_criteria": [
+      "ADR template created",
+      "Key decisions documented (SQLite vs PostgreSQL, LangChain framework, etc)",
+      "Consequences and trade-offs captured",
+      "Alternative approaches considered",
+      "Numbered and dated ADR files in /architecture/decisions"
+    ],
+    "effort": 3,
+    "business_value": 6,
+    "dependencies": [
+      "021"
+    ],
+    "technical_notes": "Follow Michael Nygard ADR template format",
+    "owner": "Architecture",
+    "is_next": false,
+    "display_order": 21,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "023",
+    "project": "Sales Genie",
+    "epic": "architecture",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a team, I need regular architecture reviews so that design stays aligned with requirements",
+    "acceptance_criteria": [
+      "Bi-weekly architecture review meetings",
+      "Review checklist created",
+      "Design patterns consistency checked",
+      "Technical debt identified and tracked",
+      "Review minutes documented"
+    ],
+    "effort": 2,
+    "business_value": 6,
+    "dependencies": [
+      "021",
+      "022"
+    ],
+    "technical_notes": "Lightweight process - focus on major decisions and technical debt",
+    "owner": "Architecture",
+    "is_next": false,
+    "display_order": 22,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "024",
+    "project": "Sales Genie",
+    "epic": "architecture",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a team, I need API design standards so that all endpoints are consistent",
+    "acceptance_criteria": [
+      "REST API conventions documented",
+      "Error response format standardized",
+      "Authentication patterns defined",
+      "Versioning strategy established",
+      "OpenAPI specification template"
+    ],
+    "effort": 3,
+    "business_value": 7,
+    "dependencies": [
+      "021"
+    ],
+    "technical_notes": "Follow REST best practices, use OpenAPI 3.0 for documentation",
+    "owner": "Architecture",
+    "is_next": false,
+    "display_order": 23,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "025",
+    "project": "Sales Genie",
+    "epic": "architecture",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a developer, I need agent design patterns so that all agents follow consistent architecture",
+    "acceptance_criteria": [
+      "Base agent class/interface defined",
+      "LangChain integration patterns documented",
+      "State management approach specified",
+      "Error handling patterns established",
+      "Testing strategy for agents defined"
+    ],
+    "effort": 5,
+    "business_value": 6,
+    "dependencies": [
+      "021",
+      "027"
+    ],
+    "technical_notes": "Define reusable patterns for agent development with LangChain/LangGraph",
+    "owner": "Architecture",
+    "is_next": false,
+    "display_order": 24,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "026",
+    "project": "Sales Genie",
+    "epic": "architecture",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a team, I need technical roadmap so that we align on priorities and sequencing",
+    "acceptance_criteria": [
+      "Quarterly roadmap with major milestones",
+      "Dependencies between components mapped",
+      "Resource allocation considered",
+      "Risk mitigation strategies identified",
+      "Roadmap reviewed and updated monthly"
+    ],
+    "effort": 3,
+    "business_value": 7,
+    "dependencies": [
+      "021",
+      "023"
+    ],
+    "technical_notes": "Visual roadmap in Mermaid or similar, linked to backlog",
+    "owner": "Architecture",
+    "is_next": false,
+    "display_order": 25,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "027",
+    "project": "Sales Genie",
+    "epic": "fanatical",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a system, I need Fanatical Orchestrator Agent so that I can coordinate all agents 24/7",
+    "acceptance_criteria": [
+      "LangGraph workflow orchestration",
+      "Multi-agent coordination",
+      "\"One More Call\" protocol implemented",
+      "24/7 operational capability"
+    ],
+    "effort": 13,
+    "business_value": 10,
+    "dependencies": [
+      "003",
+      "004",
+      "016"
+    ],
+    "technical_notes": "Core of fanatical prospecting methodology - runs on port 8000",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 26,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "028",
+    "project": "Sales Genie",
+    "epic": "fanatical",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a system, I need Golden Hours Optimization Agent so that I can maximize response rates",
+    "acceptance_criteria": [
+      "Analyze prospect response patterns by time",
+      "Identify optimal contact windows",
+      "Prioritize activities during peak hours",
+      "ML model for time prediction"
+    ],
+    "effort": 8,
+    "business_value": 8,
+    "dependencies": [
+      "027"
+    ],
+    "technical_notes": "Use historical response data to train model",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 27,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "029",
+    "project": "Sales Genie",
+    "epic": "fanatical",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a system, I need Rejection Intelligence Agent so that I can learn from every rejection",
+    "acceptance_criteria": [
+      "Track all rejection reasons",
+      "Analyze rejection patterns",
+      "Optimize follow-up timing",
+      "Improve messaging based on learnings"
+    ],
+    "effort": 8,
+    "business_value": 7,
+    "dependencies": [
+      "027",
+      "016"
+    ],
+    "technical_notes": "Transforms rejection into learning fuel",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 28,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "030",
+    "project": "Sales Genie",
+    "epic": "fanatical",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a system, I need Competitive Intelligence Agent so that I can outmaneuver competitors",
+    "acceptance_criteria": [
+      "Monitor competitor activities",
+      "Generate battlecards",
+      "Detect competitive threats",
+      "Deploy counter-strategies"
+    ],
+    "effort": 13,
+    "business_value": 6,
+    "dependencies": [
+      "027"
+    ],
+    "technical_notes": "Web scraping + news monitoring + CRM intelligence",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 29,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "031",
+    "project": "Sales Genie",
+    "epic": "content",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a marketer, I need AI content generation so that I can create engaging posts at scale",
+    "acceptance_criteria": [
+      "Content generation agent with CrewAI",
+      "Market News Monitor for real-time analysis",
+      "Data Analyst for trend identification",
+      "Content Creator for multi-format output",
+      "Quality Assurance agent for review"
+    ],
+    "effort": 13,
+    "business_value": 8,
+    "dependencies": [
+      "027"
+    ],
+    "technical_notes": "Based on Archive/Content Creation system - 4 specialized agents working in pipeline",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 30,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "036",
+    "project": "Sales Genie",
+    "epic": "content",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a brand manager, I need content performance analytics so that I can optimize strategy",
+    "acceptance_criteria": [
+      "Content engagement metrics",
+      "A/B testing results",
+      "Audience sentiment analysis",
+      "Topic performance tracking",
+      "ROI measurement per content type"
+    ],
+    "effort": 5,
+    "business_value": 7,
+    "dependencies": [
+      "033"
+    ],
+    "technical_notes": "Analytics dashboard with ML-based insights",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 31,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "032",
+    "project": "Sales Genie",
+    "epic": "content",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a content manager, I need blog post generation so that I can maintain consistent content",
+    "acceptance_criteria": [
+      "Automated blog post creation",
+      "SEO optimization included",
+      "Markdown formatting",
+      "Image suggestions and integration",
+      "Multiple draft variations"
+    ],
+    "effort": 8,
+    "business_value": 7,
+    "dependencies": [
+      "031"
+    ],
+    "technical_notes": "Blog posts with integrated multimedia, proper headers and formatting",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 32,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "033",
+    "project": "Sales Genie",
+    "epic": "content",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a social media manager, I need multi-platform post generation so that I can scale social presence",
+    "acceptance_criteria": [
+      "Platform-specific content (LinkedIn, Twitter, Instagram, Facebook)",
+      "Character limit optimization",
+      "Hashtag generation",
+      "Image caption creation",
+      "Posting schedule recommendations"
+    ],
+    "effort": 8,
+    "business_value": 9,
+    "dependencies": [
+      "031"
+    ],
+    "technical_notes": "Multi-format content for different platforms with optimization",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 33,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "034",
+    "project": "Sales Genie",
+    "epic": "content",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a content strategist, I need content calendar planning so that I can schedule posts strategically",
+    "acceptance_criteria": [
+      "AI-powered content calendar",
+      "Optimal posting time recommendations",
+      "Topic clustering and themes",
+      "Content gap analysis",
+      "Automated scheduling integration"
+    ],
+    "effort": 5,
+    "business_value": 6,
+    "dependencies": [
+      "033"
+    ],
+    "technical_notes": "Integrates with social media scheduling tools",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 34,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "035",
+    "project": "Sales Genie",
+    "epic": "content",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a content creator, I need visual content suggestions so that posts have engaging imagery",
+    "acceptance_criteria": [
+      "AI image generation integration (DALL-E/Midjourney)",
+      "Stock photo recommendations",
+      "Infographic template generation",
+      "Video script creation",
+      "Visual brand consistency"
+    ],
+    "effort": 8,
+    "business_value": 5,
+    "dependencies": [
+      "031"
+    ],
+    "technical_notes": "Integration with image generation APIs and stock photo services",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 35,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "037",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a social media manager, I need LinkedIn posting automation so that I can maintain consistent presence",
+    "acceptance_criteria": [
+      "LinkedIn API integration for posting",
+      "Automated post scheduling",
+      "Image and video upload support",
+      "Engagement tracking (likes, comments, shares)",
+      "Analytics dashboard"
+    ],
+    "effort": 8,
+    "business_value": 9,
+    "dependencies": [
+      "033"
+    ],
+    "technical_notes": "LinkedIn API v2 for company pages and personal profiles",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 36,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "038",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a social media manager, I need Twitter/X posting automation so that I can scale thought leadership",
+    "acceptance_criteria": [
+      "Twitter API v2 integration",
+      "Tweet scheduling and threading",
+      "Media upload (images, videos, GIFs)",
+      "Reply and engagement automation",
+      "Trending topic monitoring"
+    ],
+    "effort": 8,
+    "business_value": 8,
+    "dependencies": [
+      "033"
+    ],
+    "technical_notes": "Twitter API v2 with elevated access for automation",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 37,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "039",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a social media manager, I need Instagram posting automation so that I can reach visual audiences",
+    "acceptance_criteria": [
+      "Instagram Graph API integration",
+      "Photo and video post automation",
+      "Stories scheduling",
+      "Carousel posts support",
+      "Hashtag optimization"
+    ],
+    "effort": 8,
+    "business_value": 7,
+    "dependencies": [
+      "033"
+    ],
+    "technical_notes": "Instagram Graph API for business accounts only",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 38,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "040",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a social media manager, I need Facebook posting automation so that I can manage pages efficiently",
+    "acceptance_criteria": [
+      "Facebook Graph API integration",
+      "Page post scheduling",
+      "Multiple page management",
+      "Group posting capability",
+      "Ad campaign integration"
+    ],
+    "effort": 8,
+    "business_value": 6,
+    "dependencies": [
+      "033"
+    ],
+    "technical_notes": "Facebook Business API for page management",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 39,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "041",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a marketer, I need Instagram DM automation so that I can do personalized B2C outreach",
+    "acceptance_criteria": [
+      "Instagram Messaging API integration",
+      "DM template management",
+      "Automated response flows",
+      "Lead qualification via DM",
+      "ToS-compliant rate limiting"
+    ],
+    "effort": 8,
+    "business_value": 7,
+    "dependencies": [
+      "039",
+      "031"
+    ],
+    "technical_notes": "Instagram Messaging API with business account requirements",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 40,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "042",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a marketer, I need Facebook Messenger automation so that I can engage with community prospects",
+    "acceptance_criteria": [
+      "Facebook Messenger Platform integration",
+      "Chatbot flow builder",
+      "Lead capture and qualification",
+      "CRM integration",
+      "Multi-lingual support"
+    ],
+    "effort": 8,
+    "business_value": 6,
+    "dependencies": [
+      "040",
+      "031"
+    ],
+    "technical_notes": "Messenger Platform API with webhook integration",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 41,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "043",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a marketer, I need WhatsApp Business automation so that I can reach international prospects",
+    "acceptance_criteria": [
+      "WhatsApp Business API integration",
+      "Message template management",
+      "Automated follow-ups",
+      "Multi-agent support",
+      "Media message support"
+    ],
+    "effort": 8,
+    "business_value": 5,
+    "dependencies": [
+      "031"
+    ],
+    "technical_notes": "WhatsApp Business API requires Facebook Business verification",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 42,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "044",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a social media manager, I need unified social media dashboard so that I can manage all platforms",
+    "acceptance_criteria": [
+      "Single dashboard for all social platforms",
+      "Cross-platform analytics",
+      "Unified content calendar",
+      "Engagement monitoring",
+      "Team collaboration tools"
+    ],
+    "effort": 13,
+    "business_value": 9,
+    "dependencies": [
+      "037",
+      "038",
+      "039",
+      "040"
+    ],
+    "technical_notes": "Unified UI for LinkedIn, Twitter, Instagram, Facebook management",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 43,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "045",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a marketer, I need social listening agent so that I can monitor brand mentions and trends",
+    "acceptance_criteria": [
+      "Real-time mention monitoring",
+      "Sentiment analysis",
+      "Competitor tracking",
+      "Trending topic detection",
+      "Automated alerts"
+    ],
+    "effort": 13,
+    "business_value": 7,
+    "dependencies": [
+      "044"
+    ],
+    "technical_notes": "Streaming APIs from all platforms + NLP sentiment analysis",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 44,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "046",
+    "project": "Sales Genie",
+    "epic": "social",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a growth hacker, I need influencer outreach automation so that I can scale partnership opportunities",
+    "acceptance_criteria": [
+      "Influencer discovery and scoring",
+      "Automated outreach campaigns",
+      "Relationship tracking",
+      "Performance analytics",
+      "Contract management"
+    ],
+    "effort": 13,
+    "business_value": 6,
+    "dependencies": [
+      "044",
+      "031"
+    ],
+    "technical_notes": "Cross-platform influencer identification and engagement",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 45,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "047",
+    "project": "Sales Genie",
+    "epic": "crm",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a sales manager, I need CRM integration so that I can sync prospects with my existing CRM",
+    "acceptance_criteria": [
+      "Salesforce API integration",
+      "HubSpot API integration",
+      "Pipedrive API integration",
+      "Bi-directional sync (prospects, contacts, deals)",
+      "Custom field mapping"
+    ],
+    "effort": 13,
+    "business_value": 9,
+    "dependencies": [
+      "003"
+    ],
+    "technical_notes": "REST APIs for major CRMs - OAuth authentication required",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 46,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "048",
+    "project": "Sales Genie",
+    "epic": "crm",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a sales rep, I need pipeline management so that I can track deals through stages",
+    "acceptance_criteria": [
+      "Customizable pipeline stages",
+      "Drag-and-drop deal movement",
+      "Pipeline value calculations",
+      "Stage conversion tracking",
+      "Deal probability scoring"
+    ],
+    "effort": 13,
+    "business_value": 10,
+    "dependencies": [],
+    "technical_notes": "Kanban-style pipeline UI with drag-and-drop, stage automation",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 47,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "049",
+    "project": "Sales Genie",
+    "epic": "crm",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a sales rep, I need meeting scheduling so that I can book meetings with prospects",
+    "acceptance_criteria": [
+      "Calendar integration (Google, Outlook)",
+      "Availability checking",
+      "Automated meeting links (Zoom, Teams, Meet)",
+      "Email confirmations and reminders",
+      "Time zone handling"
+    ],
+    "effort": 8,
+    "business_value": 8,
+    "dependencies": [
+      "004"
+    ],
+    "technical_notes": "Google Calendar API, Microsoft Graph API for Outlook",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 48,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "050",
+    "project": "Sales Genie",
+    "epic": "crm",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a sales manager, I need activity tracking so that I can see all prospect interactions",
+    "acceptance_criteria": [
+      "Email tracking (opens, clicks, replies)",
+      "Call logging and recording",
+      "Meeting notes and outcomes",
+      "Task completion tracking",
+      "Timeline view of all activities"
+    ],
+    "effort": 8,
+    "business_value": 7,
+    "dependencies": [
+      "004"
+    ],
+    "technical_notes": "Activity logging system with timeline UI",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 49,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "051",
+    "project": "Sales Genie",
+    "epic": "crm",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a sales rep, I need lead scoring so that I can prioritize high-value prospects",
+    "acceptance_criteria": [
+      "AI-powered lead scoring model",
+      "Behavioral scoring (email opens, website visits)",
+      "Firmographic scoring (company size, industry)",
+      "Engagement scoring (response rate, meeting attendance)",
+      "Score explanations and insights"
+    ],
+    "effort": 13,
+    "business_value": 9,
+    "dependencies": [
+      "003",
+      "015"
+    ],
+    "technical_notes": "ML model using historical conversion data + real-time signals",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 50,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "052",
+    "project": "Sales Genie",
+    "epic": "crm",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a sales manager, I need team collaboration so that my team can work together on deals",
+    "acceptance_criteria": [
+      "Deal assignment and ownership",
+      "Internal notes and comments",
+      "Team activity feed",
+      "@mentions and notifications",
+      "Deal transfer workflow"
+    ],
+    "effort": 8,
+    "business_value": 6,
+    "dependencies": [
+      "048"
+    ],
+    "technical_notes": "Team collaboration features with real-time updates",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 51,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "053",
+    "project": "Sales Genie",
+    "epic": "analytics",
+    "priority": "HIGH",
+    "status": "NOT_STARTED",
+    "user_story": "As a sales manager, I need advanced analytics dashboard so that I can track team performance",
+    "acceptance_criteria": [
+      "Customizable dashboards",
+      "Real-time metrics and KPIs",
+      "Revenue forecasting",
+      "Team leaderboards",
+      "Goal tracking and progress"
+    ],
+    "effort": 13,
+    "business_value": 9,
+    "dependencies": [
+      "048"
+    ],
+    "technical_notes": "Business intelligence dashboard with drill-down capabilities",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 52,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "054",
+    "project": "Sales Genie",
+    "epic": "analytics",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a marketer, I need campaign attribution so that I can measure ROI by channel",
+    "acceptance_criteria": [
+      "Multi-touch attribution modeling",
+      "Channel performance comparison",
+      "Cost per lead/acquisition tracking",
+      "Conversion funnel analysis",
+      "ROI calculations by campaign"
+    ],
+    "effort": 13,
+    "business_value": 8,
+    "dependencies": [
+      "053"
+    ],
+    "technical_notes": "Attribution engine with first-touch, last-touch, and multi-touch models",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 53,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "055",
+    "project": "Sales Genie",
+    "epic": "analytics",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a sales manager, I need predictive analytics so that I can forecast pipeline health",
+    "acceptance_criteria": [
+      "AI-powered deal win probability",
+      "Revenue forecasting with confidence intervals",
+      "Churn risk prediction",
+      "Pipeline coverage analysis",
+      "What-if scenario modeling"
+    ],
+    "effort": 13,
+    "business_value": 8,
+    "dependencies": [
+      "053",
+      "051"
+    ],
+    "technical_notes": "ML models for probability and forecasting using historical data",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 54,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "056",
+    "project": "Sales Genie",
+    "epic": "analytics",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a sales ops leader, I need data export and reporting so that I can share insights with leadership",
+    "acceptance_criteria": [
+      "Scheduled report generation",
+      "PDF and Excel export",
+      "Email report distribution",
+      "Custom report builder",
+      "API access for external BI tools"
+    ],
+    "effort": 5,
+    "business_value": 6,
+    "dependencies": [
+      "053"
+    ],
+    "technical_notes": "Report generation engine with scheduling and distribution",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 55,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "057",
+    "project": "Sales Genie",
+    "epic": "production",
+    "priority": "MEDIUM",
+    "status": "NOT_STARTED",
+    "user_story": "As a user, I need performance monitoring dashboard so that I can track agent activity",
+    "acceptance_criteria": [
+      "Real-time agent status",
+      "Activity metrics displayed",
+      "Campaign performance graphs",
+      "Error tracking and alerts"
+    ],
+    "effort": 8,
+    "business_value": 6,
+    "dependencies": [
+      "003",
+      "004"
+    ],
+    "technical_notes": "Prometheus + Grafana or custom dashboard",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 56,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  },
+  {
+    "id": "058",
+    "project": "Sales Genie",
+    "epic": "production",
+    "priority": "LOW",
+    "status": "NOT_STARTED",
+    "user_story": "As a system, I need rate limiting and security so that the API is protected",
+    "acceptance_criteria": [
+      "Rate limiting per IP/API key",
+      "API key authentication",
+      "Request validation",
+      "SQL injection prevention",
+      "CORS properly configured"
+    ],
+    "effort": 5,
+    "business_value": 7,
+    "dependencies": [
+      "003"
+    ],
+    "technical_notes": "Express middleware for rate limiting, helmet.js for security headers",
+    "owner": "Development",
+    "is_next": false,
+    "display_order": 57,
+    "created_at": "2025-10-01T16:53:53.903644+00:00",
+    "updated_at": "2025-10-01T16:53:53.903644+00:00"
+  }
+]

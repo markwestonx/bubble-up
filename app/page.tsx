@@ -504,7 +504,6 @@ function BacklogPage() {
     {
       id: '001',
       project: 'Sales Genie',
-      project: 'Sales Genie',
       epic: 'foundation',
       priority: 'CRITICAL',
       status: 'DONE',
@@ -519,7 +518,8 @@ function BacklogPage() {
       businessValue: 10,
       dependencies: [],
       technicalNotes: 'Using better-sqlite3 for Node.js and aiosqlite for Python',
-      owner: 'Development'
+      owner: 'Development',
+      isNext: false
     },
     {
       id: '002',
@@ -538,7 +538,8 @@ function BacklogPage() {
       businessValue: 10,
       dependencies: [],
       technicalNotes: 'Avoid Python 3.14 beta - causes package compilation issues',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '003',
@@ -557,7 +558,8 @@ function BacklogPage() {
       businessValue: 10,
       dependencies: ['001', '002'],
       technicalNotes: 'FastAPI + async/await patterns for high concurrency',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '004',
@@ -576,7 +578,8 @@ function BacklogPage() {
       businessValue: 10,
       dependencies: ['001', '002'],
       technicalNotes: 'Jinja2 templates for email personalization',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '005',
@@ -595,7 +598,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['003'],
       technicalNotes: 'Free API with rate limits - implement caching',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '006',
@@ -614,7 +618,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['004'],
       technicalNotes: 'Gmail app passwords or SendGrid API - ensure deliverability',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
 
     // INFRASTRUCTURE EPIC
@@ -637,7 +642,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: [],
       technicalNotes: 'Already exists - needs updating for SQLite option and current ports (3002 for dashboard)',
-      owner: 'DevOps'
+      owner: 'DevOps',
+    isNext: false
     },
     {
       id: '008',
@@ -657,7 +663,8 @@ function BacklogPage() {
       businessValue: 8,
       dependencies: [],
       technicalNotes: 'Support both SQLite (dev) and PostgreSQL (prod) via env vars',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '009',
@@ -677,7 +684,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: [],
       technicalNotes: 'Winston for Node, structlog for Python, consider ELK stack for production',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '010',
@@ -697,7 +705,8 @@ function BacklogPage() {
       businessValue: 5,
       dependencies: ['007', '013'],
       technicalNotes: 'GitHub Actions + Azure Container Registry + Azure Container Apps',
-      owner: 'DevOps'
+      owner: 'DevOps',
+    isNext: false
     },
     {
       id: '011',
@@ -717,7 +726,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['003', '004'],
       technicalNotes: 'Already partially implemented - standardize across all services',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '012',
@@ -737,7 +747,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['001'],
       technicalNotes: 'SQLite: .backup command, PostgreSQL: pg_dump, Azure Backup for production',
-      owner: 'DevOps'
+      owner: 'DevOps',
+    isNext: false
     },
     {
       id: '013',
@@ -757,7 +768,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: [],
       technicalNotes: 'Test files already exist in tests/ directory - need full integration',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '014',
@@ -777,7 +789,8 @@ function BacklogPage() {
       businessValue: 5,
       dependencies: ['007', '010'],
       technicalNotes: 'Azure Container Apps with staging slot, or separate resource group',
-      owner: 'DevOps'
+      owner: 'DevOps',
+    isNext: false
     },
 
     // HIGH PRIORITY AGENT DEVELOPMENT
@@ -798,7 +811,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['003'],
       technicalNotes: 'ToS-compliant approach - manual exports only',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '016',
@@ -817,7 +831,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['004', '006'],
       technicalNotes: 'Use Ollama Mistral or OpenAI GPT-4',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '017',
@@ -836,7 +851,8 @@ function BacklogPage() {
       businessValue: 8,
       dependencies: ['003', '015'],
       technicalNotes: 'Free tier available - 50 credits/month',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '018',
@@ -856,7 +872,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['015', '027'],
       technicalNotes: 'Enhanced Lead Discovery Agent with fanatical prospecting capabilities',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '019',
@@ -876,7 +893,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['016', '027'],
       technicalNotes: 'Enhanced Outreach Agent with multi-channel fanatical capabilities',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '020',
@@ -896,7 +914,8 @@ function BacklogPage() {
       businessValue: 8,
       dependencies: ['027', '015'],
       technicalNotes: 'Five Cs: Connecting, Content Creation, Content Curation, Conversations, Converting',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
 
     // ARCHITECTURE & DESIGN GOVERNANCE
@@ -919,7 +938,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: [],
       technicalNotes: 'Use Mermaid diagrams for version control, store in /architecture folder',
-      owner: 'Architecture'
+      owner: 'Architecture',
+    isNext: false
     },
     {
       id: '022',
@@ -939,7 +959,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['021'],
       technicalNotes: 'Follow Michael Nygard ADR template format',
-      owner: 'Architecture'
+      owner: 'Architecture',
+    isNext: false
     },
     {
       id: '023',
@@ -959,7 +980,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['021', '022'],
       technicalNotes: 'Lightweight process - focus on major decisions and technical debt',
-      owner: 'Architecture'
+      owner: 'Architecture',
+    isNext: false
     },
     {
       id: '024',
@@ -979,7 +1001,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['021'],
       technicalNotes: 'Follow REST best practices, use OpenAPI 3.0 for documentation',
-      owner: 'Architecture'
+      owner: 'Architecture',
+    isNext: false
     },
     {
       id: '025',
@@ -999,7 +1022,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['021', '027'],
       technicalNotes: 'Define reusable patterns for agent development with LangChain/LangGraph',
-      owner: 'Architecture'
+      owner: 'Architecture',
+    isNext: false
     },
     {
       id: '026',
@@ -1019,7 +1043,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['021', '023'],
       technicalNotes: 'Visual roadmap in Mermaid or similar, linked to backlog',
-      owner: 'Architecture'
+      owner: 'Architecture',
+    isNext: false
     },
 
     // FANATICAL PROSPECTING AGENTS
@@ -1040,7 +1065,8 @@ function BacklogPage() {
       businessValue: 10,
       dependencies: ['003', '004', '016'],
       technicalNotes: 'Core of fanatical prospecting methodology - runs on port 8000',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '028',
@@ -1059,7 +1085,8 @@ function BacklogPage() {
       businessValue: 8,
       dependencies: ['027'],
       technicalNotes: 'Use historical response data to train model',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '029',
@@ -1078,7 +1105,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['027', '016'],
       technicalNotes: 'Transforms rejection into learning fuel',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '030',
@@ -1097,7 +1125,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['027'],
       technicalNotes: 'Web scraping + news monitoring + CRM intelligence',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
 
     // CONTENT GENERATION EPIC
@@ -1119,7 +1148,8 @@ function BacklogPage() {
       businessValue: 8,
       dependencies: ['027'],
       technicalNotes: 'Based on Archive/Content Creation system - 4 specialized agents working in pipeline',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '032',
@@ -1139,7 +1169,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['031'],
       technicalNotes: 'Blog posts with integrated multimedia, proper headers and formatting',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '033',
@@ -1159,7 +1190,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['031'],
       technicalNotes: 'Multi-format content for different platforms with optimization',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '034',
@@ -1179,7 +1211,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['033'],
       technicalNotes: 'Integrates with social media scheduling tools',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '035',
@@ -1199,7 +1232,8 @@ function BacklogPage() {
       businessValue: 5,
       dependencies: ['031'],
       technicalNotes: 'Integration with image generation APIs and stock photo services',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '036',
@@ -1219,7 +1253,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['033'],
       technicalNotes: 'Analytics dashboard with ML-based insights',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
 
     // SOCIAL MEDIA EPIC
@@ -1241,7 +1276,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['033'],
       technicalNotes: 'LinkedIn API v2 for company pages and personal profiles',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '038',
@@ -1261,7 +1297,8 @@ function BacklogPage() {
       businessValue: 8,
       dependencies: ['033'],
       technicalNotes: 'Twitter API v2 with elevated access for automation',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '039',
@@ -1281,7 +1318,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['033'],
       technicalNotes: 'Instagram Graph API for business accounts only',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '040',
@@ -1301,7 +1339,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['033'],
       technicalNotes: 'Facebook Business API for page management',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '041',
@@ -1321,7 +1360,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['039', '031'],
       technicalNotes: 'Instagram Messaging API with business account requirements',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '042',
@@ -1341,7 +1381,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['040', '031'],
       technicalNotes: 'Messenger Platform API with webhook integration',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '043',
@@ -1361,7 +1402,8 @@ function BacklogPage() {
       businessValue: 5,
       dependencies: ['031'],
       technicalNotes: 'WhatsApp Business API requires Facebook Business verification',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '044',
@@ -1381,7 +1423,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['037', '038', '039', '040'],
       technicalNotes: 'Unified UI for LinkedIn, Twitter, Instagram, Facebook management',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '045',
@@ -1401,7 +1444,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['044'],
       technicalNotes: 'Streaming APIs from all platforms + NLP sentiment analysis',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '046',
@@ -1421,7 +1465,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['044', '031'],
       technicalNotes: 'Cross-platform influencer identification and engagement',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
 
     // CRM & PIPELINE MANAGEMENT EPIC
@@ -1443,7 +1488,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['003'],
       technicalNotes: 'REST APIs for major CRMs - OAuth authentication required',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '048',
@@ -1463,7 +1509,8 @@ function BacklogPage() {
       businessValue: 10,
       dependencies: [],
       technicalNotes: 'Kanban-style pipeline UI with drag-and-drop, stage automation',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '049',
@@ -1483,7 +1530,8 @@ function BacklogPage() {
       businessValue: 8,
       dependencies: ['004'],
       technicalNotes: 'Google Calendar API, Microsoft Graph API for Outlook',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '050',
@@ -1503,7 +1551,8 @@ function BacklogPage() {
       businessValue: 7,
       dependencies: ['004'],
       technicalNotes: 'Activity logging system with timeline UI',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '051',
@@ -1523,7 +1572,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['003', '015'],
       technicalNotes: 'ML model using historical conversion data + real-time signals',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '052',
@@ -1543,7 +1593,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['048'],
       technicalNotes: 'Team collaboration features with real-time updates',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
 
     // ANALYTICS & INSIGHTS EPIC
@@ -1565,7 +1616,8 @@ function BacklogPage() {
       businessValue: 9,
       dependencies: ['048'],
       technicalNotes: 'Business intelligence dashboard with drill-down capabilities',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '054',
@@ -1585,7 +1637,8 @@ function BacklogPage() {
       businessValue: 8,
       dependencies: ['053'],
       technicalNotes: 'Attribution engine with first-touch, last-touch, and multi-touch models',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '055',
@@ -1605,7 +1658,8 @@ function BacklogPage() {
       businessValue: 8,
       dependencies: ['053', '051'],
       technicalNotes: 'ML models for probability and forecasting using historical data',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '056',
@@ -1625,7 +1679,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['053'],
       technicalNotes: 'Report generation engine with scheduling and distribution',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
 
     // PRODUCTION & OPERATIONAL
@@ -1646,7 +1701,8 @@ function BacklogPage() {
       businessValue: 6,
       dependencies: ['003', '004'],
       technicalNotes: 'Prometheus + Grafana or custom dashboard',
-      owner: 'Development'
+      owner: 'Development',
+    isNext: false
     },
     {
       id: '058',
@@ -2151,7 +2207,7 @@ function BacklogPage() {
 
         const { error: insertError } = await supabase
           .from('backlog_items')
-          .insert(itemsToInsert);
+          .insert(itemsToInsert as any);
 
         if (insertError) {
           console.error('❌ Error syncing to Supabase:', insertError);
@@ -2359,6 +2415,7 @@ function BacklogPage() {
     setIsAddingNew(true);
     setNewStory({
       id: generateNewId(),
+      project: currentProject,
       epic: 'foundation',
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
@@ -2368,7 +2425,8 @@ function BacklogPage() {
       businessValue: 5,
       dependencies: [],
       technicalNotes: '',
-      owner: ''
+      owner: '',
+      isNext: false
     });
   };
 
@@ -2397,7 +2455,8 @@ function BacklogPage() {
       businessValue: 5,
       dependencies: [],
       technicalNotes: '',
-      owner: ''
+      owner: '',
+      isNext: false
     });
   };
 
@@ -2415,7 +2474,8 @@ function BacklogPage() {
       businessValue: 5,
       dependencies: [],
       technicalNotes: '',
-      owner: ''
+      owner: '',
+      isNext: false
     });
   };
 
@@ -2663,7 +2723,7 @@ function BacklogPage() {
   };
 
   // Format display value for context menu based on column type
-  const formatDisplayValue = (column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'effort' | 'value' | null, value: string): string => {
+  const formatDisplayValue = (column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | null, value: string): string => {
     if (column === 'epic') {
       return getEpicLabel(value as Epic);
     }
@@ -2785,7 +2845,7 @@ function BacklogPage() {
             <div className="max-h-48 overflow-y-auto border border-gray-200 rounded mb-2">
               <div
                 onClick={() => {
-                  clearContextMenuFilter(contextMenu?.column);
+                  if (contextMenu?.column) clearContextMenuFilter(contextMenu.column);
                   setContextMenu(null);
                 }}
                 className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer border-b border-gray-100"

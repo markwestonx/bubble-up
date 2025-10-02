@@ -3165,7 +3165,13 @@ function BacklogPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div
+          onClick={() => {
+            setFilter({ ...filter, status: 'DONE' });
+            setStatusFilterMode('single');
+          }}
+          className="bg-white border border-purple-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-purple-300 transition-all"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Story Points Delivered</p>

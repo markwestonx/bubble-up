@@ -2176,6 +2176,7 @@ function BacklogPage() {
   const [currentProject, setCurrentProject] = useState<string>('Sales Genie');
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [mobileSearchTerm, setMobileSearchTerm] = useState('');
 
   // Update projects list whenever backlogItems changes
   React.useEffect(() => {
@@ -3192,7 +3193,7 @@ function BacklogPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-3">
         <div
           onClick={() => {
             setFilter({ ...filter, status: 'all' });
@@ -3262,8 +3263,8 @@ function BacklogPage() {
             // Filter by items with isNext = true
             setContextMenuFilters([{
               column: 'next',
-              value: 'true',
-              values: ['true'],
+              value: '',
+              values: ['Next'],
               isMultiple: false
             }]);
           }}
@@ -3563,14 +3564,15 @@ function BacklogPage() {
             <input
               type="text"
               placeholder="Search stories..."
-              value={contextMenu?.searchTerm || ''}
+              value={mobileSearchTerm}
               onChange={(e) => {
-                const searchValue = e.target.value.toLowerCase();
-                if (searchValue) {
+                const searchValue = e.target.value;
+                setMobileSearchTerm(searchValue);
+                if (searchValue.trim()) {
                   setContextMenuFilters([{
                     column: 'story',
-                    value: searchValue,
-                    values: [searchValue],
+                    value: searchValue.toLowerCase(),
+                    values: [],
                     isMultiple: false
                   }]);
                 } else {

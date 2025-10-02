@@ -2815,6 +2815,7 @@ function BacklogPage() {
     complete: projectItems.filter(i => i.status === 'DONE').length,
     inProgress: projectItems.filter(i => i.status === 'IN_PROGRESS').length,
     blocked: projectItems.filter(i => i.status === 'BLOCKED').length,
+    next: projectItems.filter(i => i.isNext).length,
     totalEffort: projectItems.reduce((sum, i) => sum + i.effort, 0),
     completedEffort: projectItems.filter(i => i.status === 'DONE').reduce((sum, i) => sum + i.effort, 0)
   };
@@ -3253,6 +3254,27 @@ function BacklogPage() {
               <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
             </div>
             <Clock className="h-8 w-8 text-blue-400" />
+          </div>
+        </div>
+
+        <div
+          onClick={() => {
+            // Filter by items with isNext = true
+            setContextMenuFilters([{
+              column: 'next',
+              value: 'true',
+              values: ['true'],
+              isMultiple: false
+            }]);
+          }}
+          className="bg-white border border-yellow-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-yellow-300 transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Next</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.next}</p>
+            </div>
+            <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
           </div>
         </div>
 

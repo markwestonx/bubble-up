@@ -2083,25 +2083,7 @@ function BacklogPage() {
   useEffect(() => {
     setIsMounted(true);
 
-    // Check localStorage first
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        const migrated = parsed.map((item: any) => ({
-          ...item,
-          project: item.project || 'Sales Genie'
-        }));
-        setBacklogItems(migrated);
-        console.log('✅ Loaded from localStorage:', migrated.length, 'items');
-        // Trust localStorage - it will sync to Supabase via the sync effect
-        return;
-      } catch (error) {
-        console.error('Failed to parse stored backlog:', error);
-      }
-    }
-
-    // Only load from Supabase if no localStorage
+    // Always load from Supabase to ensure we have latest data
     (async () => {
       try {
         const { data, error } = await supabase
@@ -2190,6 +2172,14 @@ function BacklogPage() {
   const [currentProject, setCurrentProject] = useState<string>('Sales Genie');
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+
+  // Update projects list whenever backlogItems changes
+  React.useEffect(() => {
+    if (backlogItems.length > 0) {
+      const uniqueProjects = Array.from(new Set(backlogItems.map(item => item.project))).sort();
+      setProjects(uniqueProjects);
+    }
+  }, [backlogItems]);
 
   // New story creation state
   const [isAddingNew, setIsAddingNew] = useState(false);

@@ -2272,7 +2272,7 @@ function BacklogPage() {
 
         const { error } = await supabase
           .from('backlog_items')
-          .upsert(itemsToUpsert, { onConflict: 'id' });
+          .upsert(itemsToUpsert as any, { onConflict: 'id' });
 
         if (error) {
           console.error('❌ Error syncing to Supabase:', error);

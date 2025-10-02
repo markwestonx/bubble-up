@@ -3040,7 +3040,7 @@ function BacklogPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
         <div
           onClick={() => {
             setFilter({ ...filter, status: 'all' });
@@ -3116,8 +3116,8 @@ function BacklogPage() {
         </div>
       </div>
 
-      {/* Backlog Table */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      {/* Backlog Table - Desktop */}
+      <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <DndContext
             sensors={sensors}
@@ -3377,6 +3377,121 @@ function BacklogPage() {
             </table>
           </DndContext>
         </div>
+      </div>
+
+      {/* Backlog Cards - Mobile */}
+      <div className="md:hidden space-y-3">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={sortedItems.map(item => item.id)} strategy={verticalListSortingStrategy}>
+            {sortedItems.map((item) => {
+              const isExpanded = expandedItems.has(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+                >
+                  {/* Card Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start space-x-2 flex-1">
+                      <button
+                        onClick={() => toggleExpand(item.id)}
+                        className="mt-1"
+                      >
+                        {isExpanded ? (
+                          <ChevronUp className="h-5 w-5 text-gray-400" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-gray-400" />
+                        )}
+                      </button>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="text-sm font-mono text-gray-500">{item.id}</span>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(item.status)}`}>
+                            {getStatusIcon(item.status)}
+                            <span className="ml-1">{item.status.replace('_', ' ')}</span>
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-900 leading-snug">{item.userStory}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateItem(item.id, { isNext: !item.isNext });
+                      }}
+                      className="ml-2 flex-shrink-0"
+                    >
+                      <Star
+                        className={`h-5 w-5 ${item.isNext ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Card Meta */}
+                  <div className="flex items-center space-x-2 flex-wrap gap-2 mb-3">
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                      {getEpicLabel(item.epic)}
+                    </span>
+                    <span className={`inline-flex items-center px-2 py-1 rounded border text-xs font-medium ${getPriorityColor(item.priority)}`}>
+                      {item.priority}
+                    </span>
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 text-purple-800 text-xs font-medium">
+                      {item.effort}
+                    </span>
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-800 text-xs font-medium">
+                      {item.businessValue}
+                    </span>
+                  </div>
+
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-900 mb-2">Acceptance Criteria</h4>
+                        <ul className="space-y-2">
+                          {item.acceptanceCriteria.map((criteria, idx) => (
+                            <li key={idx} className="text-sm text-gray-700 flex items-start">
+                              <CheckCircle className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
+                              <span>{criteria}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {item.technicalNotes && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-2">Technical Notes</h4>
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.technicalNotes}</p>
+                        </div>
+                      )}
+
+                      {item.dependencies.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-2">Dependencies</h4>
+                          <p className="text-sm text-gray-700 font-mono">{item.dependencies.join(', ')}</p>
+                        </div>
+                      )}
+
+                      {item.owner && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-2">Owner</h4>
+                          <div className="flex items-center">
+                            <Users className="h-4 w-4 mr-2 text-gray-400" />
+                            <span className="text-sm text-gray-700">{item.owner}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </SortableContext>
+        </DndContext>
       </div>
 
       {/* Summary */}

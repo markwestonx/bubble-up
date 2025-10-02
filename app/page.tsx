@@ -3211,8 +3211,15 @@ function BacklogPage() {
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-3">
         <div
           onClick={() => {
-            setFilter({ ...filter, status: 'all' });
+            // Clear all filters and show all stories
+            setFilter({ epic: 'all', priority: 'all', status: 'all' });
+            setContextMenuFilters([]);
             setStatusFilterMode('single');
+            setPriorityFilterMode('single');
+            setEpicFilterMode('single');
+            setSelectedStatuses(new Set());
+            setSelectedPriorities(new Set());
+            setSelectedEpics(new Set());
           }}
           className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
         >
@@ -3227,8 +3234,15 @@ function BacklogPage() {
 
         <div
           onClick={() => {
-            setFilter({ ...filter, status: 'BLOCKED' });
+            // Clear all filters, then show blocked
+            setFilter({ epic: 'all', priority: 'all', status: 'BLOCKED' });
+            setContextMenuFilters([]);
             setStatusFilterMode('single');
+            setPriorityFilterMode('single');
+            setEpicFilterMode('single');
+            setSelectedStatuses(new Set());
+            setSelectedPriorities(new Set());
+            setSelectedEpics(new Set());
           }}
           className="bg-white border border-red-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-red-300 transition-all"
         >
@@ -3243,8 +3257,15 @@ function BacklogPage() {
 
         <div
           onClick={() => {
-            setFilter({ ...filter, status: 'DONE' });
+            // Clear all filters, then show done
+            setFilter({ epic: 'all', priority: 'all', status: 'DONE' });
+            setContextMenuFilters([]);
             setStatusFilterMode('single');
+            setPriorityFilterMode('single');
+            setEpicFilterMode('single');
+            setSelectedStatuses(new Set());
+            setSelectedPriorities(new Set());
+            setSelectedEpics(new Set());
           }}
           className="bg-white border border-green-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-green-300 transition-all"
         >
@@ -3259,8 +3280,15 @@ function BacklogPage() {
 
         <div
           onClick={() => {
-            setFilter({ ...filter, status: 'IN_PROGRESS' });
+            // Clear all filters, then show in progress
+            setFilter({ epic: 'all', priority: 'all', status: 'IN_PROGRESS' });
+            setContextMenuFilters([]);
             setStatusFilterMode('single');
+            setPriorityFilterMode('single');
+            setEpicFilterMode('single');
+            setSelectedStatuses(new Set());
+            setSelectedPriorities(new Set());
+            setSelectedEpics(new Set());
           }}
           className="bg-white border border-blue-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-blue-300 transition-all"
         >
@@ -3275,13 +3303,20 @@ function BacklogPage() {
 
         <div
           onClick={() => {
-            // Filter by items with isNext = true
+            // Clear all filters, then show next (starred items)
+            setFilter({ epic: 'all', priority: 'all', status: 'all' });
             setContextMenuFilters([{
               column: 'next',
               value: '',
               values: ['Next'],
               isMultiple: false
             }]);
+            setStatusFilterMode('single');
+            setPriorityFilterMode('single');
+            setEpicFilterMode('single');
+            setSelectedStatuses(new Set());
+            setSelectedPriorities(new Set());
+            setSelectedEpics(new Set());
           }}
           className="bg-white border border-yellow-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-yellow-300 transition-all"
         >
@@ -3296,8 +3331,15 @@ function BacklogPage() {
 
         <div
           onClick={() => {
-            setFilter({ ...filter, status: 'DONE' });
+            // Clear all filters, then show done (story points delivered)
+            setFilter({ epic: 'all', priority: 'all', status: 'DONE' });
+            setContextMenuFilters([]);
             setStatusFilterMode('single');
+            setPriorityFilterMode('single');
+            setEpicFilterMode('single');
+            setSelectedStatuses(new Set());
+            setSelectedPriorities(new Set());
+            setSelectedEpics(new Set());
           }}
           className="bg-white border border-purple-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-purple-300 transition-all"
         >

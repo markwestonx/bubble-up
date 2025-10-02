@@ -3168,7 +3168,7 @@ function BacklogPage() {
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Story Points</p>
+              <p className="text-sm text-gray-600">Story Points Delivered</p>
               <p className="text-2xl font-bold text-purple-600">{stats.completedEffort}/{stats.totalEffort}</p>
             </div>
             <TrendingUp className="h-8 w-8 text-purple-400" />

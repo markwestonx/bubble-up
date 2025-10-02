@@ -3364,17 +3364,26 @@ function BacklogPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th
-                    onClick={() => {
-                      setIsCustomOrder(!isCustomOrder);
-                      setSortBy('custom');
-                    }}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 cursor-pointer hover:bg-gray-100"
-                  >
-                    <div className="flex items-center">
-                      <GripVertical className={`h-4 w-4 inline mr-1 ${isCustomOrder ? 'text-blue-600' : 'text-gray-400'}`} />
-                      <span className={isCustomOrder ? 'text-blue-600 font-bold' : ''}>Order</span>
-                      {isCustomOrder && <span className="ml-1 text-blue-600">●</span>}
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setExpandedRows(new Set())}
+                        className="p-1 hover:bg-gray-200 rounded transition-colors"
+                        title="Collapse all stories"
+                      >
+                        <ChevronUp className="h-4 w-4 text-gray-500" />
+                      </button>
+                      <div
+                        onClick={() => {
+                          setIsCustomOrder(!isCustomOrder);
+                          setSortBy('custom');
+                        }}
+                        className="flex items-center cursor-pointer"
+                      >
+                        <GripVertical className={`h-4 w-4 inline mr-1 ${isCustomOrder ? 'text-blue-600' : 'text-gray-400'}`} />
+                        <span className={isCustomOrder ? 'text-blue-600 font-bold' : ''}>Order</span>
+                        {isCustomOrder && <span className="ml-1 text-blue-600">●</span>}
+                      </div>
                     </div>
                   </th>
                   <th

@@ -146,7 +146,7 @@ function SortableRow({
       <tr
         ref={setNodeRef}
         style={style}
-        className="hover:bg-gray-50 cursor-pointer transition-colors"
+        className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
       >
         <td className="px-4 py-4 whitespace-nowrap">
           <div className="flex items-center space-x-2">
@@ -155,19 +155,19 @@ function SortableRow({
               {...listeners}
               className="cursor-grab active:cursor-grabbing touch-none"
             >
-              <GripVertical className="h-4 w-4 text-gray-400" />
+              <GripVertical className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </div>
             <button onClick={onToggleExpand}>
               {isExpanded ? (
-                <ChevronUp className="h-4 w-4 text-gray-400" />
+                <ChevronUp className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               ) : (
-                <ChevronDown className="h-4 w-4 text-gray-400" />
+                <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               )}
             </button>
           </div>
         </td>
         <td
-          className="px-4 py-4 whitespace-nowrap text-sm font-mono text-gray-900"
+          className="px-4 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-gray-100"
           onClick={onToggleExpand}
         >
           {item.id}
@@ -192,7 +192,7 @@ function SortableRow({
                   }
                 }}
                 autoFocus
-                className="px-2 py-1 text-xs font-medium border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-xs font-medium border border-blue-300 dark:border-blue-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {availableEpics.map((epic) => (
                   <option key={epic} value={epic}>
@@ -219,7 +219,7 @@ function SortableRow({
                   }
                 }}
                 onBlur={() => setEditingEpic(false)}
-                className="px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           ) : (
@@ -286,7 +286,7 @@ function SortableRow({
             </span>
           )}
         </td>
-        <td className="px-4 py-4 text-sm text-gray-900">
+        <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
           {isEditingStory ? (
             <input
               type="text"
@@ -295,12 +295,12 @@ function SortableRow({
               onBlur={handleStoryBlur}
               onKeyDown={handleStoryKeyDown}
               autoFocus
-              className="w-full px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-2 py-1 border border-blue-300 dark:border-blue-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           ) : (
             <div
               onClick={handleStoryClick}
-              className="cursor-text hover:bg-gray-100 px-2 py-1 rounded"
+              className="cursor-text hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded"
             >
               {item.userStory}
             </div>
@@ -312,11 +312,11 @@ function SortableRow({
               e.stopPropagation();
               onUpdate(item.id, { isNext: !item.isNext });
             }}
-            className="inline-flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded transition-colors"
+            className="inline-flex items-center justify-center w-8 h-8 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             title={item.isNext ? "Remove from Next Up" : "Mark as Next Up"}
           >
             <Star
-              className={`h-5 w-5 ${item.isNext ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+              className={`h-5 w-5 ${item.isNext ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
             />
           </button>
         </td>
@@ -2198,6 +2198,43 @@ function BacklogPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [editableCombinedStory, setEditableCombinedStory] = useState<BacklogItem | null>(null);
 
+  // Theme state
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light');
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('bubbleup-theme') as 'light' | 'dark' | 'system' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  // Apply theme to document
+  useEffect(() => {
+    const applyTheme = (isDark: boolean) => {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      applyTheme(mediaQuery.matches);
+
+      // Listen for system theme changes
+      const handler = (e: MediaQueryListEvent) => applyTheme(e.matches);
+      mediaQuery.addEventListener('change', handler);
+      return () => mediaQuery.removeEventListener('change', handler);
+    } else {
+      applyTheme(theme === 'dark');
+    }
+
+    // Save to localStorage
+    localStorage.setItem('bubbleup-theme', theme);
+  }, [theme]);
+
   // Update projects list whenever backlogItems changes
   React.useEffect(() => {
     if (backlogItems.length > 0) {
@@ -3026,12 +3063,12 @@ function BacklogPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
       {/* Create Project Modal */}
       {isCreatingProject && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-96">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Create New Project</h3>
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6 w-96">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Create New Project</h3>
             <input
               type="text"
               placeholder="Enter project name..."
@@ -3051,7 +3088,7 @@ function BacklogPage() {
                 }
               }}
               autoFocus
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
             />
             <div className="flex space-x-2">
               <button
@@ -3072,7 +3109,7 @@ function BacklogPage() {
                   setNewProjectName('');
                   setIsCreatingProject(false);
                 }}
-                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
               >
                 Cancel
               </button>
@@ -3084,9 +3121,9 @@ function BacklogPage() {
       {/* Settings Modal */}
       {isSettingsOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Settings</h2>
               <button
                 onClick={() => {
                   setIsSettingsOpen(false);
@@ -3100,18 +3137,39 @@ function BacklogPage() {
             </div>
 
             <div className="p-6 space-y-8">
-              {/* Display Mode Section (for story 116 later) */}
+              {/* Display Mode Section */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Display Mode</h3>
-                <p className="text-sm text-gray-500 mb-4">Choose your preferred color theme (Story 116 - Coming soon)</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Display Mode</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Choose your preferred color theme</p>
                 <div className="flex space-x-3">
-                  <button disabled className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                  <button
+                    onClick={() => setTheme('light')}
+                    className={`px-4 py-2 border rounded-lg transition-colors ${
+                      theme === 'light'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
+                  >
                     Light
                   </button>
-                  <button disabled className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                  <button
+                    onClick={() => setTheme('dark')}
+                    className={`px-4 py-2 border rounded-lg transition-colors ${
+                      theme === 'dark'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
+                  >
                     Dark
                   </button>
-                  <button disabled className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                  <button
+                    onClick={() => setTheme('system')}
+                    className={`px-4 py-2 border rounded-lg transition-colors ${
+                      theme === 'system'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
+                  >
                     System
                   </button>
                 </div>
@@ -3136,7 +3194,7 @@ function BacklogPage() {
                 </p>
 
                 {/* Story Selection List */}
-                <div className="border border-gray-200 rounded-lg divide-y max-h-96 overflow-y-auto">
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700 max-h-96 overflow-y-auto">
                   {projectItems
                     .sort((a, b) => {
                       // Numeric sort by ID
@@ -3147,7 +3205,7 @@ function BacklogPage() {
                     .map((item) => (
                     <label
                       key={item.id}
-                      className="flex items-start p-3 hover:bg-gray-50 cursor-pointer"
+                      className="flex items-start p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
                     >
                       <input
                         type="checkbox"
@@ -3236,13 +3294,13 @@ function BacklogPage() {
 
               {/* Before Section */}
               <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">📋 Stories Being Combined:</h3>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">📋 Stories Being Combined:</h3>
                 <div className="space-y-2">
                   {backlogItems.filter(item => selectedStoriesToCombine.has(item.id)).map((item) => (
-                    <div key={item.id} className="bg-gray-50 p-3 rounded-lg text-sm">
-                      <div className="font-mono text-gray-600">#{item.id}</div>
-                      <div className="text-gray-900 mt-1">{item.userStory}</div>
-                      <div className="text-xs text-gray-500 mt-1">{item.acceptanceCriteria.length} criteria</div>
+                    <div key={item.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-sm">
+                      <div className="font-mono text-gray-600 dark:text-gray-400">#{item.id}</div>
+                      <div className="text-gray-900 dark:text-gray-100 mt-1">{item.userStory}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.acceptanceCriteria.length} criteria</div>
                     </div>
                   ))}
                 </div>
@@ -3250,25 +3308,25 @@ function BacklogPage() {
 
               {/* After Section - Editable */}
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-gray-700">✨ Combined Result (Editable):</h3>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">✨ Combined Result (Editable):</h3>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700">ID</label>
-                  <p className="text-sm text-gray-900 font-mono">{editableCombinedStory.id}</p>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">ID</label>
+                  <p className="text-sm text-gray-900 dark:text-gray-100 font-mono">{editableCombinedStory.id}</p>
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700">User Story</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">User Story</label>
                   <textarea
                     value={editableCombinedStory.userStory}
                     onChange={(e) => setEditableCombinedStory({...editableCombinedStory, userStory: e.target.value})}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
                     rows={2}
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700">Acceptance Criteria ({editableCombinedStory.acceptanceCriteria.length})</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Acceptance Criteria ({editableCombinedStory.acceptanceCriteria.length})</label>
                   <div className="mt-2 space-y-2">
                     {editableCombinedStory.acceptanceCriteria.map((criteria, idx) => (
                       <div key={idx} className="flex items-start gap-2">
@@ -3280,14 +3338,14 @@ function BacklogPage() {
                             newCriteria[idx] = e.target.value;
                             setEditableCombinedStory({...editableCombinedStory, acceptanceCriteria: newCriteria});
                           }}
-                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <button
                           onClick={() => {
                             const newCriteria = editableCombinedStory.acceptanceCriteria.filter((_, i) => i !== idx);
                             setEditableCombinedStory({...editableCombinedStory, acceptanceCriteria: newCriteria});
                           }}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -3300,7 +3358,7 @@ function BacklogPage() {
                           acceptanceCriteria: [...editableCombinedStory.acceptanceCriteria, '']
                         });
                       }}
-                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center"
                     >
                       <Plus className="h-4 w-4 mr-1" />
                       Add criteria
@@ -3309,50 +3367,50 @@ function BacklogPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700">Technical Notes</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Technical Notes</label>
                   <textarea
                     value={editableCombinedStory.technicalNotes}
                     onChange={(e) => setEditableCombinedStory({...editableCombinedStory, technicalNotes: e.target.value})}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
                     rows={3}
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="text-sm font-semibold text-gray-700">Effort</label>
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Effort</label>
                     <input
                       type="number"
                       min="1"
                       max="13"
                       value={editableCombinedStory.effort}
                       onChange={(e) => setEditableCombinedStory({...editableCombinedStory, effort: parseInt(e.target.value) || 1})}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                      className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-gray-700">Business Value</label>
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Business Value</label>
                     <input
                       type="number"
                       min="1"
                       max="10"
                       value={editableCombinedStory.businessValue}
                       onChange={(e) => setEditableCombinedStory({...editableCombinedStory, businessValue: parseInt(e.target.value) || 1})}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                      className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-gray-700">Owner</label>
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Owner</label>
                     <input
                       value={editableCombinedStory.owner}
                       onChange={(e) => setEditableCombinedStory({...editableCombinedStory, owner: e.target.value})}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                      className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700">Dependencies</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Dependencies</label>
                   <input
                     value={editableCombinedStory.dependencies.join(', ')}
                     onChange={(e) => {
@@ -3360,7 +3418,7 @@ function BacklogPage() {
                       setEditableCombinedStory({...editableCombinedStory, dependencies: deps});
                     }}
                     placeholder="Comma-separated IDs (e.g., 003, 089)"
-                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1 font-mono"
+                    className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1 font-mono"
                   />
                 </div>
               </div>
@@ -3371,13 +3429,13 @@ function BacklogPage() {
                     setShowCombinePreview(false);
                     setEditableCombinedStory(null);
                   }}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={executeCombine}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600"
                 >
                   Confirm & Combine
                 </button>
@@ -3390,11 +3448,11 @@ function BacklogPage() {
       {/* Context Menu Filter - Excel Style */}
       {contextMenu && (
         <div
-          className={`fixed bg-white border border-gray-300 rounded-lg shadow-xl p-3 z-50 ${contextMenu.column === 'story' ? 'w-[600px]' : 'w-64'}`}
+          className={`fixed bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl p-3 z-50 ${contextMenu.column === 'story' ? 'w-[600px]' : 'w-64'}`}
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="mb-2 text-xs font-semibold text-gray-700">
+          <div className="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300">
             Filter by {contextMenu.column}
           </div>
 
@@ -3424,18 +3482,18 @@ function BacklogPage() {
                 setContextMenu(null);
               }
             }}
-            className="w-full px-2 py-1 mb-2 text-sm border border-gray-300 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full px-2 py-1 mb-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
 
           {/* Options List */}
           {!contextMenu.multiSelectMode ? (
-            <div className="max-h-48 overflow-y-auto border border-gray-200 rounded mb-2">
+            <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded mb-2">
               <div
                 onClick={() => {
                   if (contextMenu?.column) clearContextMenuFilter(contextMenu.column);
                   setContextMenu(null);
                 }}
-                className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer border-b border-gray-100"
+                className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer border-b border-gray-100 dark:border-gray-700"
               >
                 (All)
               </div>
@@ -3445,16 +3503,16 @@ function BacklogPage() {
                   <div
                     key={option}
                     onClick={() => handleSingleSelect(option)}
-                    className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                    className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                   >
                     {formatDisplayValue(contextMenu.column, option)}
                   </div>
                 ))}
             </div>
           ) : (
-            <div className="max-h-48 overflow-y-auto border border-gray-200 rounded mb-2">
+            <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded mb-2">
               {/* Select All Option */}
-              <label className="flex items-center px-3 py-2 text-sm font-semibold hover:bg-blue-50 cursor-pointer border-b border-gray-300 bg-gray-50">
+              <label className="flex items-center px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer border-b border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
                 <input
                   type="checkbox"
                   checked={contextMenu.selectedValues.size === 0 || contextMenu.selectedValues.size === getColumnOptions(contextMenu.column).length}
@@ -3468,7 +3526,7 @@ function BacklogPage() {
                       setContextMenu({ ...contextMenu, selectedValues: new Set(allOptions) });
                     }
                   }}
-                  className="mr-2 rounded border-gray-300"
+                  className="mr-2 rounded border-gray-300 dark:border-gray-600"
                 />
                 (Select All)
               </label>
@@ -3477,13 +3535,13 @@ function BacklogPage() {
                 .map((option) => (
                   <label
                     key={option}
-                    className="flex items-center px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                    className="flex items-center px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                   >
                     <input
                       type="checkbox"
                       checked={contextMenu.selectedValues.has(option)}
                       onChange={() => toggleMultiSelectValue(option)}
-                      className="mr-2 rounded border-gray-300"
+                      className="mr-2 rounded border-gray-300 dark:border-gray-600"
                     />
                     {formatDisplayValue(contextMenu.column, option)}
                   </label>
@@ -3492,12 +3550,12 @@ function BacklogPage() {
           )}
 
           {/* Multi-Select Checkbox */}
-          <label className="flex items-center mb-2 text-sm cursor-pointer">
+          <label className="flex items-center mb-2 text-sm text-gray-900 dark:text-gray-100 cursor-pointer">
             <input
               type="checkbox"
               checked={contextMenu.multiSelectMode}
               onChange={toggleMultiSelectMode}
-              className="mr-2 rounded border-gray-300"
+              className="mr-2 rounded border-gray-300 dark:border-gray-600"
             />
             Select Multiple Items
           </label>
@@ -3507,13 +3565,13 @@ function BacklogPage() {
             <div className="flex space-x-2">
               <button
                 onClick={applyMultiSelectFilter}
-                className="flex-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="flex-1 px-3 py-1.5 text-sm bg-blue-600 dark:bg-blue-500 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600"
               >
                 OK
               </button>
               <button
                 onClick={() => setContextMenu(null)}
-                className="flex-1 px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                className="flex-1 px-3 py-1.5 text-sm bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
               >
                 Cancel
               </button>
@@ -3523,15 +3581,15 @@ function BacklogPage() {
           {/* Clear Filters */}
           {contextMenuFilters.length > 0 && (
             <div className="mt-2 space-y-1">
-              <div className="text-xs font-semibold text-gray-600 mb-1">Active Filters:</div>
+              <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Active Filters:</div>
               {contextMenuFilters.map((filter, idx) => (
-                <div key={idx} className="flex items-center justify-between text-xs bg-gray-100 px-2 py-1 rounded">
+                <div key={idx} className="flex items-center justify-between text-xs bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded">
                   <span>
                     <strong>{filter.column}:</strong> {filter.values.length === 1 ? filter.values[0] : `${filter.values.length} values`}
                   </span>
                   <button
                     onClick={() => clearContextMenuFilter(filter.column)}
-                    className="ml-2 text-red-600 hover:text-red-800"
+                    className="ml-2 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -3539,7 +3597,7 @@ function BacklogPage() {
               ))}
               <button
                 onClick={() => clearContextMenuFilter()}
-                className="w-full mt-1 px-3 py-1.5 text-sm text-red-600 border border-red-600 rounded hover:bg-red-50"
+                className="w-full mt-1 px-3 py-1.5 text-sm text-red-600 dark:text-red-400 border border-red-600 dark:border-red-500 rounded hover:bg-red-50 dark:hover:bg-red-900/30"
               >
                 Clear All Filters
               </button>
@@ -3756,14 +3814,14 @@ function BacklogPage() {
             setSelectedPriorities(new Set());
             setSelectedEpics(new Set());
           }}
-          className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 cursor-pointer hover:shadow-md dark:hover:shadow-gray-700/50 transition-shadow"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Stories</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Stories</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</p>
             </div>
-            <ListTodo className="h-8 w-8 text-gray-400" />
+            <ListTodo className="h-8 w-8 text-gray-400 dark:text-gray-500" />
           </div>
         </div>
 

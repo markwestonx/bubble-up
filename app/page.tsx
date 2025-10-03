@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useRouter } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 import {
   DndContext,
   closestCenter,
@@ -2085,8 +2087,41 @@ function BacklogPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Auth state
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const router = useRouter();
+
+  // Check auth on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+
+      if (!session) {
+        router.push('/login');
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (!session) {
+        router.push('/login');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
+
   // Load from Supabase only after mounting (client-side only)
   useEffect(() => {
+    // Don't load data if not authenticated
+    if (!user) return;
+
     setIsMounted(true);
 
     // Load from Supabase - single source of truth
@@ -2141,7 +2176,7 @@ function BacklogPage() {
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, [user]);
 
   const [filter, setFilter] = useState<{
     epic: Epic | 'all';
@@ -3053,14 +3088,36 @@ function BacklogPage() {
     setIsSettingsOpen(false);
   };
 
-  // Don't render until mounted to avoid hydration errors
-  if (!isMounted) {
+  // Show loading while checking auth
+  if (authLoading || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-950">
+        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
       </div>
     );
   }
+
+  // Don't render until mounted to avoid hydration errors
+  if (!isMounted) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-950">
+        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-950">
+        <div className="text-gray-500 dark:text-gray-400">Loading backlog...</div>
+      </div>
+    );
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
 
   return (
     <div className="space-y-6 min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
@@ -3792,10 +3849,17 @@ function BacklogPage() {
           </button>
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="inline-flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             title="Settings"
           >
             <Settings className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleLogout}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            title="Logout"
+          >
+            <span>Logout</span>
           </button>
         </div>
       </div>

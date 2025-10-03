@@ -3113,7 +3113,18 @@ function BacklogPage() {
 
               {/* Combine Stories Section */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Combine User Stories</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900">Combine User Stories</h3>
+                  <button
+                    onClick={refreshFromSupabase}
+                    disabled={isRefreshing}
+                    className="inline-flex items-center px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                    title="Refresh story list from database"
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-1.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    Refresh List
+                  </button>
+                </div>
                 <p className="text-sm text-gray-500 mb-4">
                   Select 2 or more stories to combine. All details will be preserved with smart deduplication.
                 </p>

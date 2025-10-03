@@ -36,7 +36,8 @@ import {
   X,
   Archive,
   Star,
-  Settings
+  Settings,
+  RefreshCw
 } from 'lucide-react';
 
 // Epic/Phase type
@@ -2191,6 +2192,8 @@ function BacklogPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedStoriesToCombine, setSelectedStoriesToCombine] = useState<Set<string>>(new Set());
   const [showCombinePreview, setShowCombinePreview] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [editableCombinedStory, setEditableCombinedStory] = useState<BacklogItem | null>(null);
 
   // Update projects list whenever backlogItems changes
   React.useEffect(() => {
@@ -2942,25 +2945,67 @@ function BacklogPage() {
 
   const combinedStoryPreview = combineStories();
 
+  // Manual refresh from Supabase
+  const refreshFromSupabase = async () => {
+    setIsRefreshing(true);
+    try {
+      const { data, error } = await supabase
+        .from('backlog_items')
+        .select('*')
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        console.error('Failed to refresh from Supabase:', error);
+        setSaveStatus('error');
+        setSaveError('Failed to refresh data');
+      } else if (data && data.length > 0) {
+        const supabaseItems: BacklogItem[] = data.map((item: any) => ({
+          id: item.id,
+          project: item.project,
+          epic: item.epic as Epic,
+          priority: item.priority as Priority,
+          status: item.status as Status,
+          userStory: item.user_story,
+          acceptanceCriteria: item.acceptance_criteria || [],
+          effort: item.effort,
+          businessValue: item.business_value,
+          dependencies: item.dependencies || [],
+          technicalNotes: item.technical_notes || '',
+          owner: item.owner,
+          isNext: item.is_next || false
+        }));
+        setBacklogItems(supabaseItems);
+        console.log('✅ Refreshed from Supabase:', supabaseItems.length, 'items');
+      }
+    } catch (error) {
+      console.error('Failed to refresh:', error);
+      setSaveStatus('error');
+      setSaveError('Refresh failed');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   // Execute combine operation
   const executeCombine = () => {
-    if (!combinedStoryPreview) return;
+    if (!editableCombinedStory) return;
 
-    // Update the primary story with combined data
+    // Update the primary story with combined data (use edited version)
     const updatedItems = backlogItems.map(item => {
-      if (item.id === combinedStoryPreview.id) {
-        return combinedStoryPreview;
+      if (item.id === editableCombinedStory.id) {
+        return editableCombinedStory;
       }
       return item;
     });
 
     // Remove the other selected stories
     const finalItems = updatedItems.filter(item =>
-      item.id === combinedStoryPreview.id || !selectedStoriesToCombine.has(item.id)
+      item.id === editableCombinedStory.id || !selectedStoriesToCombine.has(item.id)
     );
 
     setBacklogItems(finalItems);
     setSelectedStoriesToCombine(new Set());
+    setEditableCombinedStory(null);
     setShowCombinePreview(false);
     setIsSettingsOpen(false);
   };
@@ -3120,7 +3165,11 @@ function BacklogPage() {
                   </p>
                   <button
                     disabled={selectedStoriesToCombine.size < 2}
-                    onClick={() => setShowCombinePreview(true)}
+                    onClick={() => {
+                      const combined = combineStories();
+                      setEditableCombinedStory(combined);
+                      setShowCombinePreview(true);
+                    }}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
                     Preview Combine
@@ -3133,13 +3182,16 @@ function BacklogPage() {
       )}
 
       {/* Combine Preview Modal */}
-      {showCombinePreview && combinedStoryPreview && (
+      {showCombinePreview && editableCombinedStory && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900">Preview Combined Story</h2>
               <button
-                onClick={() => setShowCombinePreview(false)}
+                onClick={() => {
+                  setShowCombinePreview(false);
+                  setEditableCombinedStory(null);
+                }}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X className="h-6 w-6" />
@@ -3153,81 +3205,148 @@ function BacklogPage() {
                   {Array.from(selectedStoriesToCombine).sort().join(', ')}
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
-                  Stories {Array.from(selectedStoriesToCombine).filter(id => id !== combinedStoryPreview.id).sort().join(', ')} will be deleted
+                  Stories {Array.from(selectedStoriesToCombine).filter(id => id !== editableCombinedStory.id).sort().join(', ')} will be deleted
                 </p>
+                <p className="text-xs text-gray-600 mt-2">✏️ Edit any field below before confirming</p>
               </div>
 
+              {/* Before Section */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">📋 Stories Being Combined:</h3>
+                <div className="space-y-2">
+                  {backlogItems.filter(item => selectedStoriesToCombine.has(item.id)).map((item) => (
+                    <div key={item.id} className="bg-gray-50 p-3 rounded-lg text-sm">
+                      <div className="font-mono text-gray-600">#{item.id}</div>
+                      <div className="text-gray-900 mt-1">{item.userStory}</div>
+                      <div className="text-xs text-gray-500 mt-1">{item.acceptanceCriteria.length} criteria</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* After Section - Editable */}
               <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-gray-700">✨ Combined Result (Editable):</h3>
+
                 <div>
                   <label className="text-sm font-semibold text-gray-700">ID</label>
-                  <p className="text-sm text-gray-900 font-mono">{combinedStoryPreview.id}</p>
+                  <p className="text-sm text-gray-900 font-mono">{editableCombinedStory.id}</p>
                 </div>
 
                 <div>
                   <label className="text-sm font-semibold text-gray-700">User Story</label>
-                  <p className="text-sm text-gray-900">{combinedStoryPreview.userStory}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-semibold text-gray-700">Priority</label>
-                    <p className={`inline-flex mt-1 px-2 py-1 rounded text-xs font-medium ${getPriorityColor(combinedStoryPreview.priority)}`}>
-                      {combinedStoryPreview.priority}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold text-gray-700">Status</label>
-                    <p className={`inline-flex mt-1 px-2 py-1 rounded text-xs font-medium ${getStatusColor(combinedStoryPreview.status)}`}>
-                      {combinedStoryPreview.status.replace('_', ' ')}
-                    </p>
-                  </div>
+                  <textarea
+                    value={editableCombinedStory.userStory}
+                    onChange={(e) => setEditableCombinedStory({...editableCombinedStory, userStory: e.target.value})}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                    rows={2}
+                  />
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700">Acceptance Criteria ({combinedStoryPreview.acceptanceCriteria.length})</label>
-                  <ul className="mt-2 space-y-1">
-                    {combinedStoryPreview.acceptanceCriteria.map((criteria, idx) => (
-                      <li key={idx} className="text-sm text-gray-900 flex items-start">
-                        <CheckCircle className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
-                        {criteria}
-                      </li>
+                  <label className="text-sm font-semibold text-gray-700">Acceptance Criteria ({editableCombinedStory.acceptanceCriteria.length})</label>
+                  <div className="mt-2 space-y-2">
+                    {editableCombinedStory.acceptanceCriteria.map((criteria, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 mt-2 text-green-500 flex-shrink-0" />
+                        <input
+                          value={criteria}
+                          onChange={(e) => {
+                            const newCriteria = [...editableCombinedStory.acceptanceCriteria];
+                            newCriteria[idx] = e.target.value;
+                            setEditableCombinedStory({...editableCombinedStory, acceptanceCriteria: newCriteria});
+                          }}
+                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          onClick={() => {
+                            const newCriteria = editableCombinedStory.acceptanceCriteria.filter((_, i) => i !== idx);
+                            setEditableCombinedStory({...editableCombinedStory, acceptanceCriteria: newCriteria});
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
                     ))}
-                  </ul>
+                    <button
+                      onClick={() => {
+                        setEditableCombinedStory({
+                          ...editableCombinedStory,
+                          acceptanceCriteria: [...editableCombinedStory.acceptanceCriteria, '']
+                        });
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add criteria
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="text-sm font-semibold text-gray-700">Technical Notes</label>
-                  <p className="text-sm text-gray-900 whitespace-pre-wrap">{combinedStoryPreview.technicalNotes}</p>
+                  <textarea
+                    value={editableCombinedStory.technicalNotes}
+                    onChange={(e) => setEditableCombinedStory({...editableCombinedStory, technicalNotes: e.target.value})}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                    rows={3}
+                  />
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-gray-700">Effort</label>
-                    <p className="text-sm text-gray-900">{combinedStoryPreview.effort} points</p>
+                    <input
+                      type="number"
+                      min="1"
+                      max="13"
+                      value={editableCombinedStory.effort}
+                      onChange={(e) => setEditableCombinedStory({...editableCombinedStory, effort: parseInt(e.target.value) || 1})}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-gray-700">Business Value</label>
-                    <p className="text-sm text-gray-900">{combinedStoryPreview.businessValue}/10</p>
+                    <input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={editableCombinedStory.businessValue}
+                      onChange={(e) => setEditableCombinedStory({...editableCombinedStory, businessValue: parseInt(e.target.value) || 1})}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-gray-700">Owner</label>
-                    <p className="text-sm text-gray-900">{combinedStoryPreview.owner || 'None'}</p>
+                    <input
+                      value={editableCombinedStory.owner}
+                      onChange={(e) => setEditableCombinedStory({...editableCombinedStory, owner: e.target.value})}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                    />
                   </div>
                 </div>
 
                 <div>
                   <label className="text-sm font-semibold text-gray-700">Dependencies</label>
-                  <p className="text-sm text-gray-900 font-mono">
-                    {combinedStoryPreview.dependencies.length > 0
-                      ? combinedStoryPreview.dependencies.join(', ')
-                      : 'None'}
-                  </p>
+                  <input
+                    value={editableCombinedStory.dependencies.join(', ')}
+                    onChange={(e) => {
+                      const deps = e.target.value.split(',').map(d => d.trim()).filter(d => d);
+                      setEditableCombinedStory({...editableCombinedStory, dependencies: deps});
+                    }}
+                    placeholder="Comma-separated IDs (e.g., 003, 089)"
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1 font-mono"
+                  />
                 </div>
               </div>
 
               <div className="mt-6 flex items-center justify-end space-x-3">
                 <button
-                  onClick={() => setShowCombinePreview(false)}
+                  onClick={() => {
+                    setShowCombinePreview(false);
+                    setEditableCombinedStory(null);
+                  }}
                   className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
                 >
                   Cancel
@@ -3580,6 +3699,14 @@ function BacklogPage() {
           >
             <Plus className="h-4 w-4 mr-1" />
             Create New Project
+          </button>
+          <button
+            onClick={refreshFromSupabase}
+            disabled={isRefreshing}
+            className="inline-flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+            title="Refresh from database"
+          >
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
           <button
             onClick={() => setIsSettingsOpen(true)}

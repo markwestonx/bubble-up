@@ -2126,14 +2126,17 @@ function BacklogPage() {
           }));
 
           setBacklogItems(supabaseItems);
+          setHasLoadedFromSupabase(true);
           console.log('✅ Loaded from Supabase:', supabaseItems.length, 'items');
         } else {
           setBacklogItems(initialBacklogItems);
+          setHasLoadedFromSupabase(true);
         }
       } catch (error) {
         console.error('Failed to load from Supabase:', error);
         setLoadError('An error occurred while loading data. Please refresh the page.');
         setBacklogItems(initialBacklogItems);
+        setHasLoadedFromSupabase(true);
       } finally {
         setIsLoading(false);
       }
@@ -2267,10 +2270,12 @@ function BacklogPage() {
   // Save state for UI feedback
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [hasLoadedFromSupabase, setHasLoadedFromSupabase] = useState(false);
 
   // Persist backlog to Supabase only (single source of truth)
   React.useEffect(() => {
-    if (typeof window === 'undefined' || backlogItems.length === 0 || isLoading) return;
+    // Don't sync until we've loaded from Supabase at least once
+    if (typeof window === 'undefined' || backlogItems.length === 0 || isLoading || !hasLoadedFromSupabase) return;
 
     // Sync to Supabase - single source of truth
     const syncToSupabase = async () => {
@@ -2975,6 +2980,7 @@ function BacklogPage() {
           isNext: item.is_next || false
         }));
         setBacklogItems(supabaseItems);
+        setHasLoadedFromSupabase(true);
         console.log('✅ Refreshed from Supabase:', supabaseItems.length, 'items');
       }
     } catch (error) {

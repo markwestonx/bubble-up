@@ -35,7 +35,8 @@ import {
   Save,
   X,
   Archive,
-  Star
+  Star,
+  Settings
 } from 'lucide-react';
 
 // Epic/Phase type
@@ -2186,6 +2187,11 @@ function BacklogPage() {
   const [newProjectName, setNewProjectName] = useState('');
   const [mobileSearchTerm, setMobileSearchTerm] = useState('');
 
+  // Settings state
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [selectedStoriesToCombine, setSelectedStoriesToCombine] = useState<Set<string>>(new Set());
+  const [showCombinePreview, setShowCombinePreview] = useState(false);
+
   // Update projects list whenever backlogItems changes
   React.useEffect(() => {
     if (backlogItems.length > 0) {
@@ -2860,6 +2866,105 @@ function BacklogPage() {
     return Array.from(uniqueEpics).sort((a, b) => getEpicLabel(a).localeCompare(getEpicLabel(b)));
   }, [projectItems]);
 
+  // Combine stories function with smart deduplication
+  const combineStories = (): BacklogItem | null => {
+    if (selectedStoriesToCombine.size < 2) return null;
+
+    const selectedItems = backlogItems.filter(item => selectedStoriesToCombine.has(item.id));
+    if (selectedItems.length === 0) return null;
+
+    // Sort by ID to keep the lowest ID
+    selectedItems.sort((a, b) => a.id.localeCompare(b.id));
+    const primaryStory = selectedItems[0];
+
+    // Merge user stories (remove duplicate phrases)
+    const allStoryParts = selectedItems.map(s => s.userStory.trim());
+    const uniqueParts = new Set(allStoryParts);
+    const combinedStory = Array.from(uniqueParts).join(' / ');
+
+    // Combine acceptance criteria (deduplicate)
+    const allCriteria = selectedItems.flatMap(s => s.acceptanceCriteria);
+    const uniqueCriteria = Array.from(new Set(allCriteria));
+
+    // Merge technical notes (deduplicate sentences)
+    const allNotes = selectedItems.map(s => s.technicalNotes).filter(n => n.trim());
+    const uniqueSentences = new Set<string>();
+    allNotes.forEach(note => {
+      note.split(/[.!?]+/).forEach(sentence => {
+        const trimmed = sentence.trim();
+        if (trimmed) uniqueSentences.add(trimmed);
+      });
+    });
+    const combinedNotes = Array.from(uniqueSentences).join('. ') + (uniqueSentences.size > 0 ? '.' : '');
+
+    // Get highest priority
+    const priorityOrder: Priority[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
+    const highestPriority = selectedItems.reduce((highest, item) => {
+      return priorityOrder.indexOf(item.priority) < priorityOrder.indexOf(highest) ? item.priority : highest;
+    }, selectedItems[0].priority);
+
+    // Get most advanced status
+    const statusOrder: Status[] = ['DONE', 'TESTING', 'IN_PROGRESS', 'BLOCKED', 'NOT_STARTED', 'CLOSED'];
+    const mostAdvancedStatus = selectedItems.reduce((advanced, item) => {
+      return statusOrder.indexOf(item.status) < statusOrder.indexOf(advanced) ? item.status : advanced;
+    }, selectedItems[0].status);
+
+    // Sum effort
+    const totalEffort = selectedItems.reduce((sum, item) => sum + item.effort, 0);
+
+    // Average business value (rounded)
+    const avgBusinessValue = Math.round(
+      selectedItems.reduce((sum, item) => sum + item.businessValue, 0) / selectedItems.length
+    );
+
+    // Merge dependencies (deduplicate)
+    const allDeps = selectedItems.flatMap(s => s.dependencies);
+    const uniqueDeps = Array.from(new Set(allDeps)).filter(dep => !selectedStoriesToCombine.has(dep));
+
+    // Combine owners (deduplicate)
+    const allOwners = selectedItems.map(s => s.owner).filter(o => o.trim());
+    const uniqueOwners = Array.from(new Set(allOwners));
+    const combinedOwner = uniqueOwners.join(', ');
+
+    return {
+      ...primaryStory,
+      userStory: combinedStory,
+      acceptanceCriteria: uniqueCriteria,
+      technicalNotes: combinedNotes,
+      priority: highestPriority,
+      status: mostAdvancedStatus,
+      effort: totalEffort,
+      businessValue: avgBusinessValue,
+      dependencies: uniqueDeps,
+      owner: combinedOwner,
+    };
+  };
+
+  const combinedStoryPreview = combineStories();
+
+  // Execute combine operation
+  const executeCombine = () => {
+    if (!combinedStoryPreview) return;
+
+    // Update the primary story with combined data
+    const updatedItems = backlogItems.map(item => {
+      if (item.id === combinedStoryPreview.id) {
+        return combinedStoryPreview;
+      }
+      return item;
+    });
+
+    // Remove the other selected stories
+    const finalItems = updatedItems.filter(item =>
+      item.id === combinedStoryPreview.id || !selectedStoriesToCombine.has(item.id)
+    );
+
+    setBacklogItems(finalItems);
+    setSelectedStoriesToCombine(new Set());
+    setShowCombinePreview(false);
+    setIsSettingsOpen(false);
+  };
+
   // Don't render until mounted to avoid hydration errors
   if (!isMounted) {
     return (
@@ -2920,6 +3025,220 @@ function BacklogPage() {
               >
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
+              <button
+                onClick={() => {
+                  setIsSettingsOpen(false);
+                  setSelectedStoriesToCombine(new Set());
+                  setShowCombinePreview(false);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-8">
+              {/* Display Mode Section (for story 116 later) */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Display Mode</h3>
+                <p className="text-sm text-gray-500 mb-4">Choose your preferred color theme (Story 116 - Coming soon)</p>
+                <div className="flex space-x-3">
+                  <button disabled className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                    Light
+                  </button>
+                  <button disabled className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                    Dark
+                  </button>
+                  <button disabled className="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                    System
+                  </button>
+                </div>
+              </div>
+
+              {/* Combine Stories Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Combine User Stories</h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  Select 2 or more stories to combine. All details will be preserved with smart deduplication.
+                </p>
+
+                {/* Story Selection List */}
+                <div className="border border-gray-200 rounded-lg divide-y max-h-96 overflow-y-auto">
+                  {projectItems.map((item) => (
+                    <label
+                      key={item.id}
+                      className="flex items-start p-3 hover:bg-gray-50 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedStoriesToCombine.has(item.id)}
+                        onChange={(e) => {
+                          const newSelected = new Set(selectedStoriesToCombine);
+                          if (e.target.checked) {
+                            newSelected.add(item.id);
+                          } else {
+                            newSelected.delete(item.id);
+                          }
+                          setSelectedStoriesToCombine(newSelected);
+                        }}
+                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <div className="ml-3 flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-mono text-gray-600">{item.id}</span>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${getPriorityColor(item.priority)}`}>
+                            {item.priority}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(item.status)}`}>
+                            {item.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-900 mt-1">{item.userStory}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {item.acceptanceCriteria.length} criteria • Effort: {item.effort} • Value: {item.businessValue}
+                        </p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                {/* Combine Button */}
+                <div className="mt-4 flex items-center justify-between">
+                  <p className="text-sm text-gray-600">
+                    {selectedStoriesToCombine.size} {selectedStoriesToCombine.size === 1 ? 'story' : 'stories'} selected
+                  </p>
+                  <button
+                    disabled={selectedStoriesToCombine.size < 2}
+                    onClick={() => setShowCombinePreview(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    Preview Combine
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Combine Preview Modal */}
+      {showCombinePreview && combinedStoryPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Preview Combined Story</h2>
+              <button
+                onClick={() => setShowCombinePreview(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-blue-800">
+                  <strong>Combining {selectedStoriesToCombine.size} stories:</strong>{' '}
+                  {Array.from(selectedStoriesToCombine).sort().join(', ')}
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  Stories {Array.from(selectedStoriesToCombine).filter(id => id !== combinedStoryPreview.id).sort().join(', ')} will be deleted
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">ID</label>
+                  <p className="text-sm text-gray-900 font-mono">{combinedStoryPreview.id}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">User Story</label>
+                  <p className="text-sm text-gray-900">{combinedStoryPreview.userStory}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Priority</label>
+                    <p className={`inline-flex mt-1 px-2 py-1 rounded text-xs font-medium ${getPriorityColor(combinedStoryPreview.priority)}`}>
+                      {combinedStoryPreview.priority}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Status</label>
+                    <p className={`inline-flex mt-1 px-2 py-1 rounded text-xs font-medium ${getStatusColor(combinedStoryPreview.status)}`}>
+                      {combinedStoryPreview.status.replace('_', ' ')}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">Acceptance Criteria ({combinedStoryPreview.acceptanceCriteria.length})</label>
+                  <ul className="mt-2 space-y-1">
+                    {combinedStoryPreview.acceptanceCriteria.map((criteria, idx) => (
+                      <li key={idx} className="text-sm text-gray-900 flex items-start">
+                        <CheckCircle className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
+                        {criteria}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">Technical Notes</label>
+                  <p className="text-sm text-gray-900 whitespace-pre-wrap">{combinedStoryPreview.technicalNotes}</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Effort</label>
+                    <p className="text-sm text-gray-900">{combinedStoryPreview.effort} points</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Business Value</label>
+                    <p className="text-sm text-gray-900">{combinedStoryPreview.businessValue}/10</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Owner</label>
+                    <p className="text-sm text-gray-900">{combinedStoryPreview.owner || 'None'}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">Dependencies</label>
+                  <p className="text-sm text-gray-900 font-mono">
+                    {combinedStoryPreview.dependencies.length > 0
+                      ? combinedStoryPreview.dependencies.join(', ')
+                      : 'None'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end space-x-3">
+                <button
+                  onClick={() => setShowCombinePreview(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={executeCombine}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Confirm & Combine
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -3261,6 +3580,13 @@ function BacklogPage() {
           >
             <Plus className="h-4 w-4 mr-1" />
             Create New Project
+          </button>
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="inline-flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Settings"
+          >
+            <Settings className="h-5 w-5" />
           </button>
         </div>
       </div>

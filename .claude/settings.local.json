@@ -16,7 +16,8 @@
       "Read(//c/Users/m/OneDrive/Desktop/sales-genie/**)",
       "SlashCommand(/sync)",
       "Bash(dir:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []

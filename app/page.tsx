@@ -2075,21 +2075,24 @@ function BacklogPage() {
     }
   ];
 
-  const STORAGE_KEY = 'sales_genie_backlog';
-
   // Track if component is mounted to prevent hydration errors
   const [isMounted, setIsMounted] = useState(false);
 
-  // Load backlog from localStorage or use initial items
+  // Load backlog from Supabase only
   const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Load from Supabase and localStorage only after mounting (client-side only)
+  // Load from Supabase only after mounting (client-side only)
   useEffect(() => {
     setIsMounted(true);
 
-    // Always load from Supabase to ensure we have latest data
+    // Load from Supabase - single source of truth
     (async () => {
       try {
+        setIsLoading(true);
+        setLoadError(null);
+
         const { data, error } = await supabase
           .from('backlog_items')
           .select('*')
@@ -2097,7 +2100,9 @@ function BacklogPage() {
 
         if (error) {
           console.error('Failed to load from Supabase:', error);
+          setLoadError('Failed to load data from database. Please refresh the page.');
           setBacklogItems(initialBacklogItems);
+          setIsLoading(false);
           return;
         }
 
@@ -2119,14 +2124,16 @@ function BacklogPage() {
           }));
 
           setBacklogItems(supabaseItems);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(supabaseItems));
           console.log('✅ Loaded from Supabase:', supabaseItems.length, 'items');
         } else {
           setBacklogItems(initialBacklogItems);
         }
       } catch (error) {
         console.error('Failed to load from Supabase:', error);
+        setLoadError('An error occurred while loading data. Please refresh the page.');
         setBacklogItems(initialBacklogItems);
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, []);
@@ -2248,17 +2255,20 @@ function BacklogPage() {
     loadFromSupabase();
   }, []); // Only run once on mount
 
-  // Persist backlog to localStorage and Supabase
+  // Save state for UI feedback
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Persist backlog to Supabase only (single source of truth)
   React.useEffect(() => {
-    if (typeof window === 'undefined' || backlogItems.length === 0) return;
+    if (typeof window === 'undefined' || backlogItems.length === 0 || isLoading) return;
 
-    // Save to localStorage
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(backlogItems));
-    console.log('💾 Saved to localStorage:', backlogItems.length, 'items');
-
-    // Sync to Supabase using safe upsert (doesn't delete existing data)
+    // Sync to Supabase - single source of truth
     const syncToSupabase = async () => {
       try {
+        setSaveStatus('saving');
+        setSaveError(null);
+
         const itemsToUpsert = backlogItems.map((item, index) => ({
           id: item.id,
           project: item.project,
@@ -2282,18 +2292,25 @@ function BacklogPage() {
 
         if (error) {
           console.error('❌ Error syncing to Supabase:', error);
+          setSaveStatus('error');
+          setSaveError(error.message || 'Failed to save changes');
         } else {
           console.log('✅ Synced to Supabase:', backlogItems.length, 'items');
+          setSaveStatus('saved');
+          // Reset to idle after 2 seconds
+          setTimeout(() => setSaveStatus('idle'), 2000);
         }
       } catch (error) {
         console.error('❌ Exception syncing to Supabase:', error);
+        setSaveStatus('error');
+        setSaveError(error instanceof Error ? error.message : 'Failed to save changes');
       }
     };
 
     // Debounce the sync to avoid too many requests
     const timeoutId = setTimeout(syncToSupabase, 1000);
     return () => clearTimeout(timeoutId);
-  }, [backlogItems]);
+  }, [backlogItems, isLoading]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -3070,6 +3087,27 @@ function BacklogPage() {
       )}
 
       {/* Header */}
+      {/* Loading State */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 flex items-center space-x-3">
+            <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+            <span className="text-gray-700">Loading backlog from database...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {loadError && (
+        <div className="mx-6 mt-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
+          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-red-800">Error Loading Data</h3>
+            <p className="text-sm text-red-600 mt-1">{loadError}</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 pt-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
@@ -3118,6 +3156,26 @@ function BacklogPage() {
               </defs>
             </svg>
             BubbleUp - {currentProject}
+
+            {/* Save Status Indicator */}
+            {saveStatus === 'saving' && (
+              <span className="ml-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <div className="animate-spin h-3 w-3 border-2 border-blue-500 border-t-transparent rounded-full mr-2"></div>
+                Saving...
+              </span>
+            )}
+            {saveStatus === 'saved' && (
+              <span className="ml-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Saved
+              </span>
+            )}
+            {saveStatus === 'error' && (
+              <span className="ml-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                Error: {saveError}
+              </span>
+            )}
           </h1>
           <p className="mt-2 text-gray-600 dark:text-gray-300 flex items-center flex-wrap">
             <span>Drag and drop to reorder</span>

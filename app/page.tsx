@@ -3137,7 +3137,14 @@ function BacklogPage() {
 
                 {/* Story Selection List */}
                 <div className="border border-gray-200 rounded-lg divide-y max-h-96 overflow-y-auto">
-                  {projectItems.map((item) => (
+                  {projectItems
+                    .sort((a, b) => {
+                      // Numeric sort by ID
+                      const numA = parseInt(a.id) || 0;
+                      const numB = parseInt(b.id) || 0;
+                      return numA - numB;
+                    })
+                    .map((item) => (
                     <label
                       key={item.id}
                       className="flex items-start p-3 hover:bg-gray-50 cursor-pointer"

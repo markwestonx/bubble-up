@@ -442,7 +442,7 @@ function SortableRow({
                               </span>
                               {depItem && (
                                 <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black text-white text-xs rounded whitespace-nowrap z-10 shadow-lg">
-                                  {depItem.userStory}
+                                  <span className="font-semibold">{depItem.status.replace('_', ' ')}</span> - {depItem.userStory}
                                   <span className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-black"></span>
                                 </span>
                               )}

@@ -62,6 +62,10 @@
     {
       "name": "SOC",
       "epics": ["Foundation", "Monitoring", "Incident Response", "Threat Detection", "Integration", "Compliance"]
+    },
+    {
+      "name": "Cyber Essentials",
+      "epics": ["Foundation", "Technical Controls", "Organizational Controls", "Certification", "Documentation"]
     }
   ],
   "priorities": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],

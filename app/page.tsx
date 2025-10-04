@@ -2264,7 +2264,7 @@ function BacklogPage() {
           // Fetch all users via API to get emails
           const usersResponse = await fetch('/api/users');
           const { users } = await usersResponse.json();
-          const creatorMap = new Map(users?.map((u: any) => [u.id, u.email]) || []);
+          const creatorMap = new Map<string, string>(users?.map((u: any) => [u.id, u.email]) || []);
 
           const supabaseItems: BacklogItem[] = data.map((item: any) => ({
             id: item.id,

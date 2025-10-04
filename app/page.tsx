@@ -148,7 +148,7 @@ function SortableRow({
       <tr
         ref={setNodeRef}
         style={style}
-        className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+        className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors border-b border-gray-200 dark:border-gray-700"
       >
         <td className="px-4 py-4 whitespace-nowrap">
           <div className="flex items-center space-x-2">
@@ -3901,14 +3901,14 @@ function BacklogPage() {
             setSelectedPriorities(new Set());
             setSelectedEpics(new Set());
           }}
-          className="bg-white border border-red-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-red-300 transition-all"
+          className="bg-white dark:bg-gray-900 border border-red-200 dark:border-red-800 rounded-lg p-4 cursor-pointer hover:shadow-md dark:hover:shadow-gray-700/50 hover:border-red-300 dark:hover:border-red-700 transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Blocked</p>
-              <p className="text-2xl font-bold text-red-600">{stats.blocked}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Blocked</p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.blocked}</p>
             </div>
-            <AlertCircle className="h-8 w-8 text-red-400" />
+            <AlertCircle className="h-8 w-8 text-red-400 dark:text-red-500" />
           </div>
         </div>
 
@@ -3924,14 +3924,14 @@ function BacklogPage() {
             setSelectedPriorities(new Set());
             setSelectedEpics(new Set());
           }}
-          className="bg-white border border-green-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-green-300 transition-all"
+          className="bg-white dark:bg-gray-900 border border-green-200 dark:border-green-800 rounded-lg p-4 cursor-pointer hover:shadow-md dark:hover:shadow-gray-700/50 hover:border-green-300 dark:hover:border-green-700 transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Done</p>
-              <p className="text-2xl font-bold text-green-600">{stats.complete}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Done</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.complete}</p>
             </div>
-            <CheckCircle className="h-8 w-8 text-green-400" />
+            <CheckCircle className="h-8 w-8 text-green-400 dark:text-green-500" />
           </div>
         </div>
 
@@ -3947,14 +3947,14 @@ function BacklogPage() {
             setSelectedPriorities(new Set());
             setSelectedEpics(new Set());
           }}
-          className="bg-white border border-blue-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-blue-300 transition-all"
+          className="bg-white dark:bg-gray-900 border border-blue-200 dark:border-blue-800 rounded-lg p-4 cursor-pointer hover:shadow-md dark:hover:shadow-gray-700/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">In Progress</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">In Progress</p>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.inProgress}</p>
             </div>
-            <Clock className="h-8 w-8 text-blue-400" />
+            <Clock className="h-8 w-8 text-blue-400 dark:text-blue-500" />
           </div>
         </div>
 
@@ -3975,12 +3975,12 @@ function BacklogPage() {
             setSelectedPriorities(new Set());
             setSelectedEpics(new Set());
           }}
-          className="bg-white border border-yellow-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-yellow-300 transition-all"
+          className="bg-white dark:bg-gray-900 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 cursor-pointer hover:shadow-md dark:hover:shadow-gray-700/50 hover:border-yellow-300 dark:hover:border-yellow-700 transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Next</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.next}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Next</p>
+              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.next}</p>
             </div>
             <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
           </div>
@@ -3998,30 +3998,30 @@ function BacklogPage() {
             setSelectedPriorities(new Set());
             setSelectedEpics(new Set());
           }}
-          className="bg-white border border-purple-200 rounded-lg p-4 cursor-pointer hover:shadow-md hover:border-purple-300 transition-all"
+          className="bg-white dark:bg-gray-900 border border-purple-200 dark:border-purple-800 rounded-lg p-4 cursor-pointer hover:shadow-md dark:hover:shadow-gray-700/50 hover:border-purple-300 dark:hover:border-purple-700 transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Story Points Delivered</p>
-              <p className="text-2xl font-bold text-purple-600">{stats.completedEffort}/{stats.totalEffort}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Story Points Delivered</p>
+              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.completedEffort}/{stats.totalEffort}</p>
             </div>
-            <TrendingUp className="h-8 w-8 text-purple-400" />
+            <TrendingUp className="h-8 w-8 text-purple-400 dark:text-purple-500" />
           </div>
         </div>
       </div>
 
       {/* Backlog Table - Desktop */}
-      <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="hidden md:block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setExpandedItems(new Set())}

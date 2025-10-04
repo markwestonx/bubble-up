@@ -620,6 +620,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Using better-sqlite3 for Node.js and aiosqlite for Python',
       owner: 'Development',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -640,6 +641,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Avoid Python 3.14 beta - causes package compilation issues',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -660,6 +662,7 @@ function BacklogPage() {
       dependencies: ['001', '002'],
       technicalNotes: 'FastAPI + async/await patterns for high concurrency',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -680,6 +683,7 @@ function BacklogPage() {
       dependencies: ['001', '002'],
       technicalNotes: 'Jinja2 templates for email personalization',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -700,6 +704,7 @@ function BacklogPage() {
       dependencies: ['003'],
       technicalNotes: 'Free API with rate limits - implement caching',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -720,6 +725,7 @@ function BacklogPage() {
       dependencies: ['004'],
       technicalNotes: 'Gmail app passwords or SendGrid API - ensure deliverability',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
 
@@ -744,6 +750,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Already exists - needs updating for SQLite option and current ports (3002 for dashboard)',
       owner: 'DevOps',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -765,6 +772,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Support both SQLite (dev) and PostgreSQL (prod) via env vars',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -786,6 +794,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Winston for Node, structlog for Python, consider ELK stack for production',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -807,6 +816,7 @@ function BacklogPage() {
       dependencies: ['007', '013'],
       technicalNotes: 'GitHub Actions + Azure Container Registry + Azure Container Apps',
       owner: 'DevOps',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -828,6 +838,7 @@ function BacklogPage() {
       dependencies: ['003', '004'],
       technicalNotes: 'Already partially implemented - standardize across all services',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -849,6 +860,7 @@ function BacklogPage() {
       dependencies: ['001'],
       technicalNotes: 'SQLite: .backup command, PostgreSQL: pg_dump, Azure Backup for production',
       owner: 'DevOps',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -870,6 +882,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Test files already exist in tests/ directory - need full integration',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -891,6 +904,7 @@ function BacklogPage() {
       dependencies: ['007', '010'],
       technicalNotes: 'Azure Container Apps with staging slot, or separate resource group',
       owner: 'DevOps',
+    assigned_to: null,
     isNext: false
     },
 
@@ -913,6 +927,7 @@ function BacklogPage() {
       dependencies: ['003'],
       technicalNotes: 'ToS-compliant approach - manual exports only',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -933,6 +948,7 @@ function BacklogPage() {
       dependencies: ['004', '006'],
       technicalNotes: 'Use Ollama Mistral or OpenAI GPT-4',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -953,6 +969,7 @@ function BacklogPage() {
       dependencies: ['003', '015'],
       technicalNotes: 'Free tier available - 50 credits/month',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -974,6 +991,7 @@ function BacklogPage() {
       dependencies: ['015', '027'],
       technicalNotes: 'Enhanced Lead Discovery Agent with fanatical prospecting capabilities',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -995,6 +1013,7 @@ function BacklogPage() {
       dependencies: ['016', '027'],
       technicalNotes: 'Enhanced Outreach Agent with multi-channel fanatical capabilities',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1016,6 +1035,7 @@ function BacklogPage() {
       dependencies: ['027', '015'],
       technicalNotes: 'Five Cs: Connecting, Content Creation, Content Curation, Conversations, Converting',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
 
@@ -1040,6 +1060,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Use Mermaid diagrams for version control, store in /architecture folder',
       owner: 'Architecture',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1061,6 +1082,7 @@ function BacklogPage() {
       dependencies: ['021'],
       technicalNotes: 'Follow Michael Nygard ADR template format',
       owner: 'Architecture',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1082,6 +1104,7 @@ function BacklogPage() {
       dependencies: ['021', '022'],
       technicalNotes: 'Lightweight process - focus on major decisions and technical debt',
       owner: 'Architecture',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1103,6 +1126,7 @@ function BacklogPage() {
       dependencies: ['021'],
       technicalNotes: 'Follow REST best practices, use OpenAPI 3.0 for documentation',
       owner: 'Architecture',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1124,6 +1148,7 @@ function BacklogPage() {
       dependencies: ['021', '027'],
       technicalNotes: 'Define reusable patterns for agent development with LangChain/LangGraph',
       owner: 'Architecture',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1145,6 +1170,7 @@ function BacklogPage() {
       dependencies: ['021', '023'],
       technicalNotes: 'Visual roadmap in Mermaid or similar, linked to backlog',
       owner: 'Architecture',
+    assigned_to: null,
     isNext: false
     },
 
@@ -1167,6 +1193,7 @@ function BacklogPage() {
       dependencies: ['003', '004', '016'],
       technicalNotes: 'Core of fanatical prospecting methodology - runs on port 8000',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1187,6 +1214,7 @@ function BacklogPage() {
       dependencies: ['027'],
       technicalNotes: 'Use historical response data to train model',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1207,6 +1235,7 @@ function BacklogPage() {
       dependencies: ['027', '016'],
       technicalNotes: 'Transforms rejection into learning fuel',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1227,6 +1256,7 @@ function BacklogPage() {
       dependencies: ['027'],
       technicalNotes: 'Web scraping + news monitoring + CRM intelligence',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
 
@@ -1250,6 +1280,7 @@ function BacklogPage() {
       dependencies: ['027'],
       technicalNotes: 'Based on Archive/Content Creation system - 4 specialized agents working in pipeline',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1271,6 +1302,7 @@ function BacklogPage() {
       dependencies: ['031'],
       technicalNotes: 'Blog posts with integrated multimedia, proper headers and formatting',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1292,6 +1324,7 @@ function BacklogPage() {
       dependencies: ['031'],
       technicalNotes: 'Multi-format content for different platforms with optimization',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1313,6 +1346,7 @@ function BacklogPage() {
       dependencies: ['033'],
       technicalNotes: 'Integrates with social media scheduling tools',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1334,6 +1368,7 @@ function BacklogPage() {
       dependencies: ['031'],
       technicalNotes: 'Integration with image generation APIs and stock photo services',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1355,6 +1390,7 @@ function BacklogPage() {
       dependencies: ['033'],
       technicalNotes: 'Analytics dashboard with ML-based insights',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
 
@@ -1378,6 +1414,7 @@ function BacklogPage() {
       dependencies: ['033'],
       technicalNotes: 'LinkedIn API v2 for company pages and personal profiles',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1399,6 +1436,7 @@ function BacklogPage() {
       dependencies: ['033'],
       technicalNotes: 'Twitter API v2 with elevated access for automation',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1420,6 +1458,7 @@ function BacklogPage() {
       dependencies: ['033'],
       technicalNotes: 'Instagram Graph API for business accounts only',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1441,6 +1480,7 @@ function BacklogPage() {
       dependencies: ['033'],
       technicalNotes: 'Facebook Business API for page management',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1462,6 +1502,7 @@ function BacklogPage() {
       dependencies: ['039', '031'],
       technicalNotes: 'Instagram Messaging API with business account requirements',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1483,6 +1524,7 @@ function BacklogPage() {
       dependencies: ['040', '031'],
       technicalNotes: 'Messenger Platform API with webhook integration',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1504,6 +1546,7 @@ function BacklogPage() {
       dependencies: ['031'],
       technicalNotes: 'WhatsApp Business API requires Facebook Business verification',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1525,6 +1568,7 @@ function BacklogPage() {
       dependencies: ['037', '038', '039', '040'],
       technicalNotes: 'Unified UI for LinkedIn, Twitter, Instagram, Facebook management',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1546,6 +1590,7 @@ function BacklogPage() {
       dependencies: ['044'],
       technicalNotes: 'Streaming APIs from all platforms + NLP sentiment analysis',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1567,6 +1612,7 @@ function BacklogPage() {
       dependencies: ['044', '031'],
       technicalNotes: 'Cross-platform influencer identification and engagement',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
 
@@ -1590,6 +1636,7 @@ function BacklogPage() {
       dependencies: ['003'],
       technicalNotes: 'REST APIs for major CRMs - OAuth authentication required',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1611,6 +1658,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Kanban-style pipeline UI with drag-and-drop, stage automation',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1632,6 +1680,7 @@ function BacklogPage() {
       dependencies: ['004'],
       technicalNotes: 'Google Calendar API, Microsoft Graph API for Outlook',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1653,6 +1702,7 @@ function BacklogPage() {
       dependencies: ['004'],
       technicalNotes: 'Activity logging system with timeline UI',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1674,6 +1724,7 @@ function BacklogPage() {
       dependencies: ['003', '015'],
       technicalNotes: 'ML model using historical conversion data + real-time signals',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1695,6 +1746,7 @@ function BacklogPage() {
       dependencies: ['048'],
       technicalNotes: 'Team collaboration features with real-time updates',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
 
@@ -1718,6 +1770,7 @@ function BacklogPage() {
       dependencies: ['048'],
       technicalNotes: 'Business intelligence dashboard with drill-down capabilities',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1739,6 +1792,7 @@ function BacklogPage() {
       dependencies: ['053'],
       technicalNotes: 'Attribution engine with first-touch, last-touch, and multi-touch models',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1760,6 +1814,7 @@ function BacklogPage() {
       dependencies: ['053', '051'],
       technicalNotes: 'ML models for probability and forecasting using historical data',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1781,6 +1836,7 @@ function BacklogPage() {
       dependencies: ['053'],
       technicalNotes: 'Report generation engine with scheduling and distribution',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
 
@@ -1803,6 +1859,7 @@ function BacklogPage() {
       dependencies: ['003', '004'],
       technicalNotes: 'Prometheus + Grafana or custom dashboard',
       owner: 'Development',
+    assigned_to: null,
     isNext: false
     },
     {
@@ -1824,6 +1881,7 @@ function BacklogPage() {
       dependencies: ['003'],
       technicalNotes: 'Express middleware for rate limiting, helmet.js for security headers',
       owner: 'Development',
+      assigned_to: null,
       isNext: false
     },
 
@@ -1847,6 +1905,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'ISO27001 likely candidate due to broad regulatory appeal',
       owner: 'Product',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -1867,6 +1926,7 @@ function BacklogPage() {
       dependencies: ['059'],
       technicalNotes: 'Use feature flag library or build simple toggle system',
       owner: 'Development',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -1888,6 +1948,7 @@ function BacklogPage() {
       dependencies: ['059'],
       technicalNotes: 'Link to payment flow and Calendly/booking system',
       owner: 'Development',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -1908,6 +1969,7 @@ function BacklogPage() {
       dependencies: ['059'],
       technicalNotes: 'Interactive onboarding flow with tooltips',
       owner: 'Product',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -1928,6 +1990,7 @@ function BacklogPage() {
       dependencies: ['059'],
       technicalNotes: 'Use tooltip library like Tippy.js or Radix UI',
       owner: 'Development',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -1948,6 +2011,7 @@ function BacklogPage() {
       dependencies: ['059'],
       technicalNotes: 'Complete all interactive elements with real or mock data',
       owner: 'Development',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -1968,6 +2032,7 @@ function BacklogPage() {
       dependencies: ['059', '060'],
       technicalNotes: 'Use feature flags to create "essentials" mode',
       owner: 'Product',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -1989,6 +2054,7 @@ function BacklogPage() {
       dependencies: ['059'],
       technicalNotes: 'RESTful API integration with caching strategy',
       owner: 'Development',
+      assigned_to: null,
       isNext: false
     },
 
@@ -2011,6 +2077,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Automated provisioning with Vercel/similar',
       owner: 'DevOps',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -2031,6 +2098,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Shell scripts or Ansible playbooks for quick deployment',
       owner: 'DevOps',
+      assigned_to: null,
       isNext: false
     },
 
@@ -2054,6 +2122,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Next.js static site with MDX for content',
       owner: 'Marketing',
+      assigned_to: null,
       isNext: false
     },
     {
@@ -2074,6 +2143,7 @@ function BacklogPage() {
       dependencies: ['069'],
       technicalNotes: 'Compelling copywriting with visual hierarchy',
       owner: 'Marketing',
+      assigned_to: null,
       isNext: false
     },
 
@@ -2097,6 +2167,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Stripe Checkout or Payment Links for quick setup',
       owner: 'Development',
+      assigned_to: null,
       isNext: false
     },
 
@@ -2120,6 +2191,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: 'Integrate with Sales Genie outreach agent',
       owner: 'Development',
+      assigned_to: null,
       isNext: false
     }
   ];

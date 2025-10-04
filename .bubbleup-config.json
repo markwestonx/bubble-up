@@ -58,6 +58,10 @@
     {
       "name": "AI Governor",
       "epics": ["Authentication", "Governance", "Compliance", "Foundation"]
+    },
+    {
+      "name": "SOC",
+      "epics": ["Foundation", "Monitoring", "Incident Response", "Threat Detection", "Integration", "Compliance"]
     }
   ],
   "priorities": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],

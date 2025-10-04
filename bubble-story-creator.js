@@ -204,6 +204,19 @@ async function createStory() {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
+    // Get the next sequential ID
+    const { data: allItems } = await supabaseAdmin
+      .from('backlog_items')
+      .select('id');
+
+    const numericIds = allItems
+      .map(item => parseInt(item.id))
+      .filter(id => !isNaN(id))
+      .sort((a, b) => b - a);
+
+    const highestId = numericIds.length > 0 ? numericIds[0] : 0;
+    const storyId = (highestId + 1).toString();
+
     // Get max display_order
     const { data: maxOrderData } = await supabaseAdmin
       .from('backlog_items')
@@ -214,9 +227,6 @@ async function createStory() {
       .single();
 
     const displayOrder = maxOrderData ? maxOrderData.display_order + 1 : 0;
-
-    // Generate story ID
-    const storyId = Math.floor(Date.now() / 1000).toString();
 
     const newStory = {
       id: storyId,

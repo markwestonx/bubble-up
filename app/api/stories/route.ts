@@ -98,6 +98,19 @@ export async function POST(request: NextRequest) {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
+    // Get the next sequential ID
+    const { data: allItems } = await supabaseAdmin
+      .from('backlog_items')
+      .select('id');
+
+    const numericIds = allItems
+      ?.map(item => parseInt(item.id))
+      .filter(id => !isNaN(id))
+      .sort((a, b) => b - a) || [];
+
+    const highestId = numericIds.length > 0 ? numericIds[0] : 0;
+    const nextId = (highestId + 1).toString();
+
     // Get the highest display_order for this project
     const { data: maxOrderData } = await supabaseAdmin
       .from('backlog_items')
@@ -111,6 +124,7 @@ export async function POST(request: NextRequest) {
 
     // Create the story
     const newStory = {
+      id: nextId,
       project: context.project,
       epic: body.epic,
       priority: body.priority,

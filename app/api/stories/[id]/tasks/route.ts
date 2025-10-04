@@ -33,7 +33,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authenticate and check permissions
@@ -44,7 +44,7 @@ export async function POST(
     }
 
     const { context } = authResult;
-    const storyId = params.id;
+    const { id: storyId } = await params;
 
     if (!storyId) {
       return NextResponse.json({ error: 'Story ID is required' }, { status: 400 });
@@ -149,7 +149,7 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authenticate (read access - all roles allowed)
@@ -160,7 +160,7 @@ export async function GET(
     }
 
     const { context } = authResult;
-    const storyId = params.id;
+    const { id: storyId } = await params;
 
     if (!storyId) {
       return NextResponse.json({ error: 'Story ID is required' }, { status: 400 });

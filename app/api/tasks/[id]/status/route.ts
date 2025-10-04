@@ -31,7 +31,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authenticate and check permissions (Contributor can update status)
@@ -42,7 +42,7 @@ export async function PATCH(
     }
 
     const { context } = authResult;
-    const taskId = params.id;
+    const { id: taskId } = await params;
 
     if (!taskId) {
       return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });

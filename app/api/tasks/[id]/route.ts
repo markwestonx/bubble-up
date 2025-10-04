@@ -31,7 +31,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authenticate and check permissions (Contributor can update)
@@ -42,7 +42,7 @@ export async function PUT(
     }
 
     const { context } = authResult;
-    const taskId = params.id;
+    const { id: taskId } = await params;
 
     if (!taskId) {
       return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
@@ -132,7 +132,7 @@ export async function PUT(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authenticate (read access - all roles allowed)
@@ -143,7 +143,7 @@ export async function GET(
     }
 
     const { context } = authResult;
-    const taskId = params.id;
+    const { id: taskId } = await params;
 
     if (!taskId) {
       return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });

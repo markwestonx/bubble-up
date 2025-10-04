@@ -1,0 +1,66 @@
+{
+  "currentUser": {
+    "name": "Mark Weston",
+    "email": "mark.weston@regulativ.ai",
+    "uuid": "88c48796-c1a2-471d-808d-8f72f38d8359",
+    "role": "Admin"
+  },
+  "users": [
+    {
+      "name": "Mark Weston",
+      "firstName": "Mark",
+      "lastName": "Weston",
+      "email": "mark.weston@regulativ.ai",
+      "alternateEmails": ["mark.x.weston@gmail.com"],
+      "uuid": "88c48796-c1a2-471d-808d-8f72f38d8359",
+      "aliases": ["Mark", "mark", "MW", "me"]
+    },
+    {
+      "name": "Jinal Shah",
+      "firstName": "Jinal",
+      "lastName": "Shah",
+      "email": "jinal.shah@regulativ.ai",
+      "alternateEmails": [],
+      "uuid": "9e09e6b9-fa9d-4cb9-8583-22cbb50e55b5",
+      "aliases": ["Jinal", "jinal", "JS"]
+    },
+    {
+      "name": "Mark Weston (Personal)",
+      "firstName": "Mark",
+      "lastName": "Weston",
+      "email": "mark.x.weston@gmail.com",
+      "alternateEmails": ["mark.weston@regulativ.ai"],
+      "uuid": "d6026bb3-dbc9-4d05-be66-5a631f7e0377",
+      "aliases": ["Mark Personal"]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Sales Genie",
+      "epics": ["Lead Discovery", "Outreach", "Messaging", "Analytics", "Foundation"]
+    },
+    {
+      "name": "BubbleUp",
+      "epics": ["Foundation", "API", "Authentication", "Authorization", "UI/UX"]
+    },
+    {
+      "name": "GTM Spike",
+      "epics": ["Foundation", "Research", "Strategy"]
+    },
+    {
+      "name": "ISO27001",
+      "epics": ["Security Controls", "Compliance", "Documentation", "Audit", "Foundation"]
+    },
+    {
+      "name": "Horizon Xceed",
+      "epics": ["Deployment", "Infrastructure", "Foundation"]
+    },
+    {
+      "name": "AI Governor",
+      "epics": ["Authentication", "Governance", "Compliance", "Foundation"]
+    }
+  ],
+  "priorities": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+  "statuses": ["NOT_STARTED", "IN_PROGRESS", "TESTING", "BLOCKED", "COMPLETE"],
+  "effortPoints": [1, 2, 3, 5, 8, 13]
+}

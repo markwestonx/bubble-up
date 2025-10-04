@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   DndContext,
   closestCenter,
@@ -64,8 +65,10 @@ interface BacklogItem {
   businessValue: number; // 1-10 scale
   dependencies: string[];
   technicalNotes: string;
-  owner: string;
+  assigned_to: string | null; // Who is assigned to work on this (UUID or null)
   isNext: boolean; // Star flag for "next up" prioritization
+  created_by?: string; // User ID of who created the item
+  creator_email?: string; // Email of creator (loaded from auth.users)
 }
 
 interface SortableRowProps {
@@ -79,6 +82,11 @@ interface SortableRowProps {
   onUpdate: (id: string, updates: Partial<BacklogItem>) => void;
   availableEpics: Epic[];
   allItems: BacklogItem[];
+  canEdit: boolean;
+  canDelete: boolean;
+  currentUserId: string | undefined;
+  userRole: string | null;
+  allUsers: Array<{ id: string; email: string }>;
 }
 
 function SortableRow({
@@ -91,7 +99,12 @@ function SortableRow({
   getEpicLabel,
   onUpdate,
   availableEpics,
-  allItems
+  allItems,
+  canEdit,
+  canDelete,
+  currentUserId,
+  userRole,
+  allUsers
 }: SortableRowProps) {
   const {
     attributes,
@@ -101,6 +114,16 @@ function SortableRow({
     transition,
     isDragging,
   } = useSortable({ id: item.id });
+
+  // Determine if user can edit this specific item
+  // read_write role can only edit items they created
+  // editor and admin can edit all items
+  const canEditThisItem = canEdit && (
+    userRole === 'admin' ||
+    userRole === 'editor' ||
+    (userRole === 'read_write' && item.created_by === currentUserId) ||
+    !item.created_by // Legacy items without created_by can be edited by anyone with canEdit
+  );
 
   const [isEditingStory, setIsEditingStory] = useState(false);
   const [editedStory, setEditedStory] = useState(item.userStory);
@@ -122,7 +145,9 @@ function SortableRow({
 
   const handleStoryClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditingStory(true);
+    if (canEditThisItem) {
+      setIsEditingStory(true);
+    }
   };
 
   const handleStoryBlur = () => {
@@ -226,8 +251,9 @@ function SortableRow({
             </div>
           ) : (
             <span
-              onClick={() => setEditingEpic(true)}
-              className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200"
+              onClick={() => canEditThisItem && setEditingEpic(true)}
+              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 ${canEditThisItem ? 'cursor-pointer hover:bg-blue-200' : 'cursor-not-allowed opacity-75'}`}
+              title={!canEditThisItem ? 'Read-only access - not your item' : 'Click to edit epic'}
             >
               {getEpicLabel(item.epic)}
             </span>
@@ -252,8 +278,9 @@ function SortableRow({
             </select>
           ) : (
             <span
-              onClick={() => setEditingPriority(true)}
-              className={`inline-flex items-center px-2 py-1 rounded border text-xs font-medium cursor-pointer hover:opacity-75 ${getPriorityColor(item.priority)}`}
+              onClick={() => canEditThisItem && setEditingPriority(true)}
+              className={`inline-flex items-center px-2 py-1 rounded border text-xs font-medium ${canEditThisItem ? 'cursor-pointer hover:opacity-75' : 'cursor-not-allowed opacity-75'} ${getPriorityColor(item.priority)}`}
+              title={!canEditThisItem ? 'Read-only access - not your item' : 'Click to edit priority'}
             >
               {item.priority}
             </span>
@@ -280,8 +307,9 @@ function SortableRow({
             </select>
           ) : (
             <span
-              onClick={() => setEditingStatus(true)}
-              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium cursor-pointer hover:opacity-75 ${getStatusColor(item.status)}`}
+              onClick={() => canEditThisItem && setEditingStatus(true)}
+              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${canEditThisItem ? 'cursor-pointer hover:opacity-75' : 'cursor-not-allowed opacity-75'} ${getStatusColor(item.status)}`}
+              title={!canEditThisItem ? 'Read-only access - not your item' : 'Click to edit status'}
             >
               {getStatusIcon(item.status)}
               <span className="ml-1">{item.status.replace('_', ' ')}</span>
@@ -302,7 +330,8 @@ function SortableRow({
           ) : (
             <div
               onClick={handleStoryClick}
-              className="cursor-text hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded"
+              className={`px-2 py-1 rounded ${canEditThisItem ? 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700' : 'cursor-not-allowed opacity-75'}`}
+              title={!canEditThisItem ? 'Read-only access - not your item' : 'Click to edit'}
             >
               {item.userStory}
             </div>
@@ -460,31 +489,46 @@ function SortableRow({
                   )}
                 </div>
 
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Owner</h4>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
-                    {editingOwner ? (
-                      <input
-                        type="text"
-                        value={item.owner}
-                        onChange={(e) => onUpdate(item.id, { owner: e.target.value })}
-                        onBlur={() => setEditingOwner(false)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') setEditingOwner(false);
-                          if (e.key === 'Escape') setEditingOwner(false);
-                        }}
-                        autoFocus
-                        className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    ) : (
-                      <div
-                        onClick={() => setEditingOwner(true)}
-                        className="flex-1 cursor-text hover:bg-gray-100 px-2 py-1 text-sm rounded"
-                      >
-                        {item.owner}
-                      </div>
-                    )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">Created By</h4>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Users className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+                      <span>{item.creator_email || 'Unknown'}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">Assigned To</h4>
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+                      {editingOwner ? (
+                        <select
+                          value={item.assigned_to || ''}
+                          onChange={(e) => {
+                            onUpdate(item.id, { assigned_to: e.target.value || null });
+                            setEditingOwner(false);
+                          }}
+                          onBlur={() => setEditingOwner(false)}
+                          autoFocus
+                          className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Unassigned</option>
+                          {allUsers.map(user => (
+                            <option key={user.id} value={user.id}>{user.email}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div
+                          onClick={() => setEditingOwner(true)}
+                          className="flex-1 cursor-pointer hover:bg-gray-100 px-2 py-1 text-sm rounded"
+                        >
+                          {item.assigned_to
+                            ? allUsers.find(u => u.id === item.assigned_to)?.email || 'Unknown user'
+                            : 'Unassigned - click to assign'}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2144,6 +2188,11 @@ function BacklogPage() {
         }
 
         if (data && data.length > 0) {
+          // Fetch all users via API to get emails
+          const usersResponse = await fetch('/api/users');
+          const { users } = await usersResponse.json();
+          const creatorMap = new Map(users?.map((u: any) => [u.id, u.email]) || []);
+
           const supabaseItems: BacklogItem[] = data.map((item: any) => ({
             id: item.id,
             project: item.project,
@@ -2156,8 +2205,10 @@ function BacklogPage() {
             businessValue: item.business_value,
             dependencies: item.dependencies || [],
             technicalNotes: item.technical_notes || '',
-            owner: item.owner,
-            isNext: item.is_next || false
+            assigned_to: item.assigned_to || null,
+            isNext: item.is_next || false,
+            created_by: item.created_by,
+            creator_email: creatorMap.get(item.created_by) || 'Unknown'
           }));
 
           setBacklogItems(supabaseItems);
@@ -2200,8 +2251,11 @@ function BacklogPage() {
   const [sortBy, setSortBy] = useState<'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'custom'>('priority');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [isCustomOrder, setIsCustomOrder] = useState(false);
+  const [userCustomOrder, setUserCustomOrder] = useState<Map<string, number>>(new Map());
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [projectUsers, setProjectUsers] = useState<Array<{ id: string; email: string }>>([]);
+  const [allUsers, setAllUsers] = useState<Array<{ id: string; email: string }>>([]);
 
   // Context menu filtering state
   const [contextMenu, setContextMenu] = useState<{
@@ -2225,6 +2279,9 @@ function BacklogPage() {
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [mobileSearchTerm, setMobileSearchTerm] = useState('');
+
+  // RBAC permissions for current project
+  const { permissions, role } = usePermissions(currentProject);
 
   // Settings state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -2277,6 +2334,72 @@ function BacklogPage() {
       setProjects(uniqueProjects);
     }
   }, [backlogItems]);
+
+  // Load user's custom order when project changes
+  React.useEffect(() => {
+    const loadCustomOrder = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+          .from('user_custom_order')
+          .select('item_id, display_order')
+          .eq('user_id', user.id)
+          .eq('project', currentProject);
+
+        if (error) {
+          console.error('Failed to load custom order:', error);
+          return;
+        }
+
+        if (data) {
+          const orderMap = new Map(data.map(item => [item.item_id, item.display_order]));
+          setUserCustomOrder(orderMap);
+        }
+      } catch (err) {
+        console.error('Error loading custom order:', err);
+      }
+    };
+
+    loadCustomOrder();
+  }, [currentProject]);
+
+  // Load all users (for assignment dropdown)
+  React.useEffect(() => {
+    const loadAllUsers = async () => {
+      try {
+        const response = await fetch('/api/users');
+        const { users } = await response.json();
+        // Sort users alphabetically by email
+        const sortedUsers = (users || []).sort((a: any, b: any) =>
+          (a.email || '').localeCompare(b.email || '')
+        );
+        setAllUsers(sortedUsers);
+      } catch (err) {
+        console.error('Error loading all users:', err);
+        setAllUsers([]);
+      }
+    };
+
+    loadAllUsers();
+  }, []);
+
+  // Load project users when project changes
+  React.useEffect(() => {
+    const loadProjectUsers = async () => {
+      try {
+        const response = await fetch(`/api/project-users?project=${encodeURIComponent(currentProject)}`);
+        const { users } = await response.json();
+        setProjectUsers(users || []);
+      } catch (err) {
+        console.error('Error loading project users:', err);
+        setProjectUsers([]);
+      }
+    };
+
+    loadProjectUsers();
+  }, [currentProject]);
 
   // New story creation state
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -2367,9 +2490,10 @@ function BacklogPage() {
           business_value: item.businessValue,
           dependencies: item.dependencies,
           technical_notes: item.technicalNotes,
-          owner: item.owner,
+          assigned_to: item.assigned_to || null,
           is_next: item.isNext,
-          display_order: index
+          display_order: index,
+          created_by: item.created_by
         }));
 
         const { error } = await supabase
@@ -2378,6 +2502,7 @@ function BacklogPage() {
 
         if (error) {
           console.error('❌ Error syncing to Supabase:', error);
+          console.error('Error details:', JSON.stringify(error, null, 2));
           setSaveStatus('error');
           setSaveError(error.message || 'Failed to save changes');
         } else {
@@ -2517,8 +2642,21 @@ function BacklogPage() {
 
   // Sort items
   const sortedItems = [...filteredItems].sort((a, b) => {
-    // Custom order mode: use original backlogItems order
+    // Custom order mode: use user-specific custom order
     if (isCustomOrder) {
+      const aOrder = userCustomOrder.get(a.id);
+      const bOrder = userCustomOrder.get(b.id);
+
+      // If both items have custom order, use it
+      if (aOrder !== undefined && bOrder !== undefined) {
+        return aOrder - bOrder;
+      }
+
+      // If only one has custom order, put it first
+      if (aOrder !== undefined) return -1;
+      if (bOrder !== undefined) return 1;
+
+      // If neither has custom order, fall back to backlogItems order
       const aIndex = backlogItems.findIndex(item => item.id === a.id);
       const bIndex = backlogItems.findIndex(item => item.id === b.id);
       return aIndex - bIndex;
@@ -2561,7 +2699,7 @@ function BacklogPage() {
     return sortDirection === 'asc' ? comparison : -comparison;
   });
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
@@ -2570,6 +2708,34 @@ function BacklogPage() {
 
       const newItems = arrayMove(backlogItems, oldIndex, newIndex);
       setBacklogItems(newItems);
+
+      // Save user-specific custom order to database
+      if (isCustomOrder) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+
+          // Create order records for this project
+          const orderRecords = newItems
+            .filter(item => item.project === currentProject)
+            .map((item, index) => ({
+              user_id: user.id,
+              project: currentProject,
+              item_id: item.id,
+              display_order: index,
+            }));
+
+          const { error } = await supabase
+            .from('user_custom_order')
+            .upsert(orderRecords, { onConflict: 'user_id,project,item_id' });
+
+          if (error) {
+            console.error('Failed to save custom order:', error);
+          }
+        } catch (err) {
+          console.error('Error saving custom order:', err);
+        }
+      }
     }
   };
 
@@ -2622,7 +2788,8 @@ function BacklogPage() {
 
     const storyToAdd = {
       ...newStory,
-      acceptanceCriteria: newStory.acceptanceCriteria.filter(c => c.trim() !== '')
+      acceptanceCriteria: newStory.acceptanceCriteria.filter(c => c.trim() !== ''),
+      created_by: user?.id // Set the creator
     };
 
     setBacklogItems([storyToAdd, ...backlogItems]);
@@ -3855,6 +4022,13 @@ function BacklogPage() {
             <Settings className="h-5 w-5" />
           </button>
           <button
+            onClick={() => router.push('/admin/users')}
+            className="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            title="User Management"
+          >
+            <Users className="h-5 w-5" />
+          </button>
+          <button
             onClick={handleLogout}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             title="Logout"
@@ -4141,8 +4315,14 @@ function BacklogPage() {
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <button
-                      onClick={handleAddNewStory}
-                      className="inline-flex items-center px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onClick={permissions.canCreate ? handleAddNewStory : undefined}
+                      disabled={!permissions.canCreate}
+                      className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        permissions.canCreate
+                          ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+                          : 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-50'
+                      }`}
+                      title={!permissions.canCreate ? 'Read-only access - cannot create stories' : 'Add new story'}
                     >
                       <Plus className="h-3 w-3 mr-1" />
                       Add Story
@@ -4279,6 +4459,11 @@ function BacklogPage() {
                       onUpdate={updateItem}
                       availableEpics={availableEpics}
                       allItems={backlogItems}
+                      canEdit={permissions.canEdit}
+                      canDelete={permissions.canDelete}
+                      currentUserId={user?.id}
+                      userRole={role}
+                      allUsers={allUsers}
                     />
                   ))}
                 </SortableContext>

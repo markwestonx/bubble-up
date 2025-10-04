@@ -1,0 +1,10 @@
+{
+  "commands": [
+    {
+      "name": "bubble",
+      "description": "Create a new user story in BubbleUp with structured prompts",
+      "script": ".claude/commands/bubble.sh",
+      "icon": "🎯"
+    }
+  ]
+}

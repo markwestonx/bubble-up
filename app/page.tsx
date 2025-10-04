@@ -69,6 +69,7 @@ interface BacklogItem {
   isNext: boolean; // Star flag for "next up" prioritization
   created_by?: string; // User ID of who created the item
   creator_email?: string; // Email of creator (loaded from auth.users)
+  owner?: string; // Team or department owner (e.g., 'Development', 'DevOps', 'Architecture')
 }
 
 interface SortableRowProps {

@@ -2357,9 +2357,9 @@ function BacklogPage() {
   const [epicFilterMode, setEpicFilterMode] = useState<'single' | 'multiple'>('single');
   const [selectedEpics, setSelectedEpics] = useState<Set<Epic>>(new Set());
 
-  const [sortBy, setSortBy] = useState<'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'custom'>('priority');
+  const [sortBy, setSortBy] = useState<'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'custom'>('custom');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [isCustomOrder, setIsCustomOrder] = useState(false);
+  const [isCustomOrder, setIsCustomOrder] = useState(true);
   const [userCustomOrder, setUserCustomOrder] = useState<Map<string, number>>(new Map());
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editingItem, setEditingItem] = useState<string | null>(null);
@@ -2380,7 +2380,12 @@ function BacklogPage() {
     value: string;
     values: string[];
     isMultiple: boolean;
-  }>>([]);
+  }>>([{
+    column: 'next',
+    value: '',
+    values: ['Next'],
+    isMultiple: false
+  }]);
 
   // Project management state
   const [projects, setProjects] = useState<string[]>(['Sales Genie', 'GTM Spike']);

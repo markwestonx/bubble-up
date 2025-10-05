@@ -2649,8 +2649,8 @@ function BacklogPage() {
 
   // Filter items
   const filteredItems = backlogItems.filter(item => {
-    // Filter by current project
-    if (item.project !== currentProject) return false;
+    // Filter by current project (unless "All Projects" is selected)
+    if (currentProject !== 'All Projects' && item.project !== currentProject) return false;
 
     // Handle epic filtering based on mode
     if (epicFilterMode === 'single') {

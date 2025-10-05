@@ -6,6 +6,96 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 /**
+ * GET /api/stories
+ * List and search user stories
+ *
+ * Required headers:
+ * - Authorization: Bearer <token>
+ *
+ * Query params:
+ * - project: Project name (required)
+ * - status: Filter by status (optional)
+ * - priority: Filter by priority (optional)
+ * - epic: Filter by epic (optional)
+ * - assignedTo: Filter by assigned user UUID (optional)
+ * - isNext: Filter by "next up" flag (optional, true/false)
+ * - search: Search in user story text (optional)
+ * - limit: Number of results (optional, default: all)
+ *
+ * Response:
+ * {
+ *   "stories": [...],
+ *   "count": 42
+ * }
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Authenticate (read access - all roles allowed)
+    const authResult = await authenticateRequest(request, [], true);
+
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    }
+
+    const { context } = authResult;
+    const { searchParams } = new URL(request.url);
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    });
+
+    // Build query
+    let query = supabaseAdmin
+      .from('backlog_items')
+      .select('*')
+      .eq('project', context.project);
+
+    // Apply filters
+    const status = searchParams.get('status');
+    if (status) query = query.eq('status', status);
+
+    const priority = searchParams.get('priority');
+    if (priority) query = query.eq('priority', priority);
+
+    const epic = searchParams.get('epic');
+    if (epic) query = query.eq('epic', epic);
+
+    const assignedTo = searchParams.get('assignedTo');
+    if (assignedTo) query = query.eq('assigned_to', assignedTo);
+
+    const isNext = searchParams.get('isNext');
+    if (isNext === 'true') query = query.eq('is_next', true);
+    if (isNext === 'false') query = query.eq('is_next', false);
+
+    const search = searchParams.get('search');
+    if (search) query = query.ilike('user_story', `%${search}%`);
+
+    // Order by display_order
+    query = query.order('display_order', { ascending: true });
+
+    // Apply limit if provided
+    const limit = searchParams.get('limit');
+    if (limit) query = query.limit(parseInt(limit));
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching stories:', error);
+      return NextResponse.json({ error: 'Failed to fetch stories' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      stories: data || [],
+      count: data?.length || 0
+    });
+
+  } catch (err) {
+    console.error('Error in GET /api/stories:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+/**
  * POST /api/stories
  * Create a new user story
  *

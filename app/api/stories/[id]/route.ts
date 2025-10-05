@@ -216,3 +216,79 @@ export async function GET(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+/**
+ * DELETE /api/stories/:id
+ * Delete a story by ID
+ *
+ * Required headers:
+ * - Authorization: Bearer <token>
+ *
+ * Query params:
+ * - project: Project name
+ *
+ * Response:
+ * {
+ *   "message": "Story deleted successfully",
+ *   "deletedStory": { ... }
+ * }
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Authenticate and check permissions (Admin or Editor only)
+    const authResult = await authenticateRequest(request, ['Admin', 'Editor'], true);
+
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    }
+
+    const { context } = authResult;
+    const { id: storyId } = await params;
+
+    if (!storyId) {
+      return NextResponse.json({ error: 'Story ID is required' }, { status: 400 });
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    });
+
+    // Check if story exists and belongs to the project
+    const { data: existingStory, error: fetchError } = await supabaseAdmin
+      .from('backlog_items')
+      .select('*')
+      .eq('id', storyId)
+      .eq('project', context.project)
+      .single();
+
+    if (fetchError || !existingStory) {
+      return NextResponse.json(
+        { error: 'Story not found in this project' },
+        { status: 404 }
+      );
+    }
+
+    // Delete the story
+    const { error: deleteError } = await supabaseAdmin
+      .from('backlog_items')
+      .delete()
+      .eq('id', storyId);
+
+    if (deleteError) {
+      console.error('Error deleting story:', deleteError);
+      return NextResponse.json({ error: 'Failed to delete story' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      message: 'Story deleted successfully',
+      deletedStory: existingStory
+    });
+
+  } catch (err) {
+    console.error('Error in DELETE /api/stories/:id:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

@@ -140,6 +140,25 @@ Authorization: Bearer <token>
 
 ---
 
+#### Delete a Story
+
+```http
+DELETE /api/stories/{storyId}?project={projectName}
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Story deleted successfully",
+  "deletedStory": { /* deleted story object */ }
+}
+```
+
+**Permissions Required:** Admin or Editor
+
+---
+
 ### Tasks
 
 #### Create a Task for a Story
@@ -383,6 +402,15 @@ curl -X PUT "http://localhost:3000/api/stories/$STORY_ID?project=Sales%20Genie" 
   -d '{
     "status": "TESTING"
   }'
+```
+
+### Example 5: Claude Deleting a Story
+
+```bash
+STORY_ID="abc123..."
+
+curl -X DELETE "http://localhost:3000/api/stories/$STORY_ID?project=Sales%20Genie" \
+  -H 'Authorization: Bearer eyJhbGc...'
 ```
 
 ---

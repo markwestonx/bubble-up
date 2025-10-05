@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "bubble": "node bubble-story-creator.js"
+    "bubble": "node bubble-story-creator.js",
+    "setup": "node setup-bubble-user.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

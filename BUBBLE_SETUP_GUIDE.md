@@ -103,7 +103,20 @@ SUPABASE_SERVICE_ROLE_KEY=<your-service-key>
 
 **Security Note:** This contains admin credentials. Do not commit to git.
 
-#### 4. Install Dependencies (if needed)
+#### 4. Set Up Slash Command (Optional)
+To enable the `/bubble` slash command in Claude Code, copy the command file to your global commands directory:
+
+```bash
+# Create directory if it doesn't exist
+mkdir -p ~/.claude/commands
+
+# Copy the bubble command
+cp C:\Users\m\OneDrive\Desktop\bubbleup\.claude\commands\bubble.md ~/.claude/commands/bubble.md
+```
+
+Or manually create `C:\Users\<you>\.claude\commands\bubble.md` with the content from the project.
+
+#### 5. Install Dependencies (if needed)
 ```bash
 cd C:\Users\<you>\OneDrive\Desktop\bubbleup
 npm install
@@ -124,7 +137,7 @@ npm run bubble
 node bubble-story-creator.js
 ```
 
-**Note:** The `/bubble` slash command is configured in `.claude/commands/bubble.md` and should be automatically available in Claude Code when working in this project directory.
+**Note:** The `/bubble` slash command is configured globally in `~/.claude/commands/bubble.md` (C:\Users\<you>\.claude\commands\bubble.md) and is available in Claude Code from any directory.
 
 ## Features
 

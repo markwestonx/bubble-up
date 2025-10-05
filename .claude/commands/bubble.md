@@ -1,23 +1,16 @@
 ---
 description: Create a new user story in BubbleUp with interactive prompts
-allowed-tools: Bash(node bubble-story-creator.js)
+allowed-tools: Bash(node:*), Bash(cd:*)
 ---
 
-Run the interactive BubbleUp story creator to create a new user story with structured prompts.
+Run the interactive BubbleUp story creator: cd C:\Users\m\OneDrive\Desktop\bubbleup && node bubble-story-creator.js
 
-Execute: `node bubble-story-creator.js`
-
-This will guide you through:
-- Selecting a project
-- Assigning the story to a team member
-- Choosing an epic
-- Writing the user story
-- Adding acceptance criteria
-- Setting priority, effort, and business value
-- Adding technical notes and dependencies
-- Marking as "Next up" if needed
-
-The story will be created with:
-- Sequential ID (automatically calculated)
-- Your user details as creator (from .bubbleup-config.json)
-- Proper display order within the project
+This will guide you through creating a user story with:
+- Project selection
+- User assignment
+- Epic selection
+- User story text
+- Acceptance criteria
+- Priority, effort, business value
+- Technical notes and dependencies
+- Sequential ID generation

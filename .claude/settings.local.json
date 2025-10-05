@@ -25,7 +25,8 @@
       "Bash(chmod:*)",
       "Bash(npm run:*)",
       "Bash(del create-cyber-essentials-story.js)",
-      "Bash(echo $HOME)"
+      "Bash(echo $HOME)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

@@ -38,6 +38,7 @@ import {
   Plus,
   Save,
   X,
+  XCircle,
   Archive,
   Star,
   Settings,

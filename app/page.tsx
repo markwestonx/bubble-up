@@ -376,8 +376,20 @@ function SortableRow({
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">Acceptance Criteria</h4>
                 <ul className="space-y-2">
                   {item.acceptanceCriteria.map((criteria, idx) => (
-                    <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
+                    <li key={idx} className="text-sm text-gray-700 flex items-start gap-2 group">
+                      <div className="relative flex items-center">
+                        <CheckCircle className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
+                        <button
+                          onClick={() => {
+                            const newCriteria = item.acceptanceCriteria.filter((_, i) => i !== idx);
+                            onUpdate(item.id, { acceptanceCriteria: newCriteria });
+                          }}
+                          className="absolute left-6 top-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700"
+                          title="Delete criteria"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </button>
+                      </div>
                       {editingCriteria === idx ? (
                         <input
                           type="text"
@@ -403,16 +415,6 @@ function SortableRow({
                           {criteria}
                         </div>
                       )}
-                      <button
-                        onClick={() => {
-                          const newCriteria = item.acceptanceCriteria.filter((_, i) => i !== idx);
-                          onUpdate(item.id, { acceptanceCriteria: newCriteria });
-                        }}
-                        className="text-red-500 hover:text-red-700 mt-0.5"
-                        title="Delete criteria"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
                     </li>
                   ))}
                   <li>

@@ -12,7 +12,7 @@
 
 2. Run this command:
 ```powershell
-irm https://bubbleup.vercel.app/cli/install.ps1 | iex
+irm https://bubble-up.vercel.app/cli/install.ps1 | iex
 ```
 
 3. When prompted, enter your **Supabase service role key** (ask Mark if you don't have it)
@@ -41,7 +41,7 @@ node setup.js
 
 2. Run this command:
 ```bash
-curl -fsSL https://bubbleup.vercel.app/cli/install.sh | bash
+curl -fsSL https://bubble-up.vercel.app/cli/install.sh | bash
 ```
 
 3. When prompted, enter your **Supabase service role key** (ask Mark if you don't have it)
@@ -123,7 +123,7 @@ Follow the prompts
 
 **Solution:**
 1. Check your internet connection
-2. Confirm the URL is correct: https://bubbleup.vercel.app
+2. Confirm the URL is correct: https://bubble-up.vercel.app
 3. Contact Mark if the problem persists
 
 ### "Config not found" when running /bubble
@@ -173,16 +173,16 @@ To get the latest version:
 ### Windows
 ```powershell
 cd Desktop\bubbleup-cli
-curl.exe -O https://bubbleup.vercel.app/cli/bubble.js
-curl.exe -O https://bubbleup.vercel.app/cli/setup.js
+curl.exe -O https://bubble-up.vercel.app/cli/bubble.js
+curl.exe -O https://bubble-up.vercel.app/cli/setup.js
 npm install
 ```
 
 ### macOS/Linux
 ```bash
 cd ~/Desktop/bubbleup-cli
-curl -O https://bubbleup.vercel.app/cli/bubble.js
-curl -O https://bubbleup.vercel.app/cli/setup.js
+curl -O https://bubble-up.vercel.app/cli/bubble.js
+curl -O https://bubble-up.vercel.app/cli/setup.js
 npm install
 ```
 

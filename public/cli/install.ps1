@@ -9,7 +9,7 @@ Write-Host "╚═════════════════════�
 Write-Host ""
 
 # Get the base URL from the script source
-$baseUrl = "https://bubbleup.vercel.app/cli"
+$baseUrl = "https://bubble-up.vercel.app/cli"
 
 # Determine install location
 $desktopPath = [Environment]::GetFolderPath("Desktop")

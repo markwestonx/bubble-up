@@ -10,7 +10,7 @@ echo "╚═══════════════════════�
 echo ""
 
 # Base URL for downloads
-BASE_URL="https://bubbleup.vercel.app/cli"
+BASE_URL="https://bubble-up.vercel.app/cli"
 
 # Determine install location
 if [ -d "$HOME/Desktop" ]; then

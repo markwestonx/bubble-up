@@ -6,12 +6,12 @@ This directory contains the standalone BubbleUp CLI files hosted on Vercel.
 
 ### Windows (PowerShell)
 ```powershell
-irm https://bubbleup.vercel.app/cli/install.ps1 | iex
+irm https://bubble-up.vercel.app/cli/install.ps1 | iex
 ```
 
 ### macOS/Linux (Bash)
 ```bash
-curl -fsSL https://bubbleup.vercel.app/cli/install.sh | bash
+curl -fsSL https://bubble-up.vercel.app/cli/install.sh | bash
 ```
 
 ## What Gets Installed
@@ -29,10 +29,10 @@ Total installation size: ~5MB
 If you prefer to download files manually:
 
 1. Download the files:
-   - https://bubbleup.vercel.app/cli/package.json
-   - https://bubbleup.vercel.app/cli/bubble.js
-   - https://bubbleup.vercel.app/cli/setup.js
-   - https://bubbleup.vercel.app/cli/.env.template
+   - https://bubble-up.vercel.app/cli/package.json
+   - https://bubble-up.vercel.app/cli/bubble.js
+   - https://bubble-up.vercel.app/cli/setup.js
+   - https://bubble-up.vercel.app/cli/.env.template
 
 2. Install dependencies:
    ```bash

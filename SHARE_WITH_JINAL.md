@@ -17,7 +17,7 @@ Right-click the Start button → Select "Windows PowerShell"
 Copy and paste this command:
 
 ```powershell
-irm https://bubbleup.vercel.app/cli/install.ps1 | iex
+irm https://bubble-up.vercel.app/cli/install.ps1 | iex
 ```
 
 Press Enter and wait for it to download (~5MB).

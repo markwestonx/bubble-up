@@ -2384,7 +2384,7 @@ function BacklogPage() {
 
   // Project management state
   const [projects, setProjects] = useState<string[]>(['Sales Genie', 'GTM Spike']);
-  const [currentProject, setCurrentProject] = useState<string>('Sales Genie');
+  const [currentProject, setCurrentProject] = useState<string>('All Projects');
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [mobileSearchTerm, setMobileSearchTerm] = useState('');

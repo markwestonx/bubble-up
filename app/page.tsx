@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 import { usePermissions } from '../hooks/usePermissions';
+import { useAuthorizedProjects } from '../hooks/useAuthorizedProjects';
 import {
   DndContext,
   closestCenter,
@@ -2389,6 +2390,9 @@ function BacklogPage() {
   // RBAC permissions for current project
   const { permissions, role } = usePermissions(currentProject);
 
+  // Get list of projects user is authorized to access
+  const { authorizedProjects } = useAuthorizedProjects();
+
   // Settings state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedStoriesToCombine, setSelectedStoriesToCombine] = useState<Set<string>>(new Set());
@@ -2651,6 +2655,15 @@ function BacklogPage() {
   const filteredItems = backlogItems.filter(item => {
     // Filter by current project (unless "All Projects" is selected)
     if (currentProject !== 'All Projects' && item.project !== currentProject) return false;
+
+    // When "All Projects" is selected, only show projects user has access to
+    if (currentProject === 'All Projects') {
+      // If user has 'ALL' access, show everything
+      if (!authorizedProjects.includes('ALL')) {
+        // Otherwise, only show projects user is authorized for
+        if (!authorizedProjects.includes(item.project)) return false;
+      }
+    }
 
     // Handle epic filtering based on mode
     if (epicFilterMode === 'single') {

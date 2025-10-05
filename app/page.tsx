@@ -44,8 +44,8 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-// Epic/Phase type
-type Epic = 'foundation' | 'agents' | 'fanatical' | 'integration' | 'infrastructure' | 'production' | 'content' | 'social' | 'crm' | 'analytics' | 'architecture' | 'product' | 'deployment' | 'marketing' | 'purchase' | 'leadgen' | 'tracking' | 'cdp' | 'personalization' | 'orchestration' | 'compliance';
+// Epic/Phase type (now dynamic - loaded from database)
+type Epic = string;
 
 // Priority levels
 type Priority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
@@ -3238,12 +3238,12 @@ function BacklogPage() {
     completedEffort: projectItems.filter(i => i.status === 'DONE').reduce((sum, i) => sum + i.effort, 0)
   };
 
-  // Get available epics for current project (auto-generated from existing items)
+  // Get available epics across ALL projects (auto-generated from all items)
   const availableEpics = React.useMemo(() => {
-    const uniqueEpics = new Set<Epic>();
-    projectItems.forEach(item => uniqueEpics.add(item.epic));
+    const uniqueEpics = new Set<string>();
+    backlogItems.forEach(item => uniqueEpics.add(item.epic));
     return Array.from(uniqueEpics).sort((a, b) => getEpicLabel(a).localeCompare(getEpicLabel(b)));
-  }, [projectItems]);
+  }, [backlogItems]);
 
   // Combine stories function with smart deduplication
   const combineStories = (): BacklogItem | null => {
@@ -4135,7 +4135,7 @@ function BacklogPage() {
           </select>
           <button
             onClick={() => setIsCreatingProject(true)}
-            className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+            className="hidden sm:inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
           >
             <Plus className="h-4 w-4 mr-1" />
             Create New Project
@@ -4598,7 +4598,7 @@ function BacklogPage() {
                       currentUserId={user?.id}
                       userRole={role}
                       allUsers={allUsers}
-                      allProjects={projects}
+                      allProjects={projects.filter(p => p !== 'All Projects')}
                     />
                   ))}
                 </SortableContext>

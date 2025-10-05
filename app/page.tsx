@@ -2489,6 +2489,7 @@ function BacklogPage() {
     dependencies: [],
     technicalNotes: '',
     owner: '',
+    assigned_to: '',
     isNext: false
   });
 
@@ -2521,6 +2522,7 @@ function BacklogPage() {
             dependencies: item.dependencies || [],
             technicalNotes: item.technical_notes || '',
             owner: item.owner || '',
+            assigned_to: item.assigned_to || '',
             isNext: item.is_next || false
           }));
 
@@ -2800,7 +2802,7 @@ function BacklogPage() {
 
           const { error } = await supabase
             .from('user_custom_order')
-            .upsert(orderRecords, { onConflict: 'user_id,project,item_id' });
+            .upsert(orderRecords as any, { onConflict: 'user_id,project,item_id' });
 
           if (error) {
             console.error('Failed to save custom order:', error);
@@ -2849,6 +2851,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: '',
       owner: '',
+      assigned_to: '',
       isNext: false
     });
   };
@@ -2880,6 +2883,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: '',
       owner: '',
+      assigned_to: '',
       isNext: false
     });
   };
@@ -2899,6 +2903,7 @@ function BacklogPage() {
       dependencies: [],
       technicalNotes: '',
       owner: '',
+      assigned_to: '',
       isNext: false
     });
   };
@@ -3242,7 +3247,7 @@ function BacklogPage() {
     const uniqueDeps = Array.from(new Set(allDeps)).filter(dep => !selectedStoriesToCombine.has(dep));
 
     // Combine owners (deduplicate)
-    const allOwners = selectedItems.map(s => s.owner).filter(o => o.trim());
+    const allOwners = selectedItems.map(s => s.owner).filter(o => o && o.trim());
     const uniqueOwners = Array.from(new Set(allOwners));
     const combinedOwner = uniqueOwners.join(', ');
 
@@ -3289,6 +3294,7 @@ function BacklogPage() {
           dependencies: item.dependencies || [],
           technicalNotes: item.technical_notes || '',
           owner: item.owner,
+          assigned_to: item.assigned_to || '',
           isNext: item.is_next || false
         }));
         setBacklogItems(supabaseItems);

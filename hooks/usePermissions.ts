@@ -51,8 +51,8 @@ export function usePermissions(project: string) {
         }
 
         // Find role for this specific project or "ALL"
-        const projectRole = roles.find((r: UserRole) => r.project === project);
-        const allProjectsRole = roles.find((r: UserRole) => r.project === 'ALL');
+        const projectRole = roles.find((r: UserRole) => r.project === project) as UserRole | undefined;
+        const allProjectsRole = roles.find((r: UserRole) => r.project === 'ALL') as UserRole | undefined;
 
         const effectiveRole = projectRole?.role || allProjectsRole?.role || null;
         setRole(effectiveRole);

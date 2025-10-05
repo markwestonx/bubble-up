@@ -1,3 +1,6 @@
 node_modules/
 .env.local
 .bubbleup-config.json
+
+# Allow .env.template (needed for installation)
+!.env.template

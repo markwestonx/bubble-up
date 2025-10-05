@@ -376,7 +376,7 @@ function SortableRow({
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">Acceptance Criteria</h4>
                 <ul className="space-y-2">
                   {item.acceptanceCriteria.map((criteria, idx) => (
-                    <li key={idx} className="text-sm text-gray-700 flex items-start">
+                    <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
                       {editingCriteria === idx ? (
                         <input
@@ -403,6 +403,16 @@ function SortableRow({
                           {criteria}
                         </div>
                       )}
+                      <button
+                        onClick={() => {
+                          const newCriteria = item.acceptanceCriteria.filter((_, i) => i !== idx);
+                          onUpdate(item.id, { acceptanceCriteria: newCriteria });
+                        }}
+                        className="text-red-500 hover:text-red-700 mt-0.5"
+                        title="Delete criteria"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     </li>
                   ))}
                   <li>

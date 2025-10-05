@@ -88,6 +88,7 @@ interface SortableRowProps {
   currentUserId: string | undefined;
   userRole: string | null;
   allUsers: Array<{ id: string; email: string }>;
+  allProjects: string[];
 }
 
 function SortableRow({
@@ -105,7 +106,8 @@ function SortableRow({
   canDelete,
   currentUserId,
   userRole,
-  allUsers
+  allUsers,
+  allProjects
 }: SortableRowProps) {
   const {
     attributes,
@@ -137,6 +139,7 @@ function SortableRow({
   const [editingStatus, setEditingStatus] = useState(false);
   const [editingEffort, setEditingEffort] = useState(false);
   const [editingBusinessValue, setEditingBusinessValue] = useState(false);
+  const [editingProject, setEditingProject] = useState(false);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -561,6 +564,36 @@ function SortableRow({
                     </div>
                   )}
                   <p className="text-xs text-gray-500 mt-1">Story points (1-13)</p>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Project</h4>
+                  {editingProject ? (
+                    <select
+                      value={item.project}
+                      onChange={(e) => {
+                        onUpdate(item.id, { project: e.target.value });
+                        setEditingProject(false);
+                      }}
+                      onBlur={() => setEditingProject(false)}
+                      autoFocus
+                      className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {allProjects.map((project) => (
+                        <option key={project} value={project}>
+                          {project}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div
+                      onClick={() => setEditingProject(true)}
+                      className="px-3 py-2 bg-gray-100 text-gray-800 text-sm rounded cursor-pointer hover:bg-gray-200"
+                    >
+                      {item.project}
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">Click to change project</p>
                 </div>
 
                 <div>
@@ -2791,8 +2824,7 @@ function BacklogPage() {
           if (!user) return;
 
           // Create order records for this project
-          const orderRecords = newItems
-            .filter(item => item.project === currentProject)
+          const orderRecords = (currentProject === 'All Projects' ? newItems : newItems.filter(item => item.project === currentProject))
             .map((item, index) => ({
               user_id: user.id,
               project: currentProject,
@@ -3173,7 +3205,9 @@ function BacklogPage() {
   };
 
   // Calculate stats (filtered by current project)
-  const projectItems = backlogItems.filter(i => i.project === currentProject);
+  const projectItems = currentProject === 'All Projects'
+    ? backlogItems
+    : backlogItems.filter(i => i.project === currentProject);
   const stats = {
     total: projectItems.length,
     complete: projectItems.filter(i => i.status === 'DONE').length,
@@ -4072,6 +4106,7 @@ function BacklogPage() {
             onChange={(e) => setCurrentProject(e.target.value)}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           >
+            <option value="All Projects">All Projects</option>
             {projects.map((project) => (
               <option key={project} value={project}>
                 {project}
@@ -4543,6 +4578,7 @@ function BacklogPage() {
                       currentUserId={user?.id}
                       userRole={role}
                       allUsers={allUsers}
+                      allProjects={projects}
                     />
                   ))}
                 </SortableContext>

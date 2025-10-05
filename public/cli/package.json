@@ -1,0 +1,14 @@
+{
+  "name": "bubbleup-cli",
+  "version": "1.0.0",
+  "description": "Standalone CLI for BubbleUp backlog management",
+  "main": "bubble.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "bubble": "node bubble.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.58.0",
+    "dotenv": "^16.0.0"
+  }
+}

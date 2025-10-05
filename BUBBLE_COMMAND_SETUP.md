@@ -4,6 +4,38 @@ Complete installation guide for setting up the `/bubble` command on your machine
 
 ---
 
+## ⚡ NEW: Standalone CLI (Recommended)
+
+**Looking for a simpler installation?** We now offer a lightweight standalone CLI that doesn't require cloning the entire Next.js application.
+
+- **5MB** instead of 400MB
+- **3 seconds** to install instead of 3 minutes
+- **2 packages** instead of 300+
+
+**See:** `bubble-cli/README.md` or `INSTALLATION_COMPARISON.md`
+
+**Quick install:**
+```powershell
+# Windows
+irm https://raw.githubusercontent.com/markwestonx/bubble-up/main/bubble-cli/install.ps1 | iex
+
+# macOS/Linux
+curl -fsSL https://raw.githubusercontent.com/markwestonx/bubble-up/main/bubble-cli/install.sh | bash
+```
+
+---
+
+## 📖 Full Application Installation (Below)
+
+**This guide is for installing the complete Next.js application.** Only follow this if you:
+- Need the web UI at localhost:3000
+- Want to develop/modify the application
+- Are contributing to the codebase
+
+**Otherwise, use the Standalone CLI above.**
+
+---
+
 ## 📋 Prerequisites
 
 Before you begin, ensure you have:

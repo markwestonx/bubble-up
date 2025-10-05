@@ -4,23 +4,54 @@
 
 ---
 
-## ⚡ Super Quick Setup
+## ⚡ One-Command Install (Recommended)
+
+### Windows (PowerShell)
+```powershell
+irm https://raw.githubusercontent.com/markwestonx/bubble-up/main/bubble-cli/install.ps1 | iex
+```
+
+### macOS/Linux (Bash)
+```bash
+curl -fsSL https://raw.githubusercontent.com/markwestonx/bubble-up/main/bubble-cli/install.sh | bash
+```
+
+**What this installs:** Just the CLI tool (~5MB) - NOT the full Next.js app
+
+**Then:**
+```bash
+# 1. Edit .env.local with Supabase credentials
+# 2. Run setup wizard
+node setup.js
+
+# 3. Restart Claude Code
+
+# 4. Test
+/bubble
+```
+
+---
+
+## 🔧 Manual Install
 
 ```bash
-# 1. Clone repo
-cd C:\Users\<YourUsername>\OneDrive\Desktop
-git clone https://github.com/markwestonx/bubble-up.git
-cd bubble-up
+# 1. Create directory
+mkdir bubbleup-cli && cd bubbleup-cli
 
-# 2. Install
+# 2. Download files
+curl -O https://raw.githubusercontent.com/markwestonx/bubble-up/main/bubble-cli/package.json
+curl -O https://raw.githubusercontent.com/markwestonx/bubble-up/main/bubble-cli/bubble.js
+curl -O https://raw.githubusercontent.com/markwestonx/bubble-up/main/bubble-cli/setup.js
+
+# 3. Install (just 2 packages)
 npm install
 
-# 3. Run setup wizard
-node setup-bubble-user.js
+# 4. Run setup wizard
+node setup.js
 
-# 4. Restart Claude Code
+# 5. Restart Claude Code
 
-# 5. Test
+# 6. Test
 /bubble
 ```
 

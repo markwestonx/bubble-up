@@ -2298,9 +2298,19 @@ function BacklogPage() {
 
         if (data && data.length > 0) {
           // Fetch all users via API to get emails
-          const usersResponse = await fetch('/api/users');
-          const { users } = await usersResponse.json();
-          const creatorMap = new Map<string, string>(users?.map((u: any) => [u.id, u.email]) || []);
+          let creatorMap = new Map<string, string>();
+          try {
+            const usersResponse = await fetch('/api/users');
+            if (usersResponse.ok) {
+              const { users } = await usersResponse.json();
+              creatorMap = new Map<string, string>(users?.map((u: any) => [u.id, u.email]) || []);
+              console.log('✅ Loaded users for creator mapping:', creatorMap.size);
+            } else {
+              console.error('❌ Failed to fetch users for creator mapping:', usersResponse.status);
+            }
+          } catch (err) {
+            console.error('❌ Error fetching users:', err);
+          }
 
           const supabaseItems: BacklogItem[] = data.map((item: any) => ({
             id: item.id,
@@ -3183,7 +3193,7 @@ function BacklogPage() {
   };
 
   const getEpicLabel = (epic: Epic) => {
-    const labels = {
+    const labels: Record<string, string> = {
       foundation: 'Foundation',
       agents: 'Agent Development',
       fanatical: 'Fanatical Prospecting',

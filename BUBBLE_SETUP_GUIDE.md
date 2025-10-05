@@ -111,20 +111,20 @@ npm install
 
 ### Usage
 
+#### From Claude Code (Recommended):
+Type `/bubble` in the Claude Code chat interface to launch the interactive story creator.
+
 #### From Project Directory:
 ```bash
 npm run bubble
-```
-
-#### From Anywhere (if using slash command):
-```bash
-/bubble
 ```
 
 #### Via Node:
 ```bash
 node bubble-story-creator.js
 ```
+
+**Note:** The `/bubble` slash command is configured in `.claude/commands/bubble.md` and should be automatically available in Claude Code when working in this project directory.
 
 ## Features
 

@@ -15,6 +15,7 @@
       "Bash(git config:*)",
       "Read(//c/Users/m/OneDrive/Desktop/sales-genie/**)",
       "SlashCommand(/sync)",
+      "SlashCommand(/bubble)",
       "Bash(dir:*)",
       "Bash(git log:*)",
       "Bash(lsof:*)",
@@ -22,7 +23,9 @@
       "WebSearch",
       "Bash(npm install:*)",
       "Bash(chmod:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(del create-cyber-essentials-story.js)",
+      "Bash(echo $HOME)"
     ],
     "deny": [],
     "ask": []

@@ -2426,8 +2426,8 @@ function BacklogPage() {
           return;
         }
 
-        if (data) {
-          const orderMap = new Map(data.map(item => [item.item_id, item.display_order]));
+        if (data && Array.isArray(data)) {
+          const orderMap = new Map(data.map((item: any) => [item.item_id, item.display_order]));
           setUserCustomOrder(orderMap);
         }
       } catch (err) {

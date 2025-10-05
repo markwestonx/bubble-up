@@ -539,62 +539,64 @@ function SortableRow({
               </div>
 
               <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Effort</h4>
-                  {editingEffort ? (
-                    <input
-                      type="number"
-                      min="1"
-                      max="13"
-                      value={item.effort}
-                      onChange={(e) => onUpdate(item.id, { effort: parseInt(e.target.value) || 1 })}
-                      onBlur={() => setEditingEffort(false)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') setEditingEffort(false);
-                        if (e.key === 'Escape') setEditingEffort(false);
-                      }}
-                      autoFocus
-                      className="w-20 px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
-                    />
-                  ) : (
-                    <div
-                      onClick={() => setEditingEffort(true)}
-                      className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-800 text-lg font-medium cursor-pointer hover:bg-purple-200"
-                    >
-                      {item.effort}
-                    </div>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">Story points (1-13)</p>
-                </div>
+                <div className="flex gap-6">
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">Effort</h4>
+                    {editingEffort ? (
+                      <input
+                        type="number"
+                        min="1"
+                        max="13"
+                        value={item.effort}
+                        onChange={(e) => onUpdate(item.id, { effort: parseInt(e.target.value) || 1 })}
+                        onBlur={() => setEditingEffort(false)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') setEditingEffort(false);
+                          if (e.key === 'Escape') setEditingEffort(false);
+                        }}
+                        autoFocus
+                        className="w-20 px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                      />
+                    ) : (
+                      <div
+                        onClick={() => setEditingEffort(true)}
+                        className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-800 text-lg font-medium cursor-pointer hover:bg-purple-200"
+                      >
+                        {item.effort}
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">Story points (1-13)</p>
+                  </div>
 
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Project</h4>
-                  {editingProject ? (
-                    <select
-                      value={item.project}
-                      onChange={(e) => {
-                        onUpdate(item.id, { project: e.target.value });
-                        setEditingProject(false);
-                      }}
-                      onBlur={() => setEditingProject(false)}
-                      autoFocus
-                      className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {allProjects.map((project) => (
-                        <option key={project} value={project}>
-                          {project}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div
-                      onClick={() => setEditingProject(true)}
-                      className="px-3 py-2 bg-gray-100 text-gray-800 text-sm rounded cursor-pointer hover:bg-gray-200"
-                    >
-                      {item.project}
-                    </div>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">Click to change project</p>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">Project</h4>
+                    {editingProject ? (
+                      <select
+                        value={item.project}
+                        onChange={(e) => {
+                          onUpdate(item.id, { project: e.target.value });
+                          setEditingProject(false);
+                        }}
+                        onBlur={() => setEditingProject(false)}
+                        autoFocus
+                        className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {allProjects.map((project) => (
+                          <option key={project} value={project}>
+                            {project}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div
+                        onClick={() => setEditingProject(true)}
+                        className="px-3 py-2 bg-gray-100 text-gray-800 text-sm rounded cursor-pointer hover:bg-gray-200"
+                      >
+                        {item.project}
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">Click to change project</p>
+                  </div>
                 </div>
 
                 <div>

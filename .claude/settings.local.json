@@ -14,7 +14,7 @@
       "Bash(npm run build:*)",
       "Bash(git config:*)",
       "Read(//c/Users/m/OneDrive/Desktop/sales-genie/**)",
-      "SlashCommand(/sync)",
+      "SlashCommand(/sync-backlog)",
       "SlashCommand(/bubble)",
       "Bash(dir:*)",
       "Bash(git log:*)",

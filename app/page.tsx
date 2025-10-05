@@ -2607,23 +2607,31 @@ function BacklogPage() {
         setSaveStatus('saving');
         setSaveError(null);
 
-        const itemsToUpsert = backlogItems.map((item, index) => ({
-          id: item.id,
-          project: item.project,
-          epic: item.epic,
-          priority: item.priority,
-          status: item.status,
-          user_story: item.userStory,
-          acceptance_criteria: item.acceptanceCriteria,
-          effort: item.effort,
-          business_value: item.businessValue,
-          dependencies: item.dependencies,
-          technical_notes: item.technicalNotes,
-          assigned_to: item.assigned_to || null,
-          is_next: item.isNext,
-          display_order: index,
-          created_by: item.created_by
-        }));
+        const itemsToUpsert = backlogItems.map((item, index) => {
+          const upsertData: any = {
+            id: item.id,
+            project: item.project,
+            epic: item.epic,
+            priority: item.priority,
+            status: item.status,
+            user_story: item.userStory,
+            acceptance_criteria: item.acceptanceCriteria,
+            effort: item.effort,
+            business_value: item.businessValue,
+            dependencies: item.dependencies,
+            technical_notes: item.technicalNotes,
+            assigned_to: item.assigned_to || null,
+            is_next: item.isNext,
+            display_order: index
+          };
+
+          // Only include created_by if it has a valid value (never overwrite with null)
+          if (item.created_by) {
+            upsertData.created_by = item.created_by;
+          }
+
+          return upsertData;
+        });
 
         const { error } = await supabase
           .from('backlog_items')

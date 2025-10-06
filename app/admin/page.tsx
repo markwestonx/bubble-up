@@ -49,16 +49,14 @@ export default function AdminPage() {
         return;
       }
 
-      // Query user role - using a more explicit approach for TypeScript
-      const roleQuery = await supabase
+      // Query user role - get all matching roles and check the first one
+      const { data: roleData } = await supabase
         .from('user_project_roles')
         .select('role')
         .eq('user_id', user.id)
-        .or(`project.eq.BubbleUp,project.eq.ALL`)
-        .limit(1)
-        .single();
+        .or(`project.eq.BubbleUp,project.eq.ALL`);
 
-      const isAdmin = (roleQuery.data?.role === 'Admin') || false;
+      const isAdmin = roleData && roleData.length > 0 && roleData[0].role === 'Admin';
       setCurrentUserIsAdmin(isAdmin);
 
       if (!isAdmin) {

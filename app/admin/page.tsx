@@ -87,13 +87,11 @@ export default function AdminPage() {
 
   const updateRole = async (roleId: string, newRole: string) => {
     const supabase = createClient();
-    // Type assertion needed for Supabase update
-    const result = await (supabase
-      .from('user_project_roles')
+    // Type assertion needed for Supabase update - cast early to bypass type inference
+    const { error } = await (supabase
+      .from('user_project_roles') as any)
       .update({ role: newRole })
-      .eq('id', roleId) as any);
-
-    const { error } = result;
+      .eq('id', roleId);
 
     if (!error) {
       setRoles(roles.map(r => r.id === roleId ? { ...r, role: newRole as any } : r));
@@ -105,8 +103,8 @@ export default function AdminPage() {
     if (!confirm('Are you sure you want to delete this role assignment?')) return;
 
     const supabase = createClient();
-    const { error } = await supabase
-      .from('user_project_roles')
+    const { error } = await (supabase
+      .from('user_project_roles') as any)
       .delete()
       .eq('id', roleId);
 

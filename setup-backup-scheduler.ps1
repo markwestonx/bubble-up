@@ -85,8 +85,8 @@ Write-Host "✅ Backup scheduler installed successfully!" -ForegroundColor Green
 Write-Host ""
 Write-Host "📋 Schedule Details:" -ForegroundColor Cyan
 Write-Host "   - Task Name: BubbleUp-Hourly-Backup" -ForegroundColor White
-Write-Host "   - Frequency: Hourly from 07:00 to 00:00 (UK time)" -ForegroundColor White
-Write-Host "   - Retention: Son (7 days), Father (28 days), Grandfather (84 days)" -ForegroundColor White
+Write-Host "   - Frequency: Hourly from 07:00 to 00:00 UK time" -ForegroundColor White
+Write-Host "   - Retention: Son 7 days, Father 28 days, Grandfather 84 days" -ForegroundColor White
 Write-Host "   - Location: $scriptPath\backups" -ForegroundColor White
 Write-Host ""
 Write-Host "🧪 Testing backup now..." -ForegroundColor Cyan
@@ -99,7 +99,7 @@ Write-Host ""
 Write-Host "📌 Next Steps:" -ForegroundColor Cyan
 Write-Host "   1. Check Task Scheduler to verify the task" -ForegroundColor White
 Write-Host "   2. Check $scriptPath\backups for backup files" -ForegroundColor White
-Write-Host "   3. Backups will run automatically every hour (07:00-00:00 UK time)" -ForegroundColor White
+Write-Host "   3. Backups will run automatically every hour 07:00-00:00 UK time" -ForegroundColor White
 Write-Host ""
 Write-Host "To manually run a backup, use: npm run backup" -ForegroundColor Yellow
 Write-Host "To view scheduled tasks: taskschd.msc" -ForegroundColor Yellow

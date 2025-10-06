@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     // Send email invite
     if (EMAIL_USER && EMAIL_PASSWORD) {
       try {
-        const transporter = nodemailer.createTransporter({
+        const transporter = nodemailer.createTransport({
           service: 'gmail',
           auth: {
             user: EMAIL_USER,

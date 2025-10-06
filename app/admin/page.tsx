@@ -54,9 +54,9 @@ export default function AdminPage() {
         .select('role')
         .eq('user_id', user.id)
         .or(`project.eq.BubbleUp,project.eq.ALL`)
-        .maybeSingle();
+        .maybeSingle() as { data: { role: string } | null, error: any };
 
-      const isAdmin = !roleError && userRole?.role === 'Admin';
+      const isAdmin = !roleError && userRole && userRole.role === 'Admin';
       setCurrentUserIsAdmin(isAdmin);
 
       if (!isAdmin) {

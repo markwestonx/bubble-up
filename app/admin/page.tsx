@@ -49,14 +49,16 @@ export default function AdminPage() {
         return;
       }
 
-      // Query user role - get all matching roles and check the first one
+      // Query user role - check if user has admin role
       const { data: roleData } = await supabase
         .from('user_project_roles')
         .select('role')
         .eq('user_id', user.id)
         .or(`project.eq.BubbleUp,project.eq.ALL`);
 
-      const isAdmin = roleData && roleData.length > 0 && roleData[0].role === 'Admin';
+      // Type assertion to work around Supabase TypeScript inference issues
+      const roles = roleData as Array<{ role: string }> | null;
+      const isAdmin = Boolean(roles && roles.length > 0 && roles[0].role === 'Admin');
       setCurrentUserIsAdmin(isAdmin);
 
       if (!isAdmin) {

@@ -49,14 +49,14 @@ export default function AdminPage() {
         return;
       }
 
-      const { data: userRole } = await supabase
+      const { data: userRole, error: roleError } = await supabase
         .from('user_project_roles')
         .select('role')
         .eq('user_id', user.id)
         .or(`project.eq.BubbleUp,project.eq.ALL`)
-        .single();
+        .maybeSingle();
 
-      const isAdmin = userRole?.role === 'Admin';
+      const isAdmin = !roleError && userRole?.role === 'Admin';
       setCurrentUserIsAdmin(isAdmin);
 
       if (!isAdmin) {

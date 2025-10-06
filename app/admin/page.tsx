@@ -87,10 +87,13 @@ export default function AdminPage() {
 
   const updateRole = async (roleId: string, newRole: string) => {
     const supabase = createClient();
-    const { error } = await supabase
+    // Type assertion needed for Supabase update
+    const result = await (supabase
       .from('user_project_roles')
-      .update({ role: newRole } as any)
-      .eq('id', roleId);
+      .update({ role: newRole })
+      .eq('id', roleId) as any);
+
+    const { error } = result;
 
     if (!error) {
       setRoles(roles.map(r => r.id === roleId ? { ...r, role: newRole as any } : r));

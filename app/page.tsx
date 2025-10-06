@@ -3468,10 +3468,23 @@ function BacklogPage() {
           <div className="flex items-center gap-4">
             {user && (
               <>
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <button
+                  onClick={() => router.push('/profile')}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  title={user.email}
+                >
                   <UserIcon className="h-4 w-4" />
-                  <span>{user.email}</span>
-                </div>
+                  <span>Profile</span>
+                </button>
+                {userRole === 'Admin' && (
+                  <button
+                    onClick={() => router.push('/admin')}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Admin</span>
+                  </button>
+                )}
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"

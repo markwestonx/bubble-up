@@ -89,7 +89,7 @@ export default function AdminPage() {
     const supabase = createClient();
     const { error } = await supabase
       .from('user_project_roles')
-      .update({ role: newRole })
+      .update({ role: newRole } as any)
       .eq('id', roleId);
 
     if (!error) {

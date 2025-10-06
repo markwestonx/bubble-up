@@ -26,7 +26,16 @@
       "Bash(npm run:*)",
       "Bash(del create-cyber-essentials-story.js)",
       "Bash(echo $HOME)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git rm:*)",
+      "Bash(cat:*)",
+      "Bash(curl http://localhost:3006/api/admin/users)",
+      "Bash(curl:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(powershell:*)",
+      "Bash(npm ls:*)"
     ],
     "deny": [],
     "ask": []

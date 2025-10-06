@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -17,13 +18,15 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const supabase = createClient();
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) {
-        setError(error.message);
+      if (signInError) {
+        // Generic error message for security
+        setError('Invalid credentials. Please try again.');
         setLoading(false);
         return;
       }
@@ -33,7 +36,7 @@ export default function LoginPage() {
         router.refresh();
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError('An error occurred. Please try again.');
       setLoading(false);
     }
   };
@@ -102,8 +105,11 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-          <p>Secure access to your backlog management system</p>
+        <div className="mt-6 text-center text-sm">
+          <span className="text-gray-600 dark:text-gray-400">Don't have an account? </span>
+          <Link href="/register" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+            Sign up
+          </Link>
         </div>
       </div>
     </div>

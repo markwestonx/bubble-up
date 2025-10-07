@@ -2625,6 +2625,7 @@ function BacklogPage() {
         setSaveStatus('saving');
         setSaveError(null);
 
+        const supabase = createClient();
         const itemsToUpsert = backlogItems.map((item, index) => {
           const upsertData: any = {
             id: item.id,
@@ -3362,6 +3363,7 @@ function BacklogPage() {
   const refreshFromSupabase = async () => {
     setIsRefreshing(true);
     try {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('backlog_items')
         .select('*')

@@ -1,0 +1,167 @@
+{
+  "enabled": true,
+  "triggers": {
+    "design": {
+      "patterns": [
+        "Design decision:",
+        "Chose .* instead of",
+        "Architecture decision:",
+        "Selected .* because",
+        "Design pattern:",
+        "Data model:",
+        "Database schema:",
+        "API design:",
+        "Decided to use"
+      ],
+      "min_confidence": 0.7
+    },
+    "plan": {
+      "patterns": [
+        "Implementation plan:",
+        "Here's how we'll implement",
+        "Step-by-step approach:",
+        "Plan for",
+        "Strategy:",
+        "Phased approach:",
+        "Breaking this down:",
+        "The plan is to"
+      ],
+      "min_confidence": 0.7
+    },
+    "progress": {
+      "patterns": [
+        "Implemented",
+        "Created",
+        "Built",
+        "Added",
+        "Updated",
+        "Fixed",
+        "Completed implementing",
+        "Successfully created",
+        "Finished building"
+      ],
+      "min_confidence": 0.6
+    },
+    "next_steps": {
+      "patterns": [
+        "Next steps:",
+        "Next, we need to",
+        "Remaining tasks:",
+        "TODO:",
+        "Still need to",
+        "Outstanding items:",
+        "What's left:",
+        "Moving forward,"
+      ],
+      "min_confidence": 0.7
+    },
+    "testing": {
+      "patterns": [
+        "Test results:",
+        "All tests pass",
+        "Testing shows",
+        "Verified that",
+        "Test coverage:",
+        "Manual testing:",
+        "Integration test"
+      ],
+      "min_confidence": 0.7
+    },
+    "success": {
+      "patterns": [
+        "✅",
+        "Successfully completed",
+        "Fully working",
+        "All done",
+        "Completed!",
+        "Working correctly",
+        "Ready to use",
+        "Deployed successfully"
+      ],
+      "min_confidence": 0.8
+    },
+    "error": {
+      "patterns": [
+        "Error:",
+        "Bug found:",
+        "Issue:",
+        "Problem:",
+        "Failed to",
+        "Not working:",
+        "Broken:",
+        "❌"
+      ],
+      "min_confidence": 0.8
+    },
+    "decision_log": {
+      "patterns": [
+        "Trade-off:",
+        "Pros and cons:",
+        "Considered .* but chose",
+        "Alternative approach:",
+        "Why we chose",
+        "Rationale:",
+        "Decision rationale"
+      ],
+      "min_confidence": 0.7
+    },
+    "technical_note": {
+      "patterns": [
+        "Technical note:",
+        "Important:",
+        "Keep in mind:",
+        "Note that",
+        "Worth noting:",
+        "Caveat:",
+        "Limitation:"
+      ],
+      "min_confidence": 0.6
+    },
+    "requirements": {
+      "patterns": [
+        "Requirements:",
+        "Must have:",
+        "Need to:",
+        "Required:",
+        "Dependency:",
+        "Prerequisites:",
+        "Needs:"
+      ],
+      "min_confidence": 0.7
+    },
+    "feedback": {
+      "patterns": [
+        "Feedback:",
+        "Suggestion:",
+        "Recommendation:",
+        "Consider:",
+        "You might want to",
+        "I recommend",
+        "Best practice:"
+      ],
+      "min_confidence": 0.6
+    }
+  },
+  "story_id_patterns": [
+    "#(\\d{3})",
+    "story (\\d{3})",
+    "Story #(\\d{3})",
+    "stories (\\d{3})",
+    "(?:^|\\s)(\\d{3})(?:\\s|$|,|\\.|:)"
+  ],
+  "extraction": {
+    "max_content_length": 2000,
+    "include_code_blocks": true,
+    "include_lists": true,
+    "exclude_conversational_fluff": true
+  },
+  "api": {
+    "endpoint": "http://localhost:3000/api/documentation",
+    "batch_interval_ms": 5000,
+    "max_retries": 3
+  },
+  "logging": {
+    "verbose": true,
+    "log_file": "bubbleup-doc-capture.log"
+  }
+}

@@ -44,8 +44,10 @@ import {
   Settings,
   RefreshCw,
   LogOut,
-  User as UserIcon
+  User as UserIcon,
+  FileText
 } from 'lucide-react';
+import DocumentationModal from '@/components/DocumentationModal';
 
 // Epic/Phase type (now dynamic - loaded from database)
 type Epic = string;
@@ -93,6 +95,7 @@ interface SortableRowProps {
   userRole: string | null;
   allUsers: Array<{ id: string; email: string }>;
   allProjects: string[];
+  showProjectColumn: boolean;
 }
 
 function SortableRow({
@@ -111,7 +114,8 @@ function SortableRow({
   currentUserId,
   userRole,
   allUsers,
-  allProjects
+  allProjects,
+  showProjectColumn
 }: SortableRowProps) {
   const {
     attributes,
@@ -144,6 +148,7 @@ function SortableRow({
   const [editingEffort, setEditingEffort] = useState(false);
   const [editingBusinessValue, setEditingBusinessValue] = useState(false);
   const [editingProject, setEditingProject] = useState(false);
+  const [showDocumentation, setShowDocumentation] = useState(false);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -201,12 +206,31 @@ function SortableRow({
             </button>
           </div>
         </td>
-        <td
-          className="px-4 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-gray-100"
-          onClick={onToggleExpand}
-        >
-          {item.id}
+        <td className="px-4 py-4 whitespace-nowrap">
+          <div className="flex items-center gap-2">
+            <span
+              className="text-sm font-mono text-gray-900 dark:text-gray-100 cursor-pointer"
+              onClick={onToggleExpand}
+            >
+              {item.id}
+            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDocumentation(true);
+              }}
+              className="p-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors group"
+              title="View documentation"
+            >
+              <FileText className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+            </button>
+          </div>
         </td>
+        {showProjectColumn && (
+          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100" onClick={onToggleExpand}>
+            {item.project}
+          </td>
+        )}
         <td className="px-4 py-4 whitespace-nowrap">
           {editingEpic ? (
             <div className="flex flex-col gap-1">
@@ -380,18 +404,22 @@ function SortableRow({
                 <ul className="space-y-2">
                   {item.acceptanceCriteria.map((criteria, idx) => (
                     <li key={idx} className="text-sm text-gray-700 flex items-start gap-2 group">
-                      <button
-                        onClick={() => {
-                          const newCriteria = item.acceptanceCriteria.filter((_, i) => i !== idx);
-                          onUpdate(item.id, { acceptanceCriteria: newCriteria });
-                        }}
-                        className="relative flex items-center mr-2 mt-0.5"
-                        title="Delete criteria"
-                      >
-                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 group-hover:opacity-0 transition-opacity" />
-                        <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 absolute left-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </button>
-                      {editingCriteria === idx ? (
+                      {canEditThisItem ? (
+                        <button
+                          onClick={() => {
+                            const newCriteria = item.acceptanceCriteria.filter((_, i) => i !== idx);
+                            onUpdate(item.id, { acceptanceCriteria: newCriteria });
+                          }}
+                          className="relative flex items-center mr-2 mt-0.5"
+                          title="Delete criteria"
+                        >
+                          <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 group-hover:opacity-0 transition-opacity" />
+                          <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 absolute left-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ) : (
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mr-2 mt-0.5" />
+                      )}
+                      {editingCriteria === idx && canEditThisItem ? (
                         <input
                           type="text"
                           value={criteria}
@@ -410,34 +438,37 @@ function SortableRow({
                         />
                       ) : (
                         <div
-                          onClick={() => setEditingCriteria(idx)}
-                          className="flex-1 cursor-text hover:bg-gray-100 px-2 py-1 rounded"
+                          onClick={() => canEditThisItem && setEditingCriteria(idx)}
+                          className={`flex-1 px-2 py-1 rounded ${canEditThisItem ? 'cursor-text hover:bg-gray-100' : 'cursor-not-allowed opacity-75'}`}
+                          title={!canEditThisItem ? 'Read-only access' : ''}
                         >
                           {criteria}
                         </div>
                       )}
                     </li>
                   ))}
-                  <li>
-                    <button
-                      onClick={() => {
-                        const newCriteria = [...item.acceptanceCriteria, ''];
-                        onUpdate(item.id, { acceptanceCriteria: newCriteria });
-                        setEditingCriteria(newCriteria.length - 1);
-                      }}
-                      className="flex items-center text-sm text-blue-600 hover:text-blue-800 mt-1"
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add acceptance criteria
-                    </button>
-                  </li>
+                  {canEditThisItem && (
+                    <li>
+                      <button
+                        onClick={() => {
+                          const newCriteria = [...item.acceptanceCriteria, ''];
+                          onUpdate(item.id, { acceptanceCriteria: newCriteria });
+                          setEditingCriteria(newCriteria.length - 1);
+                        }}
+                        className="flex items-center text-sm text-blue-600 hover:text-blue-800 mt-1"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add acceptance criteria
+                      </button>
+                    </li>
+                  )}
                 </ul>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 mb-2">Technical Notes</h4>
-                  {editingTechNotes ? (
+                  {editingTechNotes && canEditThisItem ? (
                     <textarea
                       value={item.technicalNotes}
                       onChange={(e) => onUpdate(item.id, { technicalNotes: e.target.value })}
@@ -448,8 +479,9 @@ function SortableRow({
                     />
                   ) : (
                     <div
-                      onClick={() => setEditingTechNotes(true)}
-                      className="cursor-text hover:bg-gray-100 px-3 py-2 text-sm rounded min-h-[4rem] whitespace-pre-wrap"
+                      onClick={() => canEditThisItem && setEditingTechNotes(true)}
+                      className={`px-3 py-2 text-sm rounded min-h-[4rem] whitespace-pre-wrap ${canEditThisItem ? 'cursor-text hover:bg-gray-100' : 'cursor-not-allowed opacity-75'}`}
+                      title={!canEditThisItem ? 'Read-only access' : ''}
                     >
                       {item.technicalNotes}
                     </div>
@@ -458,7 +490,7 @@ function SortableRow({
 
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 mb-2">Dependencies</h4>
-                  {editingDeps ? (
+                  {editingDeps && canEditThisItem ? (
                     <input
                       type="text"
                       value={item.dependencies.join(', ')}
@@ -477,8 +509,9 @@ function SortableRow({
                     />
                   ) : (
                     <div
-                      onClick={() => setEditingDeps(true)}
-                      className="cursor-text hover:bg-gray-100 px-3 py-2 text-sm font-mono rounded flex flex-wrap gap-2"
+                      onClick={() => canEditThisItem && setEditingDeps(true)}
+                      className={`px-3 py-2 text-sm font-mono rounded flex flex-wrap gap-2 ${canEditThisItem ? 'cursor-text hover:bg-gray-100' : 'cursor-not-allowed opacity-75'}`}
+                      title={!canEditThisItem ? 'Read-only access' : ''}
                     >
                       {item.dependencies.length > 0 ? (
                         item.dependencies.map((depId) => {
@@ -520,7 +553,7 @@ function SortableRow({
                     <h4 className="text-sm font-semibold text-gray-900 mb-2">Assigned To</h4>
                     <div className="flex items-center">
                       <Users className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
-                      {editingOwner ? (
+                      {editingOwner && canEditThisItem ? (
                         <select
                           value={item.assigned_to || ''}
                           onChange={(e) => {
@@ -538,12 +571,13 @@ function SortableRow({
                         </select>
                       ) : (
                         <div
-                          onClick={() => setEditingOwner(true)}
-                          className="flex-1 cursor-pointer hover:bg-gray-100 px-2 py-1 text-sm rounded"
+                          onClick={() => canEditThisItem && setEditingOwner(true)}
+                          className={`flex-1 px-2 py-1 text-sm rounded ${canEditThisItem ? 'cursor-pointer hover:bg-gray-100' : 'cursor-not-allowed opacity-75'}`}
+                          title={!canEditThisItem ? 'Read-only access' : ''}
                         >
                           {item.assigned_to
                             ? allUsers.find(u => u.id === item.assigned_to)?.email || 'Unknown user'
-                            : 'Unassigned - click to assign'}
+                            : canEditThisItem ? 'Unassigned - click to assign' : 'Unassigned'}
                         </div>
                       )}
                     </div>
@@ -555,7 +589,7 @@ function SortableRow({
                 <div className="flex gap-6">
                   <div className="flex-1">
                     <h4 className="text-sm font-semibold text-gray-900 mb-2">Effort</h4>
-                    {editingEffort ? (
+                    {editingEffort && canEditThisItem ? (
                       <input
                         type="number"
                         min="1"
@@ -572,8 +606,9 @@ function SortableRow({
                       />
                     ) : (
                       <div
-                        onClick={() => setEditingEffort(true)}
-                        className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-800 text-lg font-medium cursor-pointer hover:bg-purple-200"
+                        onClick={() => canEditThisItem && setEditingEffort(true)}
+                        className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-800 text-lg font-medium ${canEditThisItem ? 'cursor-pointer hover:bg-purple-200' : 'cursor-not-allowed opacity-75'}`}
+                        title={!canEditThisItem ? 'Read-only access' : ''}
                       >
                         {item.effort}
                       </div>
@@ -583,7 +618,7 @@ function SortableRow({
 
                   <div className="flex-1">
                     <h4 className="text-sm font-semibold text-gray-900 mb-2">Project</h4>
-                    {editingProject ? (
+                    {editingProject && canEditThisItem ? (
                       <select
                         value={item.project}
                         onChange={(e) => {
@@ -602,19 +637,20 @@ function SortableRow({
                       </select>
                     ) : (
                       <div
-                        onClick={() => setEditingProject(true)}
-                        className="px-3 py-2 bg-gray-100 text-gray-800 text-sm rounded cursor-pointer hover:bg-gray-200"
+                        onClick={() => canEditThisItem && setEditingProject(true)}
+                        className={`px-3 py-2 bg-gray-100 text-gray-800 text-sm rounded ${canEditThisItem ? 'cursor-pointer hover:bg-gray-200' : 'cursor-not-allowed opacity-75'}`}
+                        title={!canEditThisItem ? 'Read-only access' : ''}
                       >
                         {item.project}
                       </div>
                     )}
-                    <p className="text-xs text-gray-500 mt-1">Click to change project</p>
+                    <p className="text-xs text-gray-500 mt-1">{canEditThisItem ? 'Click to change project' : 'Project'}</p>
                   </div>
                 </div>
 
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 mb-2">Business Value</h4>
-                  {editingBusinessValue ? (
+                  {editingBusinessValue && canEditThisItem ? (
                     <input
                       type="number"
                       min="1"
@@ -631,8 +667,9 @@ function SortableRow({
                     />
                   ) : (
                     <div
-                      onClick={() => setEditingBusinessValue(true)}
-                      className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-800 text-lg font-medium cursor-pointer hover:bg-green-200"
+                      onClick={() => canEditThisItem && setEditingBusinessValue(true)}
+                      className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-800 text-lg font-medium ${canEditThisItem ? 'cursor-pointer hover:bg-green-200' : 'cursor-not-allowed opacity-75'}`}
+                      title={!canEditThisItem ? 'Read-only access' : ''}
                     >
                       {item.businessValue}
                     </div>
@@ -644,6 +681,14 @@ function SortableRow({
           </td>
         </tr>
       )}
+
+      {/* Documentation Modal */}
+      <DocumentationModal
+        isOpen={showDocumentation}
+        onClose={() => setShowDocumentation(false)}
+        storyId={item.id}
+        storyTitle={item.userStory}
+      />
     </>
   );
 }
@@ -2826,7 +2871,8 @@ function BacklogPage() {
 
     switch (sortBy) {
       case 'id':
-        comparison = a.id.localeCompare(b.id);
+        // Parse IDs as integers for numerical sorting
+        comparison = parseInt(a.id) - parseInt(b.id);
         break;
       case 'epic':
         comparison = a.epic.localeCompare(b.epic);
@@ -2994,6 +3040,11 @@ function BacklogPage() {
   };
 
   const handleSort = (column: typeof sortBy) => {
+    // Disable custom order mode when clicking on any column
+    if (isCustomOrder) {
+      setIsCustomOrder(false);
+    }
+
     if (sortBy === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -4398,6 +4449,20 @@ function BacklogPage() {
                       )}
                     </div>
                   </th>
+                  {currentProject === 'All Projects' && (
+                    <th
+                      onClick={() => handleSort('project')}
+                      onContextMenu={(e) => handleContextMenu(e, 'project')}
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    >
+                      <div className="flex items-center">
+                        <span className={contextMenuFilters.some(f => f.column === 'project') ? 'font-bold text-red-600' : ''}>Project</span>
+                        {sortBy === 'project' && (
+                          sortDirection === 'asc' ? <ChevronUp className="h-3 w-3 ml-1" /> : <ChevronDown className="h-3 w-3 ml-1" />
+                        )}
+                      </div>
+                    </th>
+                  )}
                   <th
                     onClick={() => handleSort('epic')}
                     onContextMenu={(e) => handleContextMenu(e, 'epic')}
@@ -4514,6 +4579,11 @@ function BacklogPage() {
                         placeholder="ID"
                       />
                     </td>
+                    {currentProject === 'All Projects' && (
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">{newStory.project}</span>
+                      </td>
+                    )}
                     <td className="px-4 py-3">
                       <select
                         value={newStory.epic}
@@ -4634,6 +4704,7 @@ function BacklogPage() {
                       userRole={role}
                       allUsers={allUsers}
                       allProjects={projects.filter(p => p !== 'All Projects')}
+                      showProjectColumn={currentProject === 'All Projects'}
                     />
                   ))}
                 </SortableContext>

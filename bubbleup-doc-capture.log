@@ -1,0 +1,16 @@
+[2025-10-07T15:45:38.415Z] [INFO] Processing response (525 characters)
+[2025-10-07T15:45:38.429Z] [INFO] Found story IDs: 208
+[2025-10-07T15:45:38.431Z] [FATAL] Fatal error: Cannot access 'config' before initialization
+[2025-10-07T15:46:17.542Z] [INFO] Processing response (211 characters)
+[2025-10-07T15:46:17.554Z] [INFO] Found story IDs: 208
+[2025-10-07T15:46:17.557Z] [INFO] No matching document type detected
+[2025-10-07T15:46:46.681Z] [INFO] Processing response (371 characters)
+[2025-10-07T15:46:46.695Z] [INFO] Found story IDs: 208
+[2025-10-07T15:46:46.699Z] [INFO] Detected document type: design
+[2025-10-07T15:46:46.701Z] [INFO] Creating documentation for story #208 (design): Design decision: For story #208, I chose to use pattern matching combined with AI sub-agents instead of simple regex
+[2025-10-07T15:46:47.137Z] [SUCCESS] ✅ Documentation created: 981011bc-3cc4-47fc-897d-98869070742e
+[2025-10-07T15:59:38.451Z] [INFO] Processing response (367 characters)
+[2025-10-07T15:59:38.465Z] [INFO] Found story IDs: 208
+[2025-10-07T15:59:38.469Z] [INFO] Detected document type: progress
+[2025-10-07T15:59:38.470Z] [INFO] Creating documentation for story #208 (progress): Successfully completed story #208: Implemented intelligent documentation capture agent
+[2025-10-07T15:59:39.151Z] [SUCCESS] ✅ Documentation created: 4a16828f-1d83-4d4f-b6ae-c1f4e8dd28b2

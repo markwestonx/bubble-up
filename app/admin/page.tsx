@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Users, UserPlus, Shield, Mail, Trash2, Edit2, Save, X } from 'lucide-react';
+import { Users, UserPlus, Shield, Mail, Trash2, Edit2, Save, X, ChevronDown, ChevronRight, FolderOpen, KeyRound } from 'lucide-react';
 
 interface User {
   id: string;
@@ -22,20 +22,27 @@ export default function AdminPage() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<UserRole[]>([]);
+  const [projects, setProjects] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingRole, setEditingRole] = useState<string | null>(null);
   const [currentUserIsAdmin, setCurrentUserIsAdmin] = useState(false);
+  const [viewMode, setViewMode] = useState<'users' | 'projects'>('users');
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [addingRoleForUser, setAddingRoleForUser] = useState<string | null>(null);
+  const [newRoleProject, setNewRoleProject] = useState('');
+  const [newRoleRole, setNewRoleRole] = useState('read_write');
 
   // Invite form state
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<string>('Contributor');
+  const [inviteRole, setInviteRole] = useState<string>('read_write');
   const [inviteProject, setInviteProject] = useState('BubbleUp');
   const [inviting, setInviting] = useState(false);
   const [inviteMessage, setInviteMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
     loadData();
+    loadProjects();
   }, []);
 
   const loadData = async () => {
@@ -58,7 +65,7 @@ export default function AdminPage() {
 
       // Type assertion to work around Supabase TypeScript inference issues
       const roles = roleData as Array<{ role: string }> | null;
-      const isAdmin = Boolean(roles && roles.length > 0 && roles[0].role === 'Admin');
+      const isAdmin = Boolean(roles && roles.length > 0 && roles[0].role === 'admin');
       setCurrentUserIsAdmin(isAdmin);
 
       if (!isAdmin) {
@@ -85,37 +92,105 @@ export default function AdminPage() {
     }
   };
 
-  const updateRole = async (roleId: string, newRole: string) => {
-    const supabase = createClient();
-    // Type assertion needed for Supabase update - cast early to bypass type inference
-    const { error } = await (supabase
-      .from('user_project_roles') as any)
-      .update({ role: newRole })
-      .eq('id', roleId);
+  const loadProjects = async () => {
+    try {
+      const supabase = createClient();
+      const { data: backlogData } = await supabase
+        .from('backlog_items')
+        .select('project');
 
-    if (!error) {
-      setRoles(roles.map(r => r.id === roleId ? { ...r, role: newRole as any } : r));
-      setEditingRole(null);
+      if (backlogData && backlogData.length > 0) {
+        const uniqueProjects = Array.from(new Set(backlogData.map((item: any) => item.project)));
+        setProjects(uniqueProjects as string[]);
+      }
+    } catch (err) {
+      console.error('Error loading projects:', err);
+    }
+  };
+
+  const updateRole = async (roleId: string, newRole: string) => {
+    try {
+      const roleToUpdate = roles.find(r => r.id === roleId);
+      if (!roleToUpdate) return;
+
+      const response = await fetch('/api/admin/user-roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: roleToUpdate.user_id,
+          project: roleToUpdate.project,
+          role: newRole
+        })
+      });
+
+      if (response.ok) {
+        setRoles(roles.map(r => r.id === roleId ? { ...r, role: newRole as any } : r));
+        setEditingRole(null);
+        setInviteMessage({ type: 'success', text: 'Role updated successfully' });
+      } else {
+        const data = await response.json();
+        setInviteMessage({ type: 'error', text: `Failed to update role: ${data.error}` });
+      }
+    } catch (err) {
+      setInviteMessage({ type: 'error', text: 'Failed to update role' });
     }
   };
 
   const deleteRole = async (roleId: string) => {
     if (!confirm('Are you sure you want to delete this role assignment?')) return;
 
-    const supabase = createClient();
-    const { error } = await (supabase
-      .from('user_project_roles') as any)
-      .delete()
-      .eq('id', roleId);
+    try {
+      const roleToDelete = roles.find(r => r.id === roleId);
+      if (!roleToDelete) return;
 
-    if (!error) {
-      setRoles(roles.filter(r => r.id !== roleId));
+      const response = await fetch(`/api/admin/user-roles?userId=${roleToDelete.user_id}&project=${encodeURIComponent(roleToDelete.project)}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setRoles(roles.filter(r => r.id !== roleId));
+        setInviteMessage({ type: 'success', text: 'Role deleted successfully' });
+      } else {
+        const data = await response.json();
+        setInviteMessage({ type: 'error', text: `Failed to delete role: ${data.error}` });
+      }
+    } catch (err) {
+      setInviteMessage({ type: 'error', text: 'Failed to delete role' });
     }
   };
 
   const getUserEmail = (userId: string) => {
     return users.find(u => u.id === userId)?.email || 'Unknown';
   };
+
+  const toggleExpanded = (id: string) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedItems(newExpanded);
+  };
+
+  // Group roles by user
+  const userRolesMap = roles.reduce((acc, role) => {
+    const email = getUserEmail(role.user_id);
+    if (!acc[email]) {
+      acc[email] = [];
+    }
+    acc[email].push(role);
+    return acc;
+  }, {} as Record<string, UserRole[]>);
+
+  // Group roles by project
+  const projectRolesMap = roles.reduce((acc, role) => {
+    if (!acc[role.project]) {
+      acc[role.project] = [];
+    }
+    acc[role.project].push(role);
+    return acc;
+  }, {} as Record<string, UserRole[]>);
 
   const handleInviteUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,6 +222,65 @@ export default function AdminPage() {
       setInviteMessage({ type: 'error', text: 'Failed to send invite' });
     } finally {
       setInviting(false);
+    }
+  };
+
+  const handleResetPassword = async (email: string) => {
+    if (!confirm(`Send password reset email to ${email}?`)) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        setInviteMessage({ type: 'error', text: `Failed to send reset email: ${error.message}` });
+      } else {
+        setInviteMessage({ type: 'success', text: `Password reset email sent to ${email}` });
+      }
+    } catch (err) {
+      setInviteMessage({ type: 'error', text: 'Failed to send password reset email' });
+    }
+  };
+
+  const handleAddRole = async (userEmail: string) => {
+    if (!newRoleProject.trim()) {
+      setInviteMessage({ type: 'error', text: 'Please select a project' });
+      return;
+    }
+
+    try {
+      const user = users.find(u => u.email === userEmail);
+      if (!user) {
+        setInviteMessage({ type: 'error', text: 'User not found' });
+        return;
+      }
+
+      // Use admin API endpoint instead of direct Supabase client
+      const response = await fetch('/api/admin/user-roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          project: newRoleProject,
+          role: newRoleRole
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setInviteMessage({ type: 'success', text: `Role added successfully for ${newRoleProject}` });
+        await loadData(); // Reload all data to refresh roles list
+        setAddingRoleForUser(null);
+        setNewRoleProject('');
+        setNewRoleRole('read_write');
+      } else {
+        setInviteMessage({ type: 'error', text: `Failed to add role: ${data.error}` });
+      }
+    } catch (err) {
+      setInviteMessage({ type: 'error', text: 'Failed to add role' });
     }
   };
 
@@ -214,10 +348,10 @@ export default function AdminPage() {
                   onChange={(e) => setInviteRole(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg"
                 >
-                  <option value="Admin">Admin</option>
-                  <option value="Editor">Editor</option>
-                  <option value="Contributor">Contributor</option>
-                  <option value="Read Only">Read Only</option>
+                  <option value="admin">Admin</option>
+                  <option value="editor">Editor</option>
+                  <option value="read_write">Read/Write</option>
+                  <option value="read_only">Read Only</option>
                 </select>
               </div>
               <div>
@@ -253,122 +387,327 @@ export default function AdminPage() {
         )}
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              User Roles
-            </h2>
-            {!showInviteForm && (
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                {viewMode === 'users' ? <Users className="h-5 w-5" /> : <FolderOpen className="h-5 w-5" />}
+                {viewMode === 'users' ? 'User Management' : 'Project Management'}
+              </h2>
+              {!showInviteForm && (
+                <button
+                  onClick={() => setShowInviteForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Invite User
+                </button>
+              )}
+            </div>
+
+            {/* View Toggle */}
+            <div className="flex gap-2">
               <button
-                onClick={() => setShowInviteForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={() => setViewMode('users')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  viewMode === 'users'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
               >
-                <UserPlus className="h-4 w-4" />
-                Invite User
+                View by Users
               </button>
-            )}
+              <button
+                onClick={() => setViewMode('projects')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  viewMode === 'projects'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                View by Projects
+              </button>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-900">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    User Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Project
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {roles.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                      No role assignments found
-                    </td>
-                  </tr>
-                ) : (
-                  roles.map((role) => (
-                    <tr key={role.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-900 dark:text-gray-100">
-                            {getUserEmail(role.user_id)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {role.project}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingRole === role.id ? (
-                          <select
-                            defaultValue={role.role}
-                            onChange={(e) => updateRole(role.id, e.target.value)}
-                            className="text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-2 py-1"
-                          >
-                            <option value="Admin">Admin</option>
-                            <option value="Editor">Editor</option>
-                            <option value="Contributor">Contributor</option>
-                            <option value="Read Only">Read Only</option>
-                          </select>
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {viewMode === 'users' ? (
+              // Users View
+              Object.keys(userRolesMap).length === 0 ? (
+                <div className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  No users found
+                </div>
+              ) : (
+                Object.entries(userRolesMap)
+                  .sort(([emailA], [emailB]) => emailA.localeCompare(emailB))
+                  .map(([email, userRoles]) => (
+                  <div key={email} className="hover:bg-gray-50 dark:hover:bg-gray-750">
+                    <div className="px-6 py-4 flex items-center justify-between">
+                      <button
+                        onClick={() => toggleExpanded(email)}
+                        className="flex items-center gap-3 flex-1"
+                      >
+                        {expandedItems.has(email) ? (
+                          <ChevronDown className="h-5 w-5 text-gray-400" />
                         ) : (
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            role.role === 'Admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
-                            role.role === 'Editor' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                            role.role === 'Contributor' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                            'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                          }`}>
-                            {role.role}
-                          </span>
+                          <ChevronRight className="h-5 w-5 text-gray-400" />
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <div className="flex items-center justify-end gap-2">
-                          {editingRole === role.id ? (
-                            <button
-                              onClick={() => setEditingRole(null)}
-                              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                              title="Cancel"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => setEditingRole(role.id)}
-                              className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-200"
-                              title="Edit role"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </button>
-                          )}
+                        <Mail className="h-5 w-5 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{email}</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                          {userRoles.length} {userRoles.length === 1 ? 'role' : 'roles'}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => handleResetPassword(email)}
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                        title="Send password reset email"
+                      >
+                        <KeyRound className="h-4 w-4" />
+                        Reset Password
+                      </button>
+                    </div>
+
+                    {expandedItems.has(email) && (
+                      <div className="px-6 pb-4 pl-16 space-y-2">
+                        {userRoles.map((role) => (
+                          <div key={role.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div>
+                                <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  {role.project}
+                                </div>
+                              </div>
+                              <div>
+                                {editingRole === role.id ? (
+                                  <select
+                                    defaultValue={role.role}
+                                    onChange={(e) => updateRole(role.id, e.target.value)}
+                                    onBlur={() => setEditingRole(null)}
+                                    autoFocus
+                                    className="text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-2 py-1"
+                                  >
+                                    <option value="admin">Admin</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="read_write">Read/Write</option>
+                                    <option value="read_only">Read Only</option>
+                                  </select>
+                                ) : (
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    role.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                                    role.role === 'editor' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                    role.role === 'read_write' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                                  }`}>
+                                    {role.role === 'read_write' ? 'Read/Write' : role.role === 'read_only' ? 'Read Only' : role.role.charAt(0).toUpperCase() + role.role.slice(1)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {editingRole === role.id ? (
+                                <button
+                                  onClick={() => setEditingRole(null)}
+                                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                                  title="Cancel"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => setEditingRole(role.id)}
+                                  className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-200"
+                                  title="Edit role"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => deleteRole(role.id)}
+                                className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-200"
+                                title="Delete role"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Add Role Form/Button */}
+                        {addingRoleForUser === email ? (
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div className="space-y-2">
+                              <select
+                                value={newRoleProject}
+                                onChange={(e) => setNewRoleProject(e.target.value)}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                autoFocus
+                              >
+                                <option value="">Select Project</option>
+                                <option value="ALL">ALL</option>
+                                {projects.filter(p => !userRoles.some(r => r.project === p)).map((project) => (
+                                  <option key={project} value={project}>{project}</option>
+                                ))}
+                              </select>
+                              <select
+                                value={newRoleRole}
+                                onChange={(e) => setNewRoleRole(e.target.value)}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded"
+                              >
+                                <option value="admin">Admin</option>
+                                <option value="editor">Editor</option>
+                                <option value="read_write">Read/Write</option>
+                                <option value="read_only">Read Only</option>
+                              </select>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleAddRole(email)}
+                                  className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                                >
+                                  Add Role
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setAddingRoleForUser(null);
+                                    setNewRoleProject('');
+                                    setNewRoleRole('read_write');
+                                  }}
+                                  className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
                           <button
-                            onClick={() => deleteRole(role.id)}
-                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-200"
-                            title="Delete role"
+                            onClick={() => setAddingRoleForUser(email)}
+                            className="w-full p-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg border border-dashed border-blue-300 dark:border-blue-700 transition-colors"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            + Add Role
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )
+            ) : (
+              // Projects View
+              Object.keys(projectRolesMap).length === 0 ? (
+                <div className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  No projects found
+                </div>
+              ) : (
+                Object.entries(projectRolesMap)
+                  .sort(([projectA], [projectB]) => {
+                    // Put 'ALL' first, then sort alphabetically
+                    if (projectA === 'ALL') return -1;
+                    if (projectB === 'ALL') return 1;
+                    return projectA.localeCompare(projectB);
+                  })
+                  .map(([project, projectRoles]) => (
+                  <div key={project} className="hover:bg-gray-50 dark:hover:bg-gray-750">
+                    <button
+                      onClick={() => toggleExpanded(project)}
+                      className="w-full px-6 py-4 flex items-center justify-between text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        {expandedItems.has(project) ? (
+                          <ChevronDown className="h-5 w-5 text-gray-400" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-gray-400" />
+                        )}
+                        <FolderOpen className="h-5 w-5 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{project}</span>
+                      </div>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {projectRoles.length} {projectRoles.length === 1 ? 'user' : 'users'}
+                      </span>
+                    </button>
+
+                    {expandedItems.has(project) && (
+                      <div className="px-6 pb-4 pl-16 space-y-2">
+                        {projectRoles.map((role) => (
+                          <div key={role.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div>
+                                <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  {getUserEmail(role.user_id)}
+                                </div>
+                              </div>
+                              <div>
+                                {editingRole === role.id ? (
+                                  <select
+                                    defaultValue={role.role}
+                                    onChange={(e) => updateRole(role.id, e.target.value)}
+                                    onBlur={() => setEditingRole(null)}
+                                    autoFocus
+                                    className="text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-2 py-1"
+                                  >
+                                    <option value="admin">Admin</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="read_write">Read/Write</option>
+                                    <option value="read_only">Read Only</option>
+                                  </select>
+                                ) : (
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    role.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                                    role.role === 'editor' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                    role.role === 'read_write' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                                  }`}>
+                                    {role.role === 'read_write' ? 'Read/Write' : role.role === 'read_only' ? 'Read Only' : role.role.charAt(0).toUpperCase() + role.role.slice(1)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {editingRole === role.id ? (
+                                <button
+                                  onClick={() => setEditingRole(null)}
+                                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                                  title="Cancel"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => setEditingRole(role.id)}
+                                  className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-200"
+                                  title="Edit role"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => deleteRole(role.id)}
+                                className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-200"
+                                title="Delete role"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )
+            )}
           </div>
         </div>
 
-        <div className="mt-6 text-sm text-gray-600 dark:text-gray-400">
-          <p><strong>Note:</strong> To add new users or reset passwords, use the Supabase Admin Dashboard.</p>
+        <div className="mt-6 flex items-center justify-between">
+          <button
+            onClick={() => router.push('/')}
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+          >
+            ← Back to Backlog
+          </button>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            <strong>Note:</strong> Users can reset their own password from the Profile page, or you can send a password reset email.
+          </p>
         </div>
       </div>
     </div>

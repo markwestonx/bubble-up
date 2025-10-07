@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 export function useAuthorizedProjects() {
   const [authorizedProjects, setAuthorizedProjects] = useState<string[]>([]);
@@ -8,6 +8,7 @@ export function useAuthorizedProjects() {
   useEffect(() => {
     async function loadAuthorizedProjects() {
       try {
+        const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
@@ -31,10 +32,12 @@ export function useAuthorizedProjects() {
 
         if (hasAllAccess) {
           // User has access to all projects - we'll return empty array to signal "all access"
+          console.log('User has ALL project access');
           setAuthorizedProjects(['ALL']);
         } else {
           // User only has access to specific projects
           const projects = roles.map((r: any) => r.project).filter(p => p !== 'ALL');
+          console.log('User authorized projects:', projects);
           setAuthorizedProjects(projects);
         }
       } catch (err) {

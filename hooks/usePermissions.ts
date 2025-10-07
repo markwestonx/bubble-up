@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 export type Role = 'admin' | 'editor' | 'read_write' | 'read_only';
 
@@ -32,6 +32,7 @@ export function usePermissions(project: string) {
   useEffect(() => {
     async function loadPermissions() {
       try {
+        const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {

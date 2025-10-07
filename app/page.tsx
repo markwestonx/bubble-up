@@ -2700,7 +2700,10 @@ function BacklogPage() {
       // If user has 'ALL' access, show everything
       if (!authorizedProjects.includes('ALL')) {
         // Otherwise, only show projects user is authorized for
-        if (!authorizedProjects.includes(item.project)) return false;
+        if (!authorizedProjects.includes(item.project)) {
+          console.log(`Filtering out ${item.id} because project "${item.project}" not in authorized list:`, authorizedProjects);
+          return false;
+        }
       }
     }
 

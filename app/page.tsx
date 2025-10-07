@@ -2428,7 +2428,7 @@ function BacklogPage() {
   const [epicFilterMode, setEpicFilterMode] = useState<'single' | 'multiple'>('single');
   const [selectedEpics, setSelectedEpics] = useState<Set<Epic>>(new Set());
 
-  const [sortBy, setSortBy] = useState<'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'custom'>('custom');
+  const [sortBy, setSortBy] = useState<'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'project' | 'custom'>('custom');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [isCustomOrder, setIsCustomOrder] = useState(true);
   const [userCustomOrder, setUserCustomOrder] = useState<Map<string, number>>(new Map());
@@ -2439,7 +2439,7 @@ function BacklogPage() {
 
   // Context menu filtering state
   const [contextMenu, setContextMenu] = useState<{
-    column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | null;
+    column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'project' | null;
     x: number;
     y: number;
     searchTerm: string;
@@ -2447,7 +2447,7 @@ function BacklogPage() {
     selectedValues: Set<string>;
   } | null>(null);
   const [contextMenuFilters, setContextMenuFilters] = useState<Array<{
-    column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value';
+    column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'project';
     value: string;
     values: string[];
     isMultiple: boolean;
@@ -2787,6 +2787,9 @@ function BacklogPage() {
           case 'epic':
             itemValue = item.epic;
             break;
+          case 'project':
+            itemValue = item.project;
+            break;
           case 'priority':
             itemValue = item.priority;
             break;
@@ -2818,6 +2821,9 @@ function BacklogPage() {
             break;
           case 'epic':
             if (!item.epic.toLowerCase().includes(searchTerm)) return false;
+            break;
+          case 'project':
+            if (!item.project.toLowerCase().includes(searchTerm)) return false;
             break;
           case 'priority':
             if (!item.priority.toLowerCase().includes(searchTerm)) return false;
@@ -2876,6 +2882,9 @@ function BacklogPage() {
         break;
       case 'epic':
         comparison = a.epic.localeCompare(b.epic);
+        break;
+      case 'project':
+        comparison = a.project.localeCompare(b.project);
         break;
       case 'priority':
         const priorityOrder = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
@@ -3056,7 +3065,7 @@ function BacklogPage() {
   // Handle right-click to open context menu filter
   const handleContextMenu = (
     e: React.MouseEvent,
-    column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value'
+    column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'project'
   ) => {
     e.preventDefault();
     setContextMenu({
@@ -3070,7 +3079,7 @@ function BacklogPage() {
   };
 
   // Get available options for dropdown based on column
-  const getColumnOptions = (column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | null): string[] => {
+  const getColumnOptions = (column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'project' | null): string[] => {
     if (!column) return [];
 
     // Special handling for 'next' column - always show both options
@@ -3087,6 +3096,9 @@ function BacklogPage() {
           break;
         case 'epic':
           uniqueValues.add(item.epic);
+          break;
+        case 'project':
+          uniqueValues.add(item.project);
           break;
         case 'priority':
           uniqueValues.add(item.priority);
@@ -3225,7 +3237,7 @@ function BacklogPage() {
   };
 
   // Clear specific context menu filter
-  const clearContextMenuFilter = (column?: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value') => {
+  const clearContextMenuFilter = (column?: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'project') => {
     if (column) {
       // Clear specific column filter
       setContextMenuFilters(contextMenuFilters.filter(f => f.column !== column));
@@ -3298,7 +3310,7 @@ function BacklogPage() {
   };
 
   // Format display value for context menu based on column type
-  const formatDisplayValue = (column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | null, value: string): string => {
+  const formatDisplayValue = (column: 'id' | 'epic' | 'priority' | 'status' | 'story' | 'next' | 'effort' | 'value' | 'project' | null, value: string): string => {
     if (column === 'epic') {
       return getEpicLabel(value as Epic);
     }

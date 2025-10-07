@@ -58,6 +58,7 @@ export async function POST(request: Request) {
     // Upsert (insert or update) the view state
     const { data, error } = await supabase
       .from('user_view_state')
+      // @ts-ignore - user_view_state table not in generated Supabase types
       .upsert({
         user_id: user.id,
         current_project,

@@ -31,13 +31,11 @@ export function useAuthorizedProjects() {
         const hasAllAccess = roles.some((r: any) => r.project === 'ALL');
 
         if (hasAllAccess) {
-          // User has access to all projects - we'll return empty array to signal "all access"
-          console.log('User has ALL project access');
+          // User has access to all projects
           setAuthorizedProjects(['ALL']);
         } else {
           // User only has access to specific projects
           const projects = roles.map((r: any) => r.project).filter(p => p !== 'ALL');
-          console.log('User authorized projects:', projects);
           setAuthorizedProjects(projects);
         }
       } catch (err) {

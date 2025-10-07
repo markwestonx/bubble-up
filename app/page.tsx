@@ -2406,12 +2406,7 @@ function BacklogPage() {
     value: string;
     values: string[];
     isMultiple: boolean;
-  }>>([{
-    column: 'next',
-    value: '',
-    values: ['Next'],
-    isMultiple: false
-  }]);
+  }>>([]);
 
   // Project management state
   const [projects, setProjects] = useState<string[]>(['Sales Genie', 'GTM Spike']);

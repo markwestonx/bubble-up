@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     const { data: roles } = await supabase
       .from('user_project_roles')
       .select('role, project')
-      .eq('user_id', user.id);
+      .eq('user_id', user.id) as { data: { role: string; project: string }[] | null };
 
     const hasAccess = roles?.some(r =>
       (r.project === story.project || r.project === 'ALL') &&

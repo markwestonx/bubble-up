@@ -3456,46 +3456,6 @@ function BacklogPage() {
 
   return (
     <div className="space-y-6 min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-      {/* Header with logout */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-full mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <ListTodo className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">BubbleUp</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            {user && (
-              <>
-                <button
-                  onClick={() => router.push('/profile')}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                  title={user.email}
-                >
-                  <UserIcon className="h-4 w-4" />
-                  <span>Profile</span>
-                </button>
-                {role === 'Admin' && (
-                  <button
-                    onClick={() => router.push('/admin')}
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                  >
-                    <Settings className="h-4 w-4" />
-                    <span>Admin</span>
-                  </button>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Create Project Modal */}
       {isCreatingProject && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -4231,12 +4191,21 @@ function BacklogPage() {
             <Settings className="h-5 w-5" />
           </button>
           <button
-            onClick={() => router.push('/admin/users')}
+            onClick={() => router.push('/profile')}
             className="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            title="User Management"
+            title={user?.email ? `Profile - ${user.email}` : 'Profile'}
           >
-            <Users className="h-5 w-5" />
+            <UserIcon className="h-5 w-5" />
           </button>
+          {role === 'admin' && (
+            <button
+              onClick={() => router.push('/admin')}
+              className="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              title="Admin - User Management"
+            >
+              <Users className="h-5 w-5" />
+            </button>
+          )}
           <button
             onClick={handleLogout}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"

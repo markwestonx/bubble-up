@@ -2568,6 +2568,7 @@ function BacklogPage() {
   React.useEffect(() => {
     const loadFromSupabase = async () => {
       try {
+        const supabase = createClient();
         const { data, error } = await supabase
           .from('backlog_items')
           .select('*')
@@ -3476,7 +3477,7 @@ function BacklogPage() {
                   <UserIcon className="h-4 w-4" />
                   <span>Profile</span>
                 </button>
-                {userRole === 'Admin' && (
+                {role === 'Admin' && (
                   <button
                     onClick={() => router.push('/admin')}
                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"

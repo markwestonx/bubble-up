@@ -4191,21 +4191,12 @@ function BacklogPage() {
             <Settings className="h-5 w-5" />
           </button>
           <button
-            onClick={() => router.push('/profile')}
+            onClick={() => router.push(role === 'admin' ? '/admin' : '/profile')}
             className="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            title={user?.email ? `Profile - ${user.email}` : 'Profile'}
+            title={role === 'admin' ? 'Admin - User Management' : (user?.email ? `Profile - ${user.email}` : 'Profile')}
           >
-            <UserIcon className="h-5 w-5" />
+            {role === 'admin' ? <Users className="h-5 w-5" /> : <UserIcon className="h-5 w-5" />}
           </button>
-          {role === 'admin' && (
-            <button
-              onClick={() => router.push('/admin')}
-              className="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              title="Admin - User Management"
-            >
-              <Users className="h-5 w-5" />
-            </button>
-          )}
           <button
             onClick={handleLogout}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"

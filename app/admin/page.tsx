@@ -15,7 +15,7 @@ interface UserRole {
   id: string;
   user_id: string;
   project: string;
-  role: 'Admin' | 'Editor' | 'Contributor' | 'Read Only';
+  role: 'admin' | 'editor' | 'read_write' | 'read_only';
 }
 
 export default function AdminPage() {

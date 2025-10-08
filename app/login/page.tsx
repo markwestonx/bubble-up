@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 
@@ -11,6 +11,18 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Handle magic link tokens that accidentally end up here
+  useEffect(() => {
+    const token_hash = searchParams.get('token_hash');
+    const type = searchParams.get('type');
+
+    if (token_hash && type) {
+      // Redirect to proper callback route
+      router.replace(`/auth/callback?token_hash=${token_hash}&type=${type}`);
+    }
+  }, [searchParams, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

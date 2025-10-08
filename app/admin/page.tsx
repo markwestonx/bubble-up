@@ -15,7 +15,7 @@ interface UserRole {
   id: string;
   user_id: string;
   project: string;
-  role: 'admin' | 'editor' | 'read_write' | 'read_only';
+  role: 'admin' | 'editor' | 'contributor' | 'read_only';
 }
 
 export default function AdminPage() {
@@ -30,12 +30,12 @@ export default function AdminPage() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [addingRoleForUser, setAddingRoleForUser] = useState<string | null>(null);
   const [newRoleProject, setNewRoleProject] = useState('');
-  const [newRoleRole, setNewRoleRole] = useState('read_write');
+  const [newRoleRole, setNewRoleRole] = useState('contributor');
 
   // Invite form state
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<string>('read_write');
+  const [inviteRole, setInviteRole] = useState<string>('contributor');
   const [inviteProjects, setInviteProjects] = useState<string[]>(['BubbleUp']);
   const [inviting, setInviting] = useState(false);
   const [inviteMessage, setInviteMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -292,7 +292,7 @@ export default function AdminPage() {
         await loadData(); // Reload all data to refresh roles list
         setAddingRoleForUser(null);
         setNewRoleProject('');
-        setNewRoleRole('read_write');
+        setNewRoleRole('contributor');
       } else {
         setInviteMessage({ type: 'error', text: `Failed to add role: ${data.error}` });
       }
@@ -376,7 +376,7 @@ export default function AdminPage() {
                 >
                   <option value="admin">Admin</option>
                   <option value="editor">Editor</option>
-                  <option value="read_write">Read/Write</option>
+                  <option value="contributor">Contributor</option>
                   <option value="read_only">Read Only</option>
                 </select>
               </div>
@@ -546,17 +546,17 @@ export default function AdminPage() {
                                   >
                                     <option value="admin">Admin</option>
                                     <option value="editor">Editor</option>
-                                    <option value="read_write">Read/Write</option>
+                                    <option value="contributor">Contributor</option>
                                     <option value="read_only">Read Only</option>
                                   </select>
                                 ) : (
                                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                     role.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
                                     role.role === 'editor' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                                    role.role === 'read_write' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                    role.role === 'contributor' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
                                     'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
                                   }`}>
-                                    {role.role === 'read_write' ? 'Read/Write' : role.role === 'read_only' ? 'Read Only' : role.role.charAt(0).toUpperCase() + role.role.slice(1)}
+                                    {role.role === 'contributor' ? 'Contributor' : role.role === 'read_only' ? 'Read Only' : role.role.charAt(0).toUpperCase() + role.role.slice(1)}
                                   </span>
                                 )}
                               </div>
@@ -613,7 +613,7 @@ export default function AdminPage() {
                               >
                                 <option value="admin">Admin</option>
                                 <option value="editor">Editor</option>
-                                <option value="read_write">Read/Write</option>
+                                <option value="contributor">Contributor</option>
                                 <option value="read_only">Read Only</option>
                               </select>
                               <div className="flex gap-2">
@@ -627,7 +627,7 @@ export default function AdminPage() {
                                   onClick={() => {
                                     setAddingRoleForUser(null);
                                     setNewRoleProject('');
-                                    setNewRoleRole('read_write');
+                                    setNewRoleRole('contributor');
                                   }}
                                   className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded hover:bg-gray-50 dark:hover:bg-gray-700"
                                 >
@@ -704,17 +704,17 @@ export default function AdminPage() {
                                   >
                                     <option value="admin">Admin</option>
                                     <option value="editor">Editor</option>
-                                    <option value="read_write">Read/Write</option>
+                                    <option value="contributor">Contributor</option>
                                     <option value="read_only">Read Only</option>
                                   </select>
                                 ) : (
                                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                     role.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
                                     role.role === 'editor' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                                    role.role === 'read_write' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                    role.role === 'contributor' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
                                     'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
                                   }`}>
-                                    {role.role === 'read_write' ? 'Read/Write' : role.role === 'read_only' ? 'Read Only' : role.role.charAt(0).toUpperCase() + role.role.slice(1)}
+                                    {role.role === 'contributor' ? 'Contributor' : role.role === 'read_only' ? 'Read Only' : role.role.charAt(0).toUpperCase() + role.role.slice(1)}
                                   </span>
                                 )}
                               </div>

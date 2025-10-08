@@ -2316,6 +2316,9 @@ function BacklogPage() {
   const [authLoading, setAuthLoading] = useState(true);
   const router = useRouter();
 
+  // Get list of projects user is authorized to access
+  const { authorizedProjects } = useAuthorizedProjects();
+
   // Check auth on mount
   useEffect(() => {
     const supabase = createClient();
@@ -2486,9 +2489,6 @@ function BacklogPage() {
 
   // RBAC permissions for current project
   const { permissions, role } = usePermissions(currentProject);
-
-  // Get list of projects user is authorized to access
-  const { authorizedProjects } = useAuthorizedProjects();
 
   // Settings state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);

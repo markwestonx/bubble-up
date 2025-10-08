@@ -45,6 +45,8 @@ interface DocumentationModalProps {
   onClose: () => void;
   storyId: string;
   storyTitle: string;
+  canEdit: boolean;
+  canDelete: boolean;
 }
 
 const DOC_TYPE_ICONS: Record<string, { icon: React.FC<any>; color: string; bg: string; label: string }> = {
@@ -63,7 +65,7 @@ const DOC_TYPE_ICONS: Record<string, { icon: React.FC<any>; color: string; bg: s
   success: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100', label: 'Success' }
 };
 
-export default function DocumentationModal({ isOpen, onClose, storyId, storyTitle }: DocumentationModalProps) {
+export default function DocumentationModal({ isOpen, onClose, storyId, storyTitle, canEdit, canDelete }: DocumentationModalProps) {
   const [documentation, setDocumentation] = useState<Documentation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -291,13 +293,15 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleOpenForm()}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Add Documentation
-            </button>
+            {canEdit && (
+              <button
+                onClick={() => handleOpenForm()}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Add Documentation
+              </button>
+            )}
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
@@ -442,28 +446,34 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
                     {isExpanded && (
                       <div className="px-4 pb-4 pt-2 border-t border-gray-200 dark:border-gray-700">
                         {/* Action buttons */}
-                        <div className="flex gap-2 mb-4">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenForm(doc);
-                            }}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 rounded transition-colors"
-                          >
-                            <Edit2 className="h-3.5 w-3.5" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(doc.id);
-                            }}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 rounded transition-colors"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            Delete
-                          </button>
-                        </div>
+                        {(canEdit || canDelete) && (
+                          <div className="flex gap-2 mb-4">
+                            {canEdit && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenForm(doc);
+                                }}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 rounded transition-colors"
+                              >
+                                <Edit2 className="h-3.5 w-3.5" />
+                                Edit
+                              </button>
+                            )}
+                            {canDelete && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(doc.id);
+                                }}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 rounded transition-colors"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        )}
 
                         <div className="prose prose-sm dark:prose-invert max-w-none">
                           <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">

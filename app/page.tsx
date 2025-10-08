@@ -45,7 +45,8 @@ import {
   RefreshCw,
   LogOut,
   User as UserIcon,
-  FileText
+  FileText,
+  Inbox
 } from 'lucide-react';
 import DocumentationModal from '@/components/DocumentationModal';
 
@@ -56,7 +57,7 @@ type Epic = string;
 type Priority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 
 // Status types
-type Status = 'NOT_STARTED' | 'IN_PROGRESS' | 'BLOCKED' | 'TESTING' | 'DONE' | 'CLOSED';
+type Status = 'BACKLOG' | 'NOT_STARTED' | 'IN_PROGRESS' | 'BLOCKED' | 'TESTING' | 'DONE' | 'CLOSED';
 
 // Backlog item interface
 interface BacklogItem {
@@ -224,9 +225,9 @@ function SortableRow({
               className="p-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors group"
               title="View documentation"
             >
-              <FileText className={`h-4 w-4 ${
+              <FileText className={`h-4 w-4 transition-all ${
                 hasDocumentation
-                  ? 'text-blue-600 dark:text-blue-400'
+                  ? 'text-blue-600 dark:text-blue-400 group-hover:drop-shadow-[0_0_8px_rgba(37,99,235,0.8)] dark:group-hover:drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]'
                   : 'text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400'
               }`} />
             </button>
@@ -336,6 +337,7 @@ function SortableRow({
               autoFocus
               className={`px-2 py-1 text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStatusColor(item.status)}`}
             >
+              <option value="BACKLOG">BACKLOG</option>
               <option value="NOT_STARTED">NOT STARTED</option>
               <option value="IN_PROGRESS">IN PROGRESS</option>
               <option value="TESTING">TESTING</option>
@@ -707,6 +709,8 @@ function SortableRow({
         onClose={() => setShowDocumentation(false)}
         storyId={item.id}
         storyTitle={item.userStory}
+        canEdit={canEdit}
+        canDelete={canDelete}
       />
     </>
   );
@@ -2953,7 +2957,7 @@ function BacklogPage() {
         comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
         break;
       case 'status':
-        const statusOrder = { NOT_STARTED: 0, IN_PROGRESS: 1, TESTING: 2, BLOCKED: 3, DONE: 4, CLOSED: 5 };
+        const statusOrder = { BACKLOG: 0, NOT_STARTED: 1, IN_PROGRESS: 2, TESTING: 3, BLOCKED: 4, DONE: 5, CLOSED: 6 };
         comparison = statusOrder[a.status] - statusOrder[b.status];
         break;
       case 'story':
@@ -3198,7 +3202,7 @@ function BacklogPage() {
     }
 
     if (column === 'status') {
-      const statusOrder = { NOT_STARTED: 0, IN_PROGRESS: 1, TESTING: 2, BLOCKED: 3, DONE: 4, CLOSED: 5 };
+      const statusOrder = { BACKLOG: 0, NOT_STARTED: 1, IN_PROGRESS: 2, TESTING: 3, BLOCKED: 4, DONE: 5, CLOSED: 6 };
       return values.sort((a, b) => statusOrder[a as Status] - statusOrder[b as Status]);
     }
 
@@ -3321,21 +3325,25 @@ function BacklogPage() {
 
   const getStatusColor = (status: Status) => {
     switch (status) {
-      case 'DONE': return 'bg-green-100 text-green-800';
-      case 'CLOSED': return 'bg-slate-100 text-slate-800';
+      case 'BACKLOG': return 'bg-gray-100 text-gray-600';
+      case 'NOT_STARTED': return 'bg-gray-100 text-gray-800';
       case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800';
       case 'TESTING': return 'bg-purple-100 text-purple-800';
       case 'BLOCKED': return 'bg-red-100 text-red-800';
-      case 'NOT_STARTED': return 'bg-gray-100 text-gray-800';
+      case 'DONE': return 'bg-green-100 text-green-800';
+      case 'CLOSED': return 'bg-slate-100 text-slate-800';
     }
   };
 
   const getStatusIcon = (status: Status) => {
     switch (status) {
+      case 'BACKLOG': return <Inbox className="h-4 w-4" />;
+      case 'NOT_STARTED': return <Target className="h-4 w-4" />;
+      case 'IN_PROGRESS': return <Clock className="h-4 w-4" />;
+      case 'TESTING': return <Target className="h-4 w-4" />;
+      case 'BLOCKED': return <AlertCircle className="h-4 w-4" />;
       case 'DONE': return <CheckCircle className="h-4 w-4" />;
       case 'CLOSED': return <Archive className="h-4 w-4" />;
-      case 'IN_PROGRESS': return <Clock className="h-4 w-4" />;
-      case 'BLOCKED': return <AlertCircle className="h-4 w-4" />;
       default: return <Target className="h-4 w-4" />;
     }
   };
@@ -4740,6 +4748,7 @@ function BacklogPage() {
                         onChange={(e) => setNewStory({ ...newStory, status: e.target.value as Status })}
                         className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       >
+                        <option value="BACKLOG">Backlog</option>
                         <option value="NOT_STARTED">Not Started</option>
                         <option value="IN_PROGRESS">In Progress</option>
                         <option value="TESTING">Testing</option>
@@ -4951,6 +4960,7 @@ function BacklogPage() {
                 className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All</option>
+                <option value="BACKLOG">Backlog</option>
                 <option value="NOT_STARTED">Not Started</option>
                 <option value="IN_PROGRESS">In Progress</option>
                 <option value="BLOCKED">Blocked</option>

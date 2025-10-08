@@ -217,7 +217,11 @@ export default function AdminPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setInviteMessage({ type: 'success', text: data.message || 'Invite sent successfully!' });
+        const message = data.tempPassword
+          ? `User created! Email: ${data.email}\nTemporary Password: ${data.tempPassword}\n\nPlease share this with the user. They must change it on first login.`
+          : data.message || 'Invite sent successfully!';
+
+        setInviteMessage({ type: 'success', text: message });
         setInviteEmail('');
         setInviteProjects(['BubbleUp']);
         setShowInviteForm(false);

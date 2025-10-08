@@ -25,13 +25,18 @@ export async function POST(request: NextRequest) {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    // Create user with temporary password
-    const tempPassword = Math.random().toString(36).slice(-12) + 'A1!';
+    // Generate secure temporary password
+    const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const tempPassword = `Welcome2024${randomPart}!`;
 
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password: tempPassword,
-      email_confirm: true
+      email_confirm: true,
+      user_metadata: {
+        requires_password_change: true,
+        temp_password_created_at: new Date().toISOString()
+      }
     });
 
     if (createError) {
@@ -56,27 +61,16 @@ export async function POST(request: NextRequest) {
       console.error('Failed to assign roles:', roleError);
     }
 
-    // Send password reset email to the new user
-    console.log('Sending password reset email to:', email);
-
-    const { data: resetData, error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(email);
-
-    if (resetError) {
-      console.error('Failed to send invite email:', resetError);
-      return NextResponse.json({
-        error: `User created but email failed: ${resetError.message}`,
-        userId: newUser.user.id,
-        email,
-        message: 'User created successfully but failed to send invite email. Please use "Reset Password" button.'
-      }, { status: 500 });
-    }
-
-    console.log('Password reset email sent successfully:', resetData);
+    // Return success with temporary password (for now, we'll display it in the UI)
+    // TODO: Send email with temporary password once SMTP is configured
+    console.log('User created with temporary password:', email);
 
     return NextResponse.json({
-      message: 'User invited successfully! They will receive an email to set their password.',
+      message: `User created successfully! Temporary password: ${tempPassword}`,
       userId: newUser.user.id,
-      email
+      email,
+      tempPassword, // Include in response so admin can share it
+      warning: 'Please share the temporary password with the user. They must change it on first login.'
     });
   } catch (err) {
     console.error('Error inviting user:', err);

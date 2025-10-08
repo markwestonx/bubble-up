@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
-import { User as UserIcon, Mail, Lock, Save } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { User as UserIcon, Mail, Lock, Save, AlertTriangle } from 'lucide-react';
 
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -18,7 +20,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     loadUser();
-  }, []);
+    // Check if user must change password
+    if (searchParams.get('must_change_password') === 'true') {
+      setMustChangePassword(true);
+    }
+  }, [searchParams]);
 
   const loadUser = async () => {
     const supabase = createClient();
@@ -60,10 +66,23 @@ export default function ProfilePage() {
       if (error) {
         setMessage({ type: 'error', text: error.message });
       } else {
-        setMessage({ type: 'success', text: 'Password updated successfully' });
+        // Clear the temp password flag
+        await supabase.auth.updateUser({
+          data: {
+            requires_password_change: false
+          }
+        });
+
+        setMessage({ type: 'success', text: 'Password updated successfully! Redirecting...' });
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
+        setMustChangePassword(false);
+
+        // Redirect to home after 2 seconds
+        setTimeout(() => {
+          router.push('/');
+        }, 2000);
       }
     } catch (err) {
       setMessage({ type: 'error', text: 'Failed to update password' });
@@ -90,6 +109,18 @@ export default function ProfilePage() {
           </div>
           <p className="text-gray-600 dark:text-gray-400">Manage your account settings</p>
         </div>
+
+        {mustChangePassword && (
+          <div className="mb-6 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-yellow-700 dark:text-yellow-300 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-1">Password Change Required</h3>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                You are using a temporary password. Please set a new password before continuing.
+              </p>
+            </div>
+          </div>
+        )}
 
         {message && (
           <div className={`mb-6 p-4 rounded-lg ${
@@ -189,5 +220,17 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      </div>
+    }>
+      <ProfileContent />
+    </Suspense>
   );
 }

@@ -44,7 +44,13 @@ function LoginForm() {
       }
 
       if (data.session) {
-        router.push('/');
+        // Check if user needs to change password
+        const user = data.session.user;
+        if (user.user_metadata?.requires_password_change) {
+          router.push('/profile?must_change_password=true');
+        } else {
+          router.push('/');
+        }
         router.refresh();
       }
     } catch (err) {

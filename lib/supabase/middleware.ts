@@ -27,6 +27,11 @@ export async function updateSession(request: NextRequest) {
   // Refresh session if expired
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Skip middleware for API routes - they handle their own authentication
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return supabaseResponse;
+  }
+
   // Redirect to login if not authenticated and trying to access protected routes
   const publicRoutes = ['/login', '/register', '/reset-password', '/forgot-password', '/auth/callback'];
   const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname.startsWith(route));

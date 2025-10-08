@@ -18,8 +18,37 @@ interface UserProjectRole {
 // POST /api/documentation - Create new documentation entry
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Check for Bearer token in Authorization header
+    const authHeader = request.headers.get('authorization');
+    let supabase;
+    let user = null;
+    let authError = null;
+
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      // Create client with the provided token
+      const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+      supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      const result = await supabase.auth.getUser();
+      user = result.data.user;
+      authError = result.error;
+    } else {
+      // Fall back to cookie-based auth
+      supabase = await createClient();
+      const result = await supabase.auth.getUser();
+      user = result.data.user;
+      authError = result.error;
+    }
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -142,8 +171,37 @@ export async function POST(request: Request) {
 // GET /api/documentation - Retrieve documentation entries
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Check for Bearer token in Authorization header
+    const authHeader = request.headers.get('authorization');
+    let supabase;
+    let user = null;
+    let authError = null;
+
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      // Create client with the provided token
+      const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+      supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      const result = await supabase.auth.getUser();
+      user = result.data.user;
+      authError = result.error;
+    } else {
+      // Fall back to cookie-based auth
+      supabase = await createClient();
+      const result = await supabase.auth.getUser();
+      user = result.data.user;
+      authError = result.error;
+    }
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -208,8 +266,37 @@ export async function GET(request: Request) {
 // PATCH /api/documentation/:id - Update documentation (creates new version)
 export async function PATCH(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Check for Bearer token in Authorization header
+    const authHeader = request.headers.get('authorization');
+    let supabase;
+    let user = null;
+    let authError = null;
+
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      // Create client with the provided token
+      const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+      supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      const result = await supabase.auth.getUser();
+      user = result.data.user;
+      authError = result.error;
+    } else {
+      // Fall back to cookie-based auth
+      supabase = await createClient();
+      const result = await supabase.auth.getUser();
+      user = result.data.user;
+      authError = result.error;
+    }
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -281,6 +368,115 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ documentation: newDoc });
   } catch (err) {
     console.error('Error in PATCH /api/documentation:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// DELETE /api/documentation - Delete documentation entry
+export async function DELETE(request: Request) {
+  try {
+    // Check for Bearer token in Authorization header
+    const authHeader = request.headers.get('authorization');
+    let supabase;
+    let user = null;
+    let authError = null;
+
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      // Create client with the provided token
+      const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+      supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      const result = await supabase.auth.getUser();
+      user = result.data.user;
+      authError = result.error;
+    } else {
+      // Fall back to cookie-based auth
+      supabase = await createClient();
+      const result = await supabase.auth.getUser();
+      user = result.data.user;
+      authError = result.error;
+    }
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const doc_id = searchParams.get('id');
+
+    if (!doc_id) {
+      return NextResponse.json({ error: 'Document ID is required' }, { status: 400 });
+    }
+
+    // Get the document to check permissions
+    const { data: doc, error: fetchError } = await supabase
+      .from('documentation')
+      .select('*, story:story_id(project)')
+      .eq('id', doc_id)
+      .single();
+
+    if (fetchError || !doc) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    }
+
+    // Check user has permission to delete documentation for this project
+    const { data: story } = await supabase
+      .from('backlog_items')
+      .select('project')
+      .eq('id', doc.story_id)
+      .single();
+
+    if (!story) {
+      return NextResponse.json({ error: 'Story not found' }, { status: 404 });
+    }
+
+    const rolesQuery = await supabase
+      .from('user_project_roles')
+      .select('role, project')
+      .eq('user_id', user.id);
+
+    const roles: UserProjectRole[] = (rolesQuery.data as any) || [];
+
+    let hasAccess = false;
+    for (const role of roles as UserProjectRole[]) {
+      // @ts-ignore
+      if ((role.project === story.project || role.project === 'ALL') &&
+          ['admin', 'editor', 'read_write'].includes(role.role)) {
+        hasAccess = true;
+        break;
+      }
+    }
+
+    if (!hasAccess) {
+      return NextResponse.json({
+        error: 'Permission denied. You cannot delete documentation for this project.'
+      }, { status: 403 });
+    }
+
+    // Delete the document
+    const { error: deleteError } = await supabase
+      .from('documentation')
+      .delete()
+      .eq('id', doc_id);
+
+    if (deleteError) {
+      console.error('Error deleting documentation:', deleteError);
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('Error in DELETE /api/documentation:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

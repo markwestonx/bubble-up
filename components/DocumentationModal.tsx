@@ -16,7 +16,11 @@ import {
   Target,
   Settings,
   Zap,
-  RefreshCw
+  RefreshCw,
+  Plus,
+  Edit2,
+  Trash2,
+  Save
 } from 'lucide-react';
 
 interface Documentation {
@@ -66,6 +70,19 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [expandedDoc, setExpandedDoc] = useState<string | null>(null);
 
+  // Form state
+  const [showForm, setShowForm] = useState(false);
+  const [editingDoc, setEditingDoc] = useState<Documentation | null>(null);
+  const [formData, setFormData] = useState({
+    doc_type: 'progress' as string,
+    title: '',
+    content: '',
+    tags: '',
+    category: 'general',
+    priority: 'medium'
+  });
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       loadDocumentation();
@@ -90,6 +107,122 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenForm = (doc?: Documentation) => {
+    if (doc) {
+      setEditingDoc(doc);
+      setFormData({
+        doc_type: doc.doc_type,
+        title: doc.title,
+        content: doc.content,
+        tags: doc.tags.join(', '),
+        category: doc.category,
+        priority: doc.priority
+      });
+    } else {
+      setEditingDoc(null);
+      setFormData({
+        doc_type: 'progress',
+        title: '',
+        content: '',
+        tags: '',
+        category: 'general',
+        priority: 'medium'
+      });
+    }
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingDoc(null);
+    setFormData({
+      doc_type: 'progress',
+      title: '',
+      content: '',
+      tags: '',
+      category: 'general',
+      priority: 'medium'
+    });
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+
+    try {
+      const tags = formData.tags
+        .split(',')
+        .map(t => t.trim())
+        .filter(t => t.length > 0);
+
+      const payload = {
+        story_id: storyId,
+        doc_type: formData.doc_type,
+        title: formData.title,
+        content: formData.content,
+        tags,
+        category: formData.category,
+        priority: formData.priority
+      };
+
+      let response;
+      if (editingDoc) {
+        // Update existing (creates new version)
+        response = await fetch(`/api/documentation?id=${editingDoc.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        // Create new
+        response = await fetch('/api/documentation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save documentation');
+      }
+
+      await loadDocumentation();
+      handleCloseForm();
+    } catch (err: any) {
+      console.error('Error saving documentation:', err);
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (docId: string) => {
+    if (!confirm('Are you sure you want to delete this documentation entry?')) {
+      return;
+    }
+
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/documentation?id=${docId}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete documentation');
+      }
+
+      await loadDocumentation();
+    } catch (err: any) {
+      console.error('Error deleting documentation:', err);
+      setError(err.message);
     }
   };
 
@@ -120,12 +253,21 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-          >
-            <X className="h-6 w-6" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleOpenForm()}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Add Documentation
+            </button>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
         </div>
 
         {/* Filter Tabs */}
@@ -262,6 +404,30 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
                     {/* Expanded Content */}
                     {isExpanded && (
                       <div className="px-4 pb-4 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        {/* Action buttons */}
+                        <div className="flex gap-2 mb-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenForm(doc);
+                            }}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 rounded transition-colors"
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(doc.id);
+                            }}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 rounded transition-colors"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete
+                          </button>
+                        </div>
+
                         <div className="prose prose-sm dark:prose-invert max-w-none">
                           <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                             {doc.content}
@@ -330,6 +496,151 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
           </button>
         </div>
       </div>
+
+      {/* Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col">
+            {/* Form Header */}
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                {editingDoc ? 'Edit Documentation' : 'Add Documentation'}
+              </h3>
+              <button
+                onClick={handleCloseForm}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Form Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {/* Doc Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Type
+                </label>
+                <select
+                  value={formData.doc_type}
+                  onChange={(e) => setFormData({ ...formData, doc_type: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {Object.entries(DOC_TYPE_ICONS).map(([type, config]) => (
+                    <option key={type} value={type}>
+                      {config.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Enter title..."
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Content */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Content
+                </label>
+                <textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  placeholder="Enter documentation content..."
+                  rows={12}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                />
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={formData.tags}
+                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                  placeholder="api, backend, completed"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Category and Priority */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Category
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="general">General</option>
+                    <option value="implementation">Implementation</option>
+                    <option value="architecture">Architecture</option>
+                    <option value="deployment">Deployment</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Priority
+                  </label>
+                  <select
+                    value={formData.priority}
+                    onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Form Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end gap-3">
+              <button
+                onClick={handleCloseForm}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                disabled={saving}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !formData.title || !formData.content}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+              >
+                {saving ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    {editingDoc ? 'Update' : 'Create'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -430,8 +430,21 @@ function SortableRow({
                           }}
                           onBlur={() => setEditingCriteria(null)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') setEditingCriteria(null);
-                            if (e.key === 'Escape') setEditingCriteria(null);
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              // Add new blank criteria below and focus it
+                              const newCriteria = [...item.acceptanceCriteria, ''];
+                              onUpdate(item.id, { acceptanceCriteria: newCriteria });
+                              setEditingCriteria(newCriteria.length - 1);
+                            } else if (e.key === 'Escape') {
+                              e.preventDefault();
+                              // If current criteria is empty, remove it
+                              if (!criteria.trim()) {
+                                const newCriteria = item.acceptanceCriteria.filter((_, i) => i !== idx);
+                                onUpdate(item.id, { acceptanceCriteria: newCriteria });
+                              }
+                              setEditingCriteria(null);
+                            }
                           }}
                           autoFocus
                           className="flex-1 px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -3793,6 +3806,30 @@ function BacklogPage() {
                             newCriteria[idx] = e.target.value;
                             setEditableCombinedStory({...editableCombinedStory, acceptanceCriteria: newCriteria});
                           }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              // Add new blank criteria below and focus it
+                              const newCriteria = [...editableCombinedStory.acceptanceCriteria, ''];
+                              setEditableCombinedStory({...editableCombinedStory, acceptanceCriteria: newCriteria});
+                              // Focus will be handled automatically by React
+                              setTimeout(() => {
+                                const inputs = document.querySelectorAll('input[value=""]');
+                                const lastEmpty = inputs[inputs.length - 1] as HTMLInputElement;
+                                if (lastEmpty) lastEmpty.focus();
+                              }, 0);
+                            } else if (e.key === 'Escape') {
+                              e.preventDefault();
+                              // If current criteria is empty, remove it
+                              if (!criteria.trim()) {
+                                const newCriteria = editableCombinedStory.acceptanceCriteria.filter((_, i) => i !== idx);
+                                setEditableCombinedStory({...editableCombinedStory, acceptanceCriteria: newCriteria});
+                              } else {
+                                // Just blur the input
+                                (e.target as HTMLInputElement).blur();
+                              }
+                            }
+                          }}
                           className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <button
@@ -3920,8 +3957,15 @@ function BacklogPage() {
             onChange={(e) => handleContextMenuSearch(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && contextMenu.searchTerm.trim()) {
-                // For User Story column, apply text search filter on Enter
-                if (contextMenu.column === 'story') {
+                // Get filtered options
+                const filteredOptions = getColumnOptions(contextMenu.column)
+                  .filter(option => !contextMenu.searchTerm || formatDisplayValue(contextMenu.column, option).toLowerCase().includes(contextMenu.searchTerm.toLowerCase()));
+
+                // If exactly one option matches, auto-select it
+                if (filteredOptions.length === 1) {
+                  handleSingleSelect(filteredOptions[0]);
+                } else if (contextMenu.column === 'story') {
+                  // For User Story column with multiple matches, apply text search filter
                   setContextMenuFilters(prev => {
                     const filtered = prev.filter(f => f.column !== 'story');
                     return [...filtered, {
@@ -3967,53 +4011,73 @@ function BacklogPage() {
           ) : (
             <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded mb-2">
               {/* Select All Option */}
-              <label className="flex items-center px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer border-b border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const allOptions = getColumnOptions(contextMenu.column);
+                  if (contextMenu.selectedValues.size === allOptions.length) {
+                    // Deselect all
+                    setContextMenu({ ...contextMenu, selectedValues: new Set() });
+                  } else {
+                    // Select all
+                    setContextMenu({ ...contextMenu, selectedValues: new Set(allOptions) });
+                  }
+                }}
+                className="flex items-center px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer border-b border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+              >
                 <input
                   type="checkbox"
                   checked={contextMenu.selectedValues.size === 0 || contextMenu.selectedValues.size === getColumnOptions(contextMenu.column).length}
-                  onChange={() => {
-                    const allOptions = getColumnOptions(contextMenu.column);
-                    if (contextMenu.selectedValues.size === allOptions.length) {
-                      // Deselect all
-                      setContextMenu({ ...contextMenu, selectedValues: new Set() });
-                    } else {
-                      // Select all
-                      setContextMenu({ ...contextMenu, selectedValues: new Set(allOptions) });
-                    }
+                  onChange={(e) => {
+                    e.stopPropagation();
                   }}
-                  className="mr-2 rounded border-gray-300 dark:border-gray-600"
+                  className="mr-2 rounded border-gray-300 dark:border-gray-600 pointer-events-none"
                 />
                 (Select All)
-              </label>
+              </div>
               {getColumnOptions(contextMenu.column)
                 .filter(option => !contextMenu.searchTerm || formatDisplayValue(contextMenu.column, option).toLowerCase().includes(contextMenu.searchTerm.toLowerCase()))
                 .map((option) => (
-                  <label
+                  <div
                     key={option}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleMultiSelectValue(option);
+                    }}
                     className="flex items-center px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                   >
                     <input
                       type="checkbox"
                       checked={contextMenu.selectedValues.has(option)}
-                      onChange={() => toggleMultiSelectValue(option)}
-                      className="mr-2 rounded border-gray-300 dark:border-gray-600"
+                      onChange={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="mr-2 rounded border-gray-300 dark:border-gray-600 pointer-events-none"
                     />
                     {formatDisplayValue(contextMenu.column, option)}
-                  </label>
+                  </div>
                 ))}
             </div>
           )}
 
           {/* Multi-Select Checkbox */}
-          <label className="flex items-center mb-2 text-sm text-gray-900 dark:text-gray-100 cursor-pointer">
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleMultiSelectMode();
+            }}
+            className="flex items-center mb-2 text-sm text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 px-2 py-1 rounded transition-colors"
+          >
             <input
               type="checkbox"
               checked={contextMenu.multiSelectMode}
-              onChange={toggleMultiSelectMode}
-              className="mr-2 rounded border-gray-300 dark:border-gray-600"
+              onChange={(e) => {
+                e.stopPropagation();
+              }}
+              className="mr-2 rounded border-gray-300 dark:border-gray-600 pointer-events-none"
             />
             Select Multiple Items
-          </label>
+          </div>
 
           {/* Action Buttons */}
           {contextMenu.multiSelectMode && (
@@ -4640,6 +4704,11 @@ function BacklogPage() {
                         type="text"
                         value={newStory.userStory}
                         onChange={(e) => setNewStory({ ...newStory, userStory: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && newStory.userStory.trim()) {
+                            handleSaveNewStory();
+                          }
+                        }}
                         className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         placeholder="As a [role], I need [feature] so that [benefit]..."
                         autoFocus

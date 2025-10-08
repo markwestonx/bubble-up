@@ -113,6 +113,7 @@ export async function DELETE(request: NextRequest) {
       }
     });
 
+    // Delete the role
     const { error } = await supabaseAdmin
       .from('user_project_roles')
       .delete()
@@ -121,6 +122,29 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Check if user has any remaining roles
+    const { data: remainingRoles, error: checkError } = await supabaseAdmin
+      .from('user_project_roles')
+      .select('id')
+      .eq('user_id', userId);
+
+    if (checkError) {
+      console.error('Failed to check remaining roles:', checkError);
+    }
+
+    // If user has no more roles, delete them from Supabase Auth
+    if (!remainingRoles || remainingRoles.length === 0) {
+      const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+      if (deleteUserError) {
+        console.error('Failed to delete user from auth:', deleteUserError);
+        return NextResponse.json({
+          success: true,
+          warning: 'Role deleted but failed to remove user from auth system'
+        });
+      }
     }
 
     return NextResponse.json({ success: true });

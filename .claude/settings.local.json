@@ -37,7 +37,15 @@
       "Bash(powershell:*)",
       "Bash(npm ls:*)",
       "Bash(npx supabase:*)",
-      "Bash(npx vercel:*)"
+      "Bash(npx vercel:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(del appauthcallbackroute.ts)",
+      "Bash(del create-story-212.js)",
+      "Bash(psql:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

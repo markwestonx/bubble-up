@@ -214,10 +214,29 @@ export async function GET(request: Request) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const include_versions = searchParams.get('include_versions') === 'true';
 
+    // Get user's authorized projects
+    const rolesQuery = await supabase
+      .from('user_project_roles')
+      .select('role, project')
+      .eq('user_id', user.id);
+
+    const roles: UserProjectRole[] = (rolesQuery.data as any) || [];
+    const hasAllAccess = roles.some((r: UserProjectRole) => r.project === 'ALL');
+    const authorizedProjects = roles.map((r: UserProjectRole) => r.project);
+
+    if (!hasAllAccess && authorizedProjects.length === 0) {
+      return NextResponse.json({
+        documentation: [],
+        total: 0,
+        limit,
+        offset
+      });
+    }
+
     // Build query
     let query = supabase
       .from('documentation')
-      .select('*', { count: 'exact' });
+      .select('*, story:story_id(project)', { count: 'exact' });
 
     // Filter by story_id
     if (story_id) {
@@ -249,9 +268,18 @@ export async function GET(request: Request) {
       }, { status: 500 });
     }
 
+    // Filter docs to only include those from authorized projects
+    let filteredDocs = docs || [];
+    if (!hasAllAccess) {
+      filteredDocs = filteredDocs.filter((doc: any) => {
+        const storyProject = doc.story?.project;
+        return storyProject && authorizedProjects.includes(storyProject);
+      });
+    }
+
     return NextResponse.json({
-      documentation: docs || [],
-      total: count || 0,
+      documentation: filteredDocs,
+      total: filteredDocs.length,
       limit,
       offset
     });
@@ -321,6 +349,40 @@ export async function PATCH(request: Request) {
 
     if (fetchError || !existingDoc) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    }
+
+    // Check user has permission to edit documentation for this project
+    const { data: story } = await supabase
+      .from('backlog_items')
+      .select('project')
+      .eq('id', existingDoc.story_id)
+      .single();
+
+    if (!story) {
+      return NextResponse.json({ error: 'Story not found' }, { status: 404 });
+    }
+
+    const rolesQuery = await supabase
+      .from('user_project_roles')
+      .select('role, project')
+      .eq('user_id', user.id);
+
+    const roles: UserProjectRole[] = (rolesQuery.data as any) || [];
+
+    let hasAccess = false;
+    for (const role of roles as UserProjectRole[]) {
+      // @ts-ignore
+      if ((role.project === story.project || role.project === 'ALL') &&
+          ['admin', 'editor', 'read_write'].includes(role.role)) {
+        hasAccess = true;
+        break;
+      }
+    }
+
+    if (!hasAccess) {
+      return NextResponse.json({
+        error: 'Permission denied. You cannot edit documentation for this project.'
+      }, { status: 403 });
     }
 
     // Mark old version as not latest

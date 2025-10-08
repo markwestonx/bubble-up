@@ -2348,6 +2348,9 @@ function BacklogPage() {
     // Don't load data if not authenticated
     if (!user) return;
 
+    // Wait for authorized projects to load
+    if (authorizedProjects.length === 0) return;
+
     setIsMounted(true);
 
     // Load from Supabase - single source of truth
@@ -2357,10 +2360,18 @@ function BacklogPage() {
         setLoadError(null);
 
         const supabase = createClient();
-        const { data, error } = await supabase
+
+        // Build query with project filtering based on user's authorized projects
+        let query = supabase
           .from('backlog_items')
-          .select('*')
-          .order('display_order', { ascending: true });
+          .select('*');
+
+        // If user doesn't have 'ALL' access, filter by specific projects
+        if (!authorizedProjects.includes('ALL')) {
+          query = query.in('project', authorizedProjects);
+        }
+
+        const { data, error } = await query.order('display_order', { ascending: true });
 
         if (error) {
           console.error('Failed to load from Supabase:', error);
@@ -2420,7 +2431,7 @@ function BacklogPage() {
         setIsLoading(false);
       }
     })();
-  }, [user]);
+  }, [user, authorizedProjects]);
 
   const [filter, setFilter] = useState<{
     epic: Epic | 'all';

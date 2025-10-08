@@ -57,12 +57,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Send password reset email to the new user
-    const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bubble-up.vercel.app'}/auth/callback?next=/reset-password`;
-    console.log('Sending password reset email to:', email, 'with redirect:', redirectUrl);
+    console.log('Sending password reset email to:', email);
 
-    const { data: resetData, error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectUrl
-    });
+    const { data: resetData, error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(email);
 
     if (resetError) {
       console.error('Failed to send invite email:', resetError);

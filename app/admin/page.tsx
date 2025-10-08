@@ -245,9 +245,7 @@ export default function AdminPage() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
 
       if (error) {
         setInviteMessage({ type: 'error', text: `Failed to send reset email: ${error.message}` });

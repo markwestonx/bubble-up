@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Users, UserPlus, Shield, Mail, Trash2, Edit2, Save, X, ChevronDown, ChevronRight, FolderOpen, KeyRound } from 'lucide-react';
+import { Users, UserPlus, Shield, Mail, Trash2, Edit2, Save, X, ChevronDown, ChevronRight, FolderOpen, KeyRound, User } from 'lucide-react';
 
 interface User {
   id: string;
@@ -36,7 +36,7 @@ export default function AdminPage() {
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<string>('read_write');
-  const [inviteProject, setInviteProject] = useState('BubbleUp');
+  const [inviteProjects, setInviteProjects] = useState<string[]>(['BubbleUp']);
   const [inviting, setInviting] = useState(false);
   const [inviteMessage, setInviteMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -195,6 +195,12 @@ export default function AdminPage() {
   const handleInviteUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setInviteMessage(null);
+
+    if (inviteProjects.length === 0) {
+      setInviteMessage({ type: 'error', text: 'Please select at least one project' });
+      return;
+    }
+
     setInviting(true);
 
     try {
@@ -204,7 +210,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           email: inviteEmail,
           role: inviteRole,
-          project: inviteProject
+          projects: inviteProjects
         })
       });
 
@@ -213,6 +219,7 @@ export default function AdminPage() {
       if (response.ok) {
         setInviteMessage({ type: 'success', text: data.message || 'Invite sent successfully!' });
         setInviteEmail('');
+        setInviteProjects(['BubbleUp']);
         setShowInviteForm(false);
         loadData(); // Reload users and roles
       } else {
@@ -225,13 +232,21 @@ export default function AdminPage() {
     }
   };
 
+  const toggleProjectSelection = (project: string) => {
+    setInviteProjects(prev =>
+      prev.includes(project)
+        ? prev.filter(p => p !== project)
+        : [...prev, project]
+    );
+  };
+
   const handleResetPassword = async (email: string) => {
     if (!confirm(`Send password reset email to ${email}?`)) return;
 
     try {
       const supabase = createClient();
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
       });
 
       if (error) {
@@ -300,9 +315,18 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Shield className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <Shield className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
+            </div>
+            <button
+              onClick={() => router.push('/profile')}
+              className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <User className="h-5 w-5" />
+              <span>Profile</span>
+            </button>
           </div>
           <p className="text-gray-600 dark:text-gray-400">Manage users and their project roles</p>
         </div>
@@ -355,15 +379,47 @@ export default function AdminPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project</label>
-                <input
-                  type="text"
-                  value={inviteProject}
-                  onChange={(e) => setInviteProject(e.target.value)}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg"
-                  placeholder="BubbleUp"
-                />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Projects ({inviteProjects.length} selected)
+                </label>
+                <div className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                  {/* ALL project option */}
+                  <div
+                    onClick={() => toggleProjectSelection('ALL')}
+                    className="flex items-center px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer rounded"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={inviteProjects.includes('ALL')}
+                      onChange={() => {}}
+                      className="mr-2 pointer-events-none"
+                    />
+                    <span className="text-gray-900 dark:text-gray-100 font-medium">ALL</span>
+                  </div>
+
+                  {/* Individual project options */}
+                  {projects.map((project) => (
+                    <div
+                      key={project}
+                      onClick={() => toggleProjectSelection(project)}
+                      className="flex items-center px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer rounded"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={inviteProjects.includes(project)}
+                        onChange={() => {}}
+                        className="mr-2 pointer-events-none"
+                      />
+                      <span className="text-gray-900 dark:text-gray-100">{project}</span>
+                    </div>
+                  ))}
+
+                  {projects.length === 0 && (
+                    <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                      No projects found
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2 pt-4">
                 <button

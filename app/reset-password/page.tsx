@@ -15,12 +15,20 @@ function ResetPasswordForm() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
-    // Check if we have the recovery code
-    const code = searchParams.get('code');
-    if (!code) {
-      setMessage({ type: 'error', text: 'Invalid reset link. Please request a new password reset email.' });
-    }
-  }, [searchParams]);
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        setMessage({
+          type: 'error',
+          text: 'Session expired or invalid. Please click the reset link in your email again.'
+        });
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();

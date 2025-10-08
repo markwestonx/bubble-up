@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-export type Role = 'admin' | 'editor' | 'read_write' | 'read_only';
+export type Role = 'admin' | 'editor' | 'contributor' | 'read_only';
 
 export interface UserPermissions {
   canView: boolean;
@@ -96,7 +96,7 @@ function getPermissionsForRole(role: Role): UserPermissions {
         canManageProjects: true,
       };
 
-    case 'read_write':
+    case 'contributor':
       return {
         canView: true,
         canCreate: true,

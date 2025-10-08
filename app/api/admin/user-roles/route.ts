@@ -55,9 +55,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!['admin', 'editor', 'read_write', 'read_only'].includes(role)) {
+    if (!['admin', 'editor', 'contributor', 'read_only'].includes(role)) {
       return NextResponse.json(
-        { error: 'Role must be admin, editor, read_write, or read_only' },
+        { error: 'Role must be admin, editor, contributor, or read_only' },
         { status: 400 }
       );
     }

@@ -130,12 +130,12 @@ function SortableRow({
   } = useSortable({ id: item.id });
 
   // Determine if user can edit this specific item
-  // read_write role can only edit items they created
+  // contributor role can only edit items they created
   // editor and admin can edit all items
   const canEditThisItem = canEdit && (
     userRole === 'admin' ||
     userRole === 'editor' ||
-    (userRole === 'read_write' && item.created_by === currentUserId) ||
+    (userRole === 'contributor' && item.created_by === currentUserId) ||
     !item.created_by // Legacy items without created_by can be edited by anyone with canEdit
   );
 

@@ -110,7 +110,7 @@ export async function POST(request: Request) {
     for (const role of roles as UserProjectRole[]) {
       // @ts-ignore - TypeScript incorrectly infers role as never despite explicit type assertions
       if ((role.project === story.project || role.project === 'ALL') &&
-          ['admin', 'editor', 'read_write'].includes(role.role)) {
+          ['admin', 'editor', 'contributor'].includes(role.role)) {
         hasAccess = true;
         break;
       }
@@ -373,7 +373,7 @@ export async function PATCH(request: Request) {
     for (const role of roles as UserProjectRole[]) {
       // @ts-ignore
       if ((role.project === story.project || role.project === 'ALL') &&
-          ['admin', 'editor', 'read_write'].includes(role.role)) {
+          ['admin', 'editor', 'contributor'].includes(role.role)) {
         hasAccess = true;
         break;
       }
@@ -513,7 +513,7 @@ export async function DELETE(request: Request) {
     for (const role of roles as UserProjectRole[]) {
       // @ts-ignore
       if ((role.project === story.project || role.project === 'ALL') &&
-          ['admin', 'editor', 'read_write'].includes(role.role)) {
+          ['admin', 'editor', 'contributor'].includes(role.role)) {
         hasAccess = true;
         break;
       }

@@ -7,7 +7,7 @@ interface UserRole {
   id: string;
   user_id: string;
   project: string;
-  role: 'admin' | 'editor' | 'read_write' | 'read_only';
+  role: 'admin' | 'editor' | 'contributor' | 'read_only';
 }
 
 interface Props {
@@ -22,7 +22,7 @@ export default function UserRolesManager({ userId, userEmail, onClose }: Props) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState('');
-  const [selectedRole, setSelectedRole] = useState<'admin' | 'editor' | 'read_write' | 'read_only'>('read_write');
+  const [selectedRole, setSelectedRole] = useState<'admin' | 'editor' | 'contributor' | 'read_only'>('contributor');
   const [assigning, setAssigning] = useState(false);
 
   useEffect(() => {
@@ -126,7 +126,7 @@ export default function UserRolesManager({ userId, userEmail, onClose }: Props) 
     switch (role) {
       case 'admin': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
       case 'editor': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
-      case 'read_write': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'contributor': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
       case 'read_only': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
@@ -136,7 +136,7 @@ export default function UserRolesManager({ userId, userEmail, onClose }: Props) 
     switch (role) {
       case 'admin': return 'Admin';
       case 'editor': return 'Editor';
-      case 'read_write': return 'Contributor';
+      case 'contributor': return 'Contributor';
       case 'read_only': return 'Read Only';
       default: return role;
     }
@@ -187,11 +187,11 @@ export default function UserRolesManager({ userId, userEmail, onClose }: Props) 
 
               <select
                 value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value as 'admin' | 'editor' | 'read_write' | 'read_only')}
+                onChange={(e) => setSelectedRole(e.target.value as 'admin' | 'editor' | 'contributor' | 'read_only')}
                 className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="read_only">Read Only (View Only)</option>
-                <option value="read_write">Contributor (Create & Edit Own)</option>
+                <option value="contributor">Contributor (Create & Edit Own)</option>
                 <option value="editor">Editor (Edit All Items)</option>
                 <option value="admin">Admin (Full Access)</option>
               </select>

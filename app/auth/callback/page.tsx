@@ -12,27 +12,60 @@ function AuthCallbackContent() {
   useEffect(() => {
     const handleCallback = async () => {
       const code = searchParams.get('code');
-      const next = searchParams.get('next') || '/';
+      const token_hash = searchParams.get('token_hash');
+      const type = searchParams.get('type');
+      const error_param = searchParams.get('error');
+      const error_description = searchParams.get('error_description');
+      const next = searchParams.get('next') || '/reset-password';
 
-      if (!code) {
-        setError('No authentication code found');
-        setTimeout(() => router.push('/login'), 2000);
+      // Handle errors from Supabase
+      if (error_param) {
+        const errorMsg = error_description || error_param;
+        setError(decodeURIComponent(errorMsg));
+        setTimeout(() => router.push('/login'), 3000);
         return;
       }
 
       const supabase = createClient();
 
-      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      // Handle PKCE flow (code parameter)
+      if (code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
-      if (exchangeError) {
-        console.error('Error exchanging code:', exchangeError);
-        setError(exchangeError.message);
-        setTimeout(() => router.push('/login'), 2000);
+        if (exchangeError) {
+          console.error('Error exchanging code:', exchangeError);
+          setError(exchangeError.message);
+          setTimeout(() => router.push('/login'), 2000);
+          return;
+        }
+
+        // Successfully authenticated
+        router.push(next);
         return;
       }
 
-      // Successfully authenticated
-      router.push(next);
+      // Handle token_hash flow (recovery links)
+      if (token_hash && type) {
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          type: type as any,
+          token_hash,
+        });
+
+        if (verifyError) {
+          console.error('Error verifying token:', verifyError);
+          setError(verifyError.message);
+          setTimeout(() => router.push('/login'), 2000);
+          return;
+        }
+
+        // Successfully authenticated
+        router.push(next);
+        return;
+      }
+
+      // No auth parameters found
+      setError('No authentication code found');
+      setTimeout(() => router.push('/login'), 2000);
     };
 
     handleCallback();

@@ -56,10 +56,31 @@ export function usePermissions(project: string) {
         const allProjectsRole = roles.find((r: UserRole) => r.project === 'ALL') as UserRole | undefined;
 
         const effectiveRole = projectRole?.role || allProjectsRole?.role || null;
+
+        console.log('🔐 Permission check:', {
+          currentProject: project,
+          userRoles: roles,
+          projectRole: projectRole?.role,
+          allProjectsRole: allProjectsRole?.role,
+          effectiveRole
+        });
+
         setRole(effectiveRole);
 
         if (effectiveRole) {
-          setPermissions(getPermissionsForRole(effectiveRole));
+          const newPermissions = getPermissionsForRole(effectiveRole);
+          console.log('✅ Setting permissions:', newPermissions);
+          setPermissions(newPermissions);
+        } else {
+          console.log('❌ No role found - setting read-only permissions');
+          setPermissions({
+            canView: false,
+            canCreate: false,
+            canEdit: false,
+            canDelete: false,
+            canManageUsers: false,
+            canManageProjects: false,
+          });
         }
       } catch (err) {
         console.error('Error loading permissions:', err);

@@ -2384,8 +2384,8 @@ function BacklogPage() {
           query = query.in('project', authorizedProjects);
         }
 
-        // Don't order by display_order here - let client-side custom order handle it
-        const { data, error } = await query;
+        // Order by display_order as fallback (user custom order will override)
+        const { data, error } = await query.order('display_order', { ascending: true });
 
         if (error) {
           console.error('Failed to load from Supabase:', error);
@@ -3097,7 +3097,8 @@ function BacklogPage() {
     const storyToAdd = {
       ...newStory,
       acceptanceCriteria: newStory.acceptanceCriteria.filter(c => c.trim() !== ''),
-      created_by: user?.id // Set the creator
+      created_by: user?.id, // Set the creator ID
+      creator_email: user?.email || 'Unknown' // Set the creator email
     };
 
     setBacklogItems([storyToAdd, ...backlogItems]);

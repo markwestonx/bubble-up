@@ -96,6 +96,7 @@ interface SortableRowProps {
   allUsers: Array<{ id: string; email: string }>;
   allProjects: string[];
   showProjectColumn: boolean;
+  hasDocumentation: boolean;
 }
 
 function SortableRow({
@@ -222,7 +223,11 @@ function SortableRow({
               className="p-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors group"
               title="View documentation"
             >
-              <FileText className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+              <FileText className={`h-4 w-4 ${
+                props.hasDocumentation
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400'
+              }`} />
             </button>
           </div>
         </td>
@@ -2463,6 +2468,7 @@ function BacklogPage() {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [projectUsers, setProjectUsers] = useState<Array<{ id: string; email: string }>>([]);
   const [allUsers, setAllUsers] = useState<Array<{ id: string; email: string }>>([]);
+  const [storiesWithDocs, setStoriesWithDocs] = useState<Set<string>>(new Set());
 
   // Context menu filtering state
   const [contextMenu, setContextMenu] = useState<{
@@ -2608,6 +2614,37 @@ function BacklogPage() {
 
     loadProjectUsers();
   }, [currentProject]);
+
+  // Load documentation status for all stories
+  React.useEffect(() => {
+    const loadDocumentationStatus = async () => {
+      if (!user || backlogItems.length === 0) return;
+
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) return;
+
+        // Fetch all documentation for visible stories
+        const response = await fetch(`/api/documentation?limit=1000`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const storyIds = new Set(data.documentation.map((doc: any) => doc.story_id));
+          setStoriesWithDocs(storyIds);
+        }
+      } catch (err) {
+        console.error('Error loading documentation status:', err);
+      }
+    };
+
+    loadDocumentationStatus();
+  }, [user, backlogItems.length]);
 
   // New story creation state
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -4797,6 +4834,7 @@ function BacklogPage() {
                       allUsers={allUsers}
                       allProjects={projects.filter(p => p !== 'All Projects')}
                       showProjectColumn={currentProject === 'All Projects'}
+                      hasDocumentation={storiesWithDocs.has(item.id)}
                     />
                   ))}
                 </SortableContext>

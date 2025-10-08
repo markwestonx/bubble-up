@@ -94,7 +94,19 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
     setError(null);
 
     try {
-      const response = await fetch(`/api/documentation?story_id=${storyId}&limit=100`);
+      // Get auth token from Supabase client
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(`/api/documentation?story_id=${storyId}&limit=100`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
       const data = await response.json();
 
       if (!response.ok) {
@@ -153,6 +165,14 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
     setError(null);
 
     try {
+      // Get auth token from Supabase client
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
       const tags = formData.tags
         .split(',')
         .map(t => t.trim())
@@ -173,14 +193,20 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
         // Update existing (creates new version)
         response = await fetch(`/api/documentation?id=${editingDoc.id}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
           body: JSON.stringify(payload)
         });
       } else {
         // Create new
         response = await fetch('/api/documentation', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
           body: JSON.stringify(payload)
         });
       }
@@ -209,8 +235,19 @@ export default function DocumentationModal({ isOpen, onClose, storyId, storyTitl
     setError(null);
 
     try {
+      // Get auth token from Supabase client
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
       const response = await fetch(`/api/documentation?id=${docId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
       });
 
       const data = await response.json();

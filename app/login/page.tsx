@@ -39,7 +39,8 @@ function LoginForm() {
       if (signInError) {
         // Log failed login attempt
         try {
-          await fetch('/api/access-log', {
+          console.log('🔐 Logging failed login for:', email);
+          const logResponse = await fetch('/api/access-log', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -49,11 +50,19 @@ function LoginForm() {
                 error: signInError.message,
                 timestamp: new Date().toISOString()
               }
-            })
+            }),
+            // Use keepalive to ensure request completes
+            keepalive: true
           });
+
+          if (!logResponse.ok) {
+            const errorData = await logResponse.json();
+            console.error('❌ Failed to log access attempt:', logResponse.status, errorData);
+          } else {
+            console.log('✅ Failed login logged successfully');
+          }
         } catch (logError) {
-          // Silently fail if logging doesn't work
-          console.error('Failed to log access attempt:', logError);
+          console.error('❌ Error calling access-log API:', logError);
         }
 
         // Generic error message for security
@@ -65,7 +74,8 @@ function LoginForm() {
       if (data.session) {
         // Log successful login
         try {
-          await fetch('/api/access-log', {
+          console.log('🔐 Logging successful login for:', email, 'userId:', data.session.user.id);
+          const logResponse = await fetch('/api/access-log', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -75,11 +85,19 @@ function LoginForm() {
               metadata: {
                 timestamp: new Date().toISOString()
               }
-            })
+            }),
+            // Use keepalive to ensure request completes even if page navigates away
+            keepalive: true
           });
+
+          if (!logResponse.ok) {
+            const errorData = await logResponse.json();
+            console.error('❌ Failed to log access attempt:', logResponse.status, errorData);
+          } else {
+            console.log('✅ Access log created successfully');
+          }
         } catch (logError) {
-          // Silently fail if logging doesn't work
-          console.error('Failed to log access attempt:', logError);
+          console.error('❌ Error calling access-log API:', logError);
         }
 
         // Check if user needs to change password

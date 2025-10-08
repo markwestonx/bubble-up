@@ -116,7 +116,8 @@ function SortableRow({
   userRole,
   allUsers,
   allProjects,
-  showProjectColumn
+  showProjectColumn,
+  hasDocumentation
 }: SortableRowProps) {
   const {
     attributes,
@@ -224,7 +225,7 @@ function SortableRow({
               title="View documentation"
             >
               <FileText className={`h-4 w-4 ${
-                props.hasDocumentation
+                hasDocumentation
                   ? 'text-blue-600 dark:text-blue-400'
                   : 'text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400'
               }`} />

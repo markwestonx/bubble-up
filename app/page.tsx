@@ -2384,7 +2384,8 @@ function BacklogPage() {
           query = query.in('project', authorizedProjects);
         }
 
-        const { data, error } = await query.order('display_order', { ascending: true });
+        // Don't order by display_order here - let client-side custom order handle it
+        const { data, error } = await query;
 
         if (error) {
           console.error('Failed to load from Supabase:', error);
@@ -2794,11 +2795,29 @@ function BacklogPage() {
 
   // Close context menu on click outside
   React.useEffect(() => {
-    const handleClickOutside = () => setContextMenu(null);
-    if (contextMenu) {
+    if (!contextMenu) return;
+
+    // Use a small delay to prevent the opening click from immediately closing the menu
+    const timeoutId = setTimeout(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        // Check if click is inside the context menu
+        const contextMenuElement = document.querySelector('[data-context-menu]');
+        if (contextMenuElement && contextMenuElement.contains(target)) {
+          return; // Don't close if clicking inside the menu
+        }
+        setContextMenu(null);
+      };
+
       document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }
+
+      // Cleanup function
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [contextMenu]);
 
   // Filter items
@@ -2984,11 +3003,19 @@ function BacklogPage() {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = backlogItems.findIndex((item) => item.id === active.id);
-      const newIndex = backlogItems.findIndex((item) => item.id === over.id);
+      // Work with sortedItems (the filtered view) instead of backlogItems
+      const oldIndex = sortedItems.findIndex((item) => item.id === active.id);
+      const newIndex = sortedItems.findIndex((item) => item.id === over.id);
 
-      const newItems = arrayMove(backlogItems, oldIndex, newIndex);
-      setBacklogItems(newItems);
+      // Move items in the sorted/filtered view
+      const reorderedItems = arrayMove(sortedItems, oldIndex, newIndex);
+
+      // Update the custom order map with new positions
+      const newOrderMap = new Map(userCustomOrder);
+      reorderedItems.forEach((item, index) => {
+        newOrderMap.set(item.id, index);
+      });
+      setUserCustomOrder(newOrderMap);
 
       // Save user-specific custom order to database
       if (isCustomOrder) {
@@ -2997,14 +3024,13 @@ function BacklogPage() {
           const { data: { user } } = await supabase.auth.getUser();
           if (!user) return;
 
-          // Create order records for this project
-          const orderRecords = (currentProject === 'All Projects' ? newItems : newItems.filter(item => item.project === currentProject))
-            .map((item, index) => ({
-              user_id: user.id,
-              project: currentProject,
-              item_id: item.id,
-              display_order: index,
-            }));
+          // Create order records for the displayed items
+          const orderRecords = reorderedItems.map((item, index) => ({
+            user_id: user.id,
+            project: currentProject,
+            item_id: item.id,
+            display_order: index,
+          }));
 
           const { error } = await supabase
             .from('user_custom_order')
@@ -3997,11 +4023,20 @@ function BacklogPage() {
       {/* Context Menu Filter - Excel Style */}
       {contextMenu && (
         <div
-          className={`fixed bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl p-3 z-50 ${contextMenu.column === 'story' ? 'w-[600px]' : 'w-64'}`}
-          style={{ top: contextMenu.y, left: contextMenu.x }}
+          data-context-menu
+          className={`fixed bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl p-3 z-50 ${contextMenu.column === 'story' ? 'w-[600px]' : 'w-64'} min-w-64 min-h-[200px] flex flex-col`}
+          style={{
+            top: contextMenu.y,
+            left: contextMenu.x,
+            resize: 'both',
+            maxWidth: '1000px',
+            maxHeight: '1000px',
+            overflow: 'hidden'
+          }}
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
-          <div className="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300">
+          <div className="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0">
             Filter by {contextMenu.column}
           </div>
 
@@ -4038,12 +4073,12 @@ function BacklogPage() {
                 setContextMenu(null);
               }
             }}
-            className="w-full px-2 py-1 mb-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full px-2 py-1 mb-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500 flex-shrink-0"
           />
 
           {/* Options List */}
           {!contextMenu.multiSelectMode ? (
-            <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded mb-2">
+            <div className="flex-1 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded mb-2 min-h-0">
               <div
                 onClick={() => {
                   if (contextMenu?.column) clearContextMenuFilter(contextMenu.column);
@@ -4066,7 +4101,7 @@ function BacklogPage() {
                 ))}
             </div>
           ) : (
-            <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded mb-2">
+            <div className="flex-1 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded mb-2 min-h-0">
               {/* Select All Option */}
               <div
                 onClick={(e) => {
@@ -4123,7 +4158,7 @@ function BacklogPage() {
               e.stopPropagation();
               toggleMultiSelectMode();
             }}
-            className="flex items-center mb-2 text-sm text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 px-2 py-1 rounded transition-colors"
+            className="flex items-center mb-2 text-sm text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 px-2 py-1 rounded transition-colors flex-shrink-0"
           >
             <input
               type="checkbox"
@@ -4138,7 +4173,7 @@ function BacklogPage() {
 
           {/* Action Buttons */}
           {contextMenu.multiSelectMode && (
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 flex-shrink-0">
               <button
                 onClick={applyMultiSelectFilter}
                 className="flex-1 px-3 py-1.5 text-sm bg-blue-600 dark:bg-blue-500 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600"
@@ -4156,7 +4191,7 @@ function BacklogPage() {
 
           {/* Clear Filters */}
           {contextMenuFilters.length > 0 && (
-            <div className="mt-2 space-y-1">
+            <div className="mt-2 space-y-1 flex-shrink-0">
               <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Active Filters:</div>
               {contextMenuFilters.map((filter, idx) => (
                 <div key={idx} className="flex items-center justify-between text-xs bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded">

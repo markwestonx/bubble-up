@@ -36,7 +36,11 @@ export default function UserRolesManager({ userId, userEmail, onClose }: Props) 
       const data = await response.json();
 
       if (response.ok && data.roles) {
-        setRoles(data.roles);
+        // Sort roles by project name alphabetically
+        const sortedRoles = data.roles.sort((a: UserRole, b: UserRole) =>
+          a.project.localeCompare(b.project)
+        );
+        setRoles(sortedRoles);
       } else {
         setError(data.error || 'Failed to load roles');
       }

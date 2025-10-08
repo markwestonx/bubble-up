@@ -11,6 +11,7 @@ interface UserData {
   email: string;
   created_at: string;
   last_sign_in_at: string | null;
+  last_login_at: string | null;
 }
 
 export default function UsersPage() {
@@ -49,12 +50,32 @@ export default function UsersPage() {
       if (!response.ok) {
         setError(data.error || 'Failed to load users');
       } else if (data.users) {
-        const userData: UserData[] = data.users.map((u: any) => ({
-          id: u.id,
-          email: u.email || '',
-          created_at: u.created_at,
-          last_sign_in_at: u.last_sign_in_at || null,
-        }));
+        const userData: UserData[] = await Promise.all(
+          data.users.map(async (u: any) => {
+            // Fetch last login time from access logs
+            let lastLoginAt = null;
+            try {
+              const logResponse = await fetch(`/api/access-log?userId=${u.id}&limit=1`);
+              const logData = await logResponse.json();
+              if (logData.logs && logData.logs.length > 0) {
+                const lastSuccessfulLogin = logData.logs.find((log: any) => log.event_type === 'login_success');
+                if (lastSuccessfulLogin) {
+                  lastLoginAt = lastSuccessfulLogin.created_at;
+                }
+              }
+            } catch (logErr) {
+              console.error('Failed to fetch last login:', logErr);
+            }
+
+            return {
+              id: u.id,
+              email: u.email || '',
+              created_at: u.created_at,
+              last_sign_in_at: u.last_sign_in_at || null,
+              last_login_at: lastLoginAt,
+            };
+          })
+        );
         setUsers(userData);
       }
     } catch (err) {
@@ -205,7 +226,7 @@ export default function UsersPage() {
                     Created
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Last Sign In
+                    Last Login
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Actions
@@ -227,9 +248,16 @@ export default function UsersPage() {
                       {new Date(user.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                      {user.last_sign_in_at
-                        ? new Date(user.last_sign_in_at).toLocaleDateString()
-                        : 'Never'}
+                      {user.last_login_at ? (
+                        <div>
+                          <div>{new Date(user.last_login_at).toLocaleDateString()}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-500">
+                            {new Date(user.last_login_at).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      ) : (
+                        'Never'
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex items-center gap-3">

@@ -37,6 +37,25 @@ function LoginForm() {
       });
 
       if (signInError) {
+        // Log failed login attempt
+        try {
+          await fetch('/api/access-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email,
+              eventType: 'login_failure',
+              metadata: {
+                error: signInError.message,
+                timestamp: new Date().toISOString()
+              }
+            })
+          });
+        } catch (logError) {
+          // Silently fail if logging doesn't work
+          console.error('Failed to log access attempt:', logError);
+        }
+
         // Generic error message for security
         setError('Invalid credentials. Please try again.');
         setLoading(false);
@@ -44,6 +63,25 @@ function LoginForm() {
       }
 
       if (data.session) {
+        // Log successful login
+        try {
+          await fetch('/api/access-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: data.session.user.id,
+              email,
+              eventType: 'login_success',
+              metadata: {
+                timestamp: new Date().toISOString()
+              }
+            })
+          });
+        } catch (logError) {
+          // Silently fail if logging doesn't work
+          console.error('Failed to log access attempt:', logError);
+        }
+
         // Check if user needs to change password
         const user = data.session.user;
         if (user.user_metadata?.requires_password_change) {

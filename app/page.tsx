@@ -2636,7 +2636,7 @@ function BacklogPage() {
 
         if (response.ok) {
           const data = await response.json();
-          const storyIds = new Set(data.documentation.map((doc: any) => doc.story_id));
+          const storyIds = new Set<string>(data.documentation.map((doc: any) => doc.story_id));
           setStoriesWithDocs(storyIds);
         }
       } catch (err) {

@@ -180,9 +180,12 @@ function LoginForm() {
         </form>
 
         <div className="mt-6 text-center text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Don't have an account? </span>
-          <a href="mailto:mark.weston@regulativ.ai" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
-            email mark.weston@regulativ.ai
+          <span className="text-gray-600 dark:text-gray-400">Don't have an account? email </span>
+          <a
+            href="mailto:mark.weston@regulativ.ai?subject=BubbleUp%20user%20access%20request&body=Hi%20Mark%2C%20please%20set%20me%20up%20with%20a%20user%20account%20on%20BubbleUp.%20And%20then%20let%27s%20connect%20on%20which%20projects%20and%20level%20of%20access%20are%20required."
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+          >
+            mark.weston@regulativ.ai
           </a>
         </div>
       </div>

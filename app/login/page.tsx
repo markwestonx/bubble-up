@@ -181,9 +181,9 @@ function LoginForm() {
 
         <div className="mt-6 text-center text-sm">
           <span className="text-gray-600 dark:text-gray-400">Don't have an account? </span>
-          <Link href="/register" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
-            Sign up
-          </Link>
+          <a href="mailto:mark.weston@regulativ.ai" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+            email mark.weston@regulativ.ai
+          </a>
         </div>
       </div>
     </div>

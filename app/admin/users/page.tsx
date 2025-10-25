@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import UserRolesManager from './UserRolesManager';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 interface UserData {
   id: string;
   email: string;

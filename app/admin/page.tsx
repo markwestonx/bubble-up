@@ -5,6 +5,9 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Users, UserPlus, Shield, Mail, Trash2, Edit2, Save, X, ChevronDown, ChevronRight, FolderOpen, KeyRound, User } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 interface User {
   id: string;
   email: string;

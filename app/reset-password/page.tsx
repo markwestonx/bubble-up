@@ -18,12 +18,33 @@ function ResetPasswordForm() {
     const setupSession = async () => {
       const supabase = createClient();
 
-      // Check if we have hash fragments (Supabase puts recovery session tokens in URL hash)
+      // Check if we have a recovery code in URL query params
+      const code = searchParams.get('code');
+
+      if (code) {
+        // Exchange the recovery code for a session
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (error) {
+          console.error('Error exchanging code:', error);
+          setMessage({
+            type: 'error',
+            text: 'Session expired or invalid. Please click the reset link in your email again.'
+          });
+          return;
+        }
+
+        // Clear the code from URL for security
+        window.history.replaceState(null, '', window.location.pathname);
+        return;
+      }
+
+      // Check if we have hash fragments (alternative Supabase flow)
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
 
-      // If we have tokens in the URL, set the session
+      // If we have tokens in the URL hash, set the session
       if (accessToken && refreshToken) {
         const { error } = await supabase.auth.setSession({
           access_token: accessToken,
@@ -36,6 +57,7 @@ function ResetPasswordForm() {
             type: 'error',
             text: 'Failed to establish session. Please click the reset link in your email again.'
           });
+          return;
         }
         // Clear the hash from URL for security
         window.history.replaceState(null, '', window.location.pathname);
@@ -54,7 +76,7 @@ function ResetPasswordForm() {
     };
 
     setupSession();
-  }, []);
+  }, [searchParams]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();

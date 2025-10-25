@@ -15,76 +15,20 @@ function ResetPasswordForm() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
-    const setupSession = async () => {
+    const checkSession = async () => {
       const supabase = createClient();
-
-      // FIRST: Check if we already have a session from cookies
-      // Supabase's /verify endpoint should set session cookies before redirecting
       const { data: { session } } = await supabase.auth.getSession();
 
-      if (session) {
-        console.log('Session already established from cookies');
-        // Clear any URL parameters for security
-        window.history.replaceState(null, '', window.location.pathname);
-        return;
-      }
-
-      // If no session, try to get it from URL parameters
-      const code = searchParams.get('code');
-
-      if (code) {
-        console.log('No session in cookies, trying to exchange code');
-        // This will fail with PKCE error, but try anyway
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-        if (error) {
-          console.error('Error exchanging code:', error);
-          setMessage({
-            type: 'error',
-            text: 'Session expired or invalid. Please click the reset link in your email again.'
-          });
-          return;
-        }
-
-        window.history.replaceState(null, '', window.location.pathname);
-        return;
-      }
-
-      // Check for hash fragments (alternative flow)
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-
-      if (accessToken && refreshToken) {
-        console.log('Found tokens in URL hash');
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
+      if (!session) {
+        setMessage({
+          type: 'error',
+          text: 'Session expired or invalid. Please click the reset link in your email again.'
         });
-
-        if (error) {
-          console.error('Error setting session:', error);
-          setMessage({
-            type: 'error',
-            text: 'Failed to establish session. Please click the reset link in your email again.'
-          });
-          return;
-        }
-
-        window.history.replaceState(null, '', window.location.pathname);
-        return;
       }
-
-      // No session found anywhere
-      console.log('No session found in cookies or URL');
-      setMessage({
-        type: 'error',
-        text: 'Session expired or invalid. Please click the reset link in your email again.'
-      });
     };
 
-    setupSession();
-  }, [searchParams]);
+    checkSession();
+  }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();

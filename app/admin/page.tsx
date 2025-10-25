@@ -252,14 +252,14 @@ export default function AdminPage() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/api/auth/reset-callback`
-      });
+      // Use implicit flow (hash-based) for password recovery
+      // This avoids PKCE issues entirely
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
 
       if (error) {
         setInviteMessage({ type: 'error', text: `Failed to send reset email: ${error.message}` });
       } else {
-        setInviteMessage({ type: 'success', text: `Password reset email sent to ${email}` });
+        setInviteMessage({ type: 'success', text: `Password reset email sent to ${email}. User should use the link within 60 seconds.` });
       }
     } catch (err) {
       setInviteMessage({ type: 'error', text: 'Failed to send password reset email' });

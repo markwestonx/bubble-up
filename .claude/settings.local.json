@@ -45,7 +45,9 @@
       "Bash(del appauthcallbackroute.ts)",
       "Bash(del create-story-212.js)",
       "Bash(psql:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:bubble-up.vercel.app)",
+      "Read(//c/Users/m/OneDrive/Desktop/BubbleUp/**)"
     ],
     "deny": [],
     "ask": []

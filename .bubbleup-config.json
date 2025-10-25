@@ -66,6 +66,10 @@
     {
       "name": "Cyber Essentials",
       "epics": ["Foundation", "Technical Controls", "Organizational Controls", "Certification", "Documentation"]
+    },
+    {
+      "name": "Ajency.AI",
+      "epics": ["Foundation", "Specialist Marketplace", "Project & Payments", "Trust & Reviews", "AI Agent Library", "Subscription System", "Launch Prep"]
     }
   ],
   "priorities": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],

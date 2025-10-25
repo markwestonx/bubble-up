@@ -15,8 +15,21 @@ function ResetPasswordForm() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
-    const checkSession = async () => {
+    const setupSession = async () => {
       const supabase = createClient();
+
+      // Check for recovery token in URL hash (implicit flow)
+      // Supabase puts recovery tokens in URL hash like: #access_token=xxx&refresh_token=yyy&type=recovery
+      const hash = window.location.hash;
+
+      if (hash && hash.includes('access_token')) {
+        console.log('Recovery tokens found in URL hash');
+        // Supabase client automatically picks up tokens from hash
+        // Just wait a moment for it to process
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      // Check if session is established
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
@@ -24,10 +37,16 @@ function ResetPasswordForm() {
           type: 'error',
           text: 'Session expired or invalid. Please click the reset link in your email again.'
         });
+      } else {
+        console.log('Session established for password reset');
+        // Clear hash from URL for security
+        if (hash) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
       }
     };
 
-    checkSession();
+    setupSession();
   }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {

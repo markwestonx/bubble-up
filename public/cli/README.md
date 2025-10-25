@@ -17,7 +17,7 @@ curl -fsSL https://bubble-up.vercel.app/cli/install.sh | bash
 ## What Gets Installed
 
 The installer downloads and sets up:
-- `bubble.js` - Main CLI tool (all 10 features)
+- `bubble.js` - Main CLI tool (all 11 features including documentation)
 - `setup.js` - User setup wizard
 - `package.json` - Minimal dependencies
 - `.env.template` - Supabase configuration template
@@ -57,5 +57,5 @@ If you prefer to download files manually:
 
 ## Version
 
-Version: 1.0.0
-Last Updated: 2025-10-05
+Version: 1.1.0
+Last Updated: 2025-10-09

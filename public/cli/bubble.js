@@ -918,6 +918,151 @@ async function viewProjectStats(supabaseAdmin) {
   console.log('\n═══════════════════════════════════════════════════════════════\n');
 }
 
+// 11. ADD DOCUMENTATION
+async function addDocumentation(supabaseAdmin) {
+  console.log('\n📚 ADD DOCUMENTATION TO A STORY\n');
+
+  const storyId = await question('Enter story ID: ');
+
+  // Fetch the story
+  const { data: story, error: fetchError } = await supabaseAdmin
+    .from('backlog_items')
+    .select('*')
+    .eq('id', storyId)
+    .single();
+
+  if (fetchError || !story) {
+    console.log('❌ Story not found');
+    return;
+  }
+
+  console.log(`\n📝 Story: ${story.user_story}`);
+  console.log(`   Project: ${story.project}\n`);
+
+  // Select document type
+  const docTypes = [
+    'design', 'plan', 'progress', 'next_steps', 'testing', 'requirements',
+    'feedback', 'build_log', 'test_result', 'decision_log', 'technical_note',
+    'error', 'success'
+  ];
+
+  console.log('📋 Select documentation type:');
+  docTypes.forEach((type, idx) => {
+    console.log(`   ${idx + 1}. ${type}`);
+  });
+
+  const typeChoice = await question(`\n   Your choice (1-${docTypes.length}): `);
+  const docType = docTypes[parseInt(typeChoice) - 1];
+
+  if (!docType) {
+    console.log('❌ Invalid choice');
+    return;
+  }
+
+  console.log(`   ✅ ${docType}\n`);
+
+  // Get title
+  const title = await question('📌 Title: ');
+  console.log('');
+
+  // Get content
+  console.log('📄 Content (press Enter twice when done):');
+  const contentLines = [];
+  let emptyLineCount = 0;
+  while (emptyLineCount < 2) {
+    const line = await question('   ');
+    if (!line.trim()) {
+      emptyLineCount++;
+    } else {
+      emptyLineCount = 0;
+      contentLines.push(line);
+    }
+  }
+  const content = contentLines.join('\n');
+  console.log(`   ✅ ${contentLines.length} lines captured\n`);
+
+  // Get tags (optional)
+  const tagsInput = await question('🏷️  Tags (comma-separated, or press Enter to skip): ');
+  const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(Boolean) : [];
+  console.log('');
+
+  // Get related stories (optional)
+  const relatedInput = await question('🔗 Related story IDs (comma-separated, or press Enter to skip): ');
+  const relatedStories = relatedInput ? relatedInput.split(',').map(s => s.trim()).filter(Boolean) : [];
+  console.log('');
+
+  // Get category (optional)
+  const category = await question('📁 Category (default: general): ') || 'general';
+  console.log('');
+
+  // Get priority (optional)
+  console.log('⭐ Priority:');
+  console.log('   1. low');
+  console.log('   2. medium');
+  console.log('   3. high');
+  const priorityChoice = await question('\n   Your choice (1-3, default: 2): ') || '2';
+  const priorities = ['low', 'medium', 'high'];
+  const priority = priorities[parseInt(priorityChoice) - 1] || 'medium';
+  console.log(`   ✅ ${priority}\n`);
+
+  // Create the documentation entry
+  console.log('🚀 Creating documentation entry...\n');
+
+  const { data: doc, error: docError } = await supabaseAdmin
+    .from('documentation')
+    .insert({
+      story_id: storyId,
+      doc_type: docType,
+      title,
+      content,
+      author: 'CLI Entry',
+      author_email: config.currentUser.email,
+      tags,
+      related_stories: relatedStories,
+      category,
+      priority,
+      version_number: 1,
+      is_latest: true,
+      metadata: {}
+    })
+    .select()
+    .single();
+
+  if (docError) {
+    console.error('❌ Error creating documentation:', docError.message);
+    return;
+  }
+
+  // Success!
+  console.log('✅ Documentation created successfully!\n');
+  console.log('═══════════════════════════════════════════════════════════════');
+  console.log(`📚 Documentation Entry`);
+  console.log('═══════════════════════════════════════════════════════════════');
+  console.log(`📝 Story #${storyId}: ${story.user_story.substring(0, 50)}...`);
+  console.log(`📋 Type:           ${doc.doc_type}`);
+  console.log(`📌 Title:          ${doc.title}`);
+  console.log(`📁 Category:       ${doc.category}`);
+  console.log(`⭐ Priority:       ${doc.priority}`);
+  console.log(`👤 Author:         ${doc.author}`);
+  console.log(`📧 Email:          ${doc.author_email}`);
+  console.log(`🆔 Document ID:    ${doc.id}`);
+  console.log(`📅 Created:        ${new Date(doc.created_at).toLocaleString()}`);
+  if (tags.length > 0) {
+    console.log(`🏷️  Tags:           ${tags.join(', ')}`);
+  }
+  if (relatedStories.length > 0) {
+    console.log(`🔗 Related:        Stories ${relatedStories.join(', ')}`);
+  }
+  console.log('');
+  console.log('📄 Content Preview:');
+  const preview = content.split('\n').slice(0, 5).join('\n   ');
+  console.log(`   ${preview}`);
+  if (contentLines.length > 5) {
+    console.log(`   ... (${contentLines.length - 5} more lines)`);
+  }
+  console.log('\n═══════════════════════════════════════════════════════════════\n');
+}
+
 // MAIN MENU
 async function mainMenu() {
   console.log('\n╔═══════════════════════════════════════════════════════════════╗');
@@ -944,6 +1089,7 @@ async function mainMenu() {
   console.log('   8. ⚡ Update priority/effort');
   console.log('   9. ⭐ Mark as "Next up"');
   console.log('  10. 📈 View project stats');
+  console.log('  11. 📚 Add documentation');
 
   console.log('\n═══════════════════════════════════════════════════════════════\n');
   console.log('   0. 🚪 Exit');
@@ -984,6 +1130,9 @@ async function mainMenu() {
       break;
     case '10':
       await viewProjectStats(supabaseAdmin);
+      break;
+    case '11':
+      await addDocumentation(supabaseAdmin);
       break;
     case '0':
       console.log('\n👋 Goodbye!\n');

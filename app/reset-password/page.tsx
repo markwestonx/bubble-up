@@ -18,11 +18,23 @@ function ResetPasswordForm() {
     const setupSession = async () => {
       const supabase = createClient();
 
-      // Check if we have a recovery code in URL query params
+      // FIRST: Check if we already have a session from cookies
+      // Supabase's /verify endpoint should set session cookies before redirecting
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session) {
+        console.log('Session already established from cookies');
+        // Clear any URL parameters for security
+        window.history.replaceState(null, '', window.location.pathname);
+        return;
+      }
+
+      // If no session, try to get it from URL parameters
       const code = searchParams.get('code');
 
       if (code) {
-        // Exchange the recovery code for a session
+        console.log('No session in cookies, trying to exchange code');
+        // This will fail with PKCE error, but try anyway
         const { error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (error) {
@@ -34,18 +46,17 @@ function ResetPasswordForm() {
           return;
         }
 
-        // Clear the code from URL for security
         window.history.replaceState(null, '', window.location.pathname);
         return;
       }
 
-      // Check if we have hash fragments (alternative Supabase flow)
+      // Check for hash fragments (alternative flow)
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
 
-      // If we have tokens in the URL hash, set the session
       if (accessToken && refreshToken) {
+        console.log('Found tokens in URL hash');
         const { error } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken
@@ -59,20 +70,17 @@ function ResetPasswordForm() {
           });
           return;
         }
-        // Clear the hash from URL for security
+
         window.history.replaceState(null, '', window.location.pathname);
         return;
       }
 
-      // Otherwise check if we already have a session
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        setMessage({
-          type: 'error',
-          text: 'Session expired or invalid. Please click the reset link in your email again.'
-        });
-      }
+      // No session found anywhere
+      console.log('No session found in cookies or URL');
+      setMessage({
+        type: 'error',
+        text: 'Session expired or invalid. Please click the reset link in your email again.'
+      });
     };
 
     setupSession();

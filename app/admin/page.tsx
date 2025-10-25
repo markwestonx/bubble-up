@@ -266,6 +266,38 @@ export default function AdminPage() {
     }
   };
 
+  const handleManualReset = async (email: string) => {
+    if (!confirm(`Generate new temporary password for ${email}?\n\nYou will need to share it with the user manually.`)) return;
+
+    try {
+      const response = await fetch('/api/admin/manual-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const message = `Password reset for ${email}\n\nTemporary Password: ${data.tempPassword}\n\n✅ Share this securely with the user\n✅ They must change it on first login`;
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(data.tempPassword).then(() => {
+          setInviteMessage({
+            type: 'success',
+            text: `${message}\n\n📋 Password copied to clipboard!`
+          });
+        }).catch(() => {
+          setInviteMessage({ type: 'success', text: message });
+        });
+      } else {
+        setInviteMessage({ type: 'error', text: data.error || 'Failed to reset password' });
+      }
+    } catch (err) {
+      setInviteMessage({ type: 'error', text: 'Failed to reset password' });
+    }
+  };
+
   const handleAddRole = async (userEmail: string) => {
     if (!newRoleProject.trim()) {
       setInviteMessage({ type: 'error', text: 'Please select a project' });
@@ -520,14 +552,24 @@ export default function AdminPage() {
                           {userRoles.length} {userRoles.length === 1 ? 'role' : 'roles'}
                         </span>
                       </button>
-                      <button
-                        onClick={() => handleResetPassword(email)}
-                        className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                        title="Send password reset email"
-                      >
-                        <KeyRound className="h-4 w-4" />
-                        Reset Password
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleManualReset(email)}
+                          className="flex items-center gap-2 px-3 py-1.5 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors font-medium"
+                          title="Generate temporary password (recommended)"
+                        >
+                          <KeyRound className="h-4 w-4" />
+                          Manual Reset
+                        </button>
+                        <button
+                          onClick={() => handleResetPassword(email)}
+                          className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/30 rounded-lg transition-colors"
+                          title="Send password reset email (may not work)"
+                        >
+                          <Mail className="h-4 w-4" />
+                          Email Reset
+                        </button>
+                      </div>
                     </div>
 
                     {expandedItems.has(email) && (

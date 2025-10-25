@@ -15,8 +15,34 @@ function ResetPasswordForm() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const setupSession = async () => {
       const supabase = createClient();
+
+      // Check if we have hash fragments (Supabase puts recovery session tokens in URL hash)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+
+      // If we have tokens in the URL, set the session
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+
+        if (error) {
+          console.error('Error setting session:', error);
+          setMessage({
+            type: 'error',
+            text: 'Failed to establish session. Please click the reset link in your email again.'
+          });
+        }
+        // Clear the hash from URL for security
+        window.history.replaceState(null, '', window.location.pathname);
+        return;
+      }
+
+      // Otherwise check if we already have a session
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
@@ -27,7 +53,7 @@ function ResetPasswordForm() {
       }
     };
 
-    checkAuth();
+    setupSession();
   }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
